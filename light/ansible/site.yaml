@@ -1,0 +1,24 @@
+---
+- name: Базовая настройка
+  hosts: all
+  roles:
+    - common
+
+- name: Настройка приложения
+  hosts: app01
+  roles:
+    - java_app
+    - nginx
+#    - filebeat
+
+- name: Настройка Elastic Stack
+  hosts: mon01
+  roles:
+    - elasticsearch
+    - kibana
+    - logstash
+
+- name: Настройка Prometheus
+  hosts: prom01
+  roles:
+    - prometheus

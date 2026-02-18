@@ -14,6 +14,7 @@ config:
     ssh_pwauth: no
     users:
       - name: admin
+        groups: sudo
         sudo: ALL=(ALL) NOPASSWD:ALL
         shell: /bin/bash
         ssh_authorized_keys:
