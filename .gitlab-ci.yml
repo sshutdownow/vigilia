@@ -1,44 +1,210 @@
-workflow:
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
-      when: never
-    - when: always
-
-include:
-  # include the component located in the current project from the current SHA
-  - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/my-component@$CI_COMMIT_SHA
-    inputs:
-      job_name: "component job of my-component"
-      stage: build
-
 stages:
+  - tests
+  - plan
+  - apply
+  - destroy
+  - terratest
+  - ansible_deploy
   - build
-  - test
-  - release
+  - package
 
-ensure-job-added:
-  stage: test
-  image: badouralix/curl-jq
-  rules:
-    # project must be public for `curl` to access the API; using `CI_JOB_TOKEN` is insufficient!
-    - if: $CI_PROJECT_VISIBILITY != "public"
-      when: never
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
-      when: never
-    - when: always
-  script: |
-    url="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/pipelines/${CI_PIPELINE_ID}/jobs"
-    curl --fail --show-error --silent "$url" |
-    jq --exit-status 'map(select(.name | contains("component job of my-component"))) | length >= 1'
+variables:
+  ANSIBLE_ROOT: ${CI_PROJECT_DIR}/ansible
+  TF_ROOT: ${CI_PROJECT_DIR}/infra
+  PLAN: infra_plan.cache
+  GITLAB_ACCESS_TOKEN: ${TF_HTTP_PASSWORD}
+  OPERATION:
+    description: "Select CI/CD-operation"
+    value: "terraform"
+    options:
+      - "terraform"
+      - "ansible"
+      - "k8s"
 
-create-release:
-  stage: release
-  image: registry.gitlab.com/gitlab-org/release-cli:latest
+before_script:
+  - cd ${TF_ROOT}
+  - touch ./authorized_key.json && chmod 0600 ./authorized_key.json && echo ${AUTHORIZED_KEY} | base64 -d > ./authorized_key.json
+  - sed -i -e "s/\${CI_PROJECT_ID}/${CI_PROJECT_ID}/g" -e "s/\${GITLAB_USER_NAME}/${GITLAB_USER_NAME}/g" -e "s/\${TF_HTTP_PASSWORD}/${TF_HTTP_PASSWORD}/g" provider.tf
+
+# Выполнение тестов checkov
+checkov:
+  stage: tests
+  allow_failure: true
+  image: bridgecrew/checkov:latest
+  script:
+    - checkov -d . --external-checks-dir ./custom_policies --output junitxml --output-file-path checkov_report
+  artifacts:
+    reports:
+      junit: ${TF_ROOT}/checkov_report/results_junitxml.xml
+    paths:
+      - ${TF_ROOT}/checkov_report/
   rules:
-    - if: $CI_COMMIT_TAG
-  script: echo "Creating release $CI_COMMIT_TAG"
-  release:
-    tag_name: $CI_COMMIT_TAG
-    description: "Release $CI_COMMIT_TAG of components repository $CI_PROJECT_PATH"
+    - if: $OPERATION == "terraform"
+      when: always
+
+# Terraform plan для инфраструктуры
+plan:
+  stage: plan
+  image: hashicorp/terraform:latest
+  needs:
+    - checkov
+  script:
+    - terraform init
+    - terraform fmt -check -recursive
+    - terraform validate
+    - terraform plan -out=${PLAN}
+    - terraform show -json ${PLAN} > tfplan.json
+  rules:
+    - if: $OPERATION == "terraform"
+      when: always
+  variables:
+    TF_LOG: INFO
+    TF_VAR_cloud_id: ${CLOUD_ID}
+    TF_VAR_folder_id: ${FOLDER_ID}
+    TF_VAR_vm_user: "${SERVER_USER}"
+    TF_VAR_ssh_key: "${SERVER_SSH_PUBKEY}"
+    TF_VAR_ssh_private_key: "${SSH_PRIVATE_KEY}"
+  artifacts:
+    reports: # GitLab displays the details of the Terraform plan within the merge request widget.
+      terraform: ${TF_ROOT}/tfplan.json
+    paths:
+      - ${TF_ROOT}/${PLAN}
+      - ${TF_ROOT}/tfplan.json
+      - ${TF_ROOT}/.terraform/
+    expire_in: 1 day
+
+# Создание инфраструктуры Terraform
+apply:
+  stage: apply
+  image: hashicorp/terraform:latest
+  script:
+    - terraform init
+    - terraform apply -auto-approve ${PLAN}
+  rules:
+    - if: $OPERATION == "terraform"
+      when: manual
+    - when: never
+  variables:
+    TF_LOG: INFO
+    TF_VAR_cloud_id: ${CLOUD_ID}
+    TF_VAR_folder_id: ${FOLDER_ID}
+    TF_VAR_vm_user: "${SERVER_USER}"
+    TF_VAR_ssh_key: "${SERVER_SSH_PUBKEY}"
+    TF_VAR_ssh_private_key: "${SSH_PRIVATE_KEY}"
+
+# Выполнение тестов terratest
+terratest:
+  stage: terratest
+  image: golang:1.21
+  script:
+    - cd test
+    - go mod init terratest
+    - go mod edit -go=1.21
+    - go mod edit -require github.com/gruntwork-io/terratest@v0.46.16
+    - go mod tidy
+    - go test -v -timeout 3m
+  needs:
+    - job: apply
+  dependencies:
+    - apply
+  rules:
+    - if: $OPERATION == "terraform"
+      when: on_success
+  allow_failure: false
+  variables:
+    TF_LOG: INFO
+    TF_VAR_cloud_id: ${CLOUD_ID}
+    TF_VAR_folder_id: ${FOLDER_ID}
+    TF_VAR_vm_user: "${SERVER_USER}"
+    TF_VAR_ssh_key: "${SERVER_SSH_PUBKEY}"
+
+# Деплой ansible-playbook
+ansible-vmdevip:
+  stage: ansible_deploy
+  image: hashicorp/terraform:latest
+  script:
+    - terraform init
+    - echo "VM_DEV_ADDRESS=$(terraform output -raw vm_dev_address)" >> ${CI_PROJECT_DIR}/vmdevip.env
+  rules:
+    - if: $OPERATION == "ansible"
+      when: always
+  variables:
+    TF_VAR_cloud_id: ${CLOUD_ID}
+    TF_VAR_folder_id: ${FOLDER_ID}
+    TF_VAR_vm_user: "${SERVER_USER}"
+    TF_VAR_ssh_key: "${SERVER_SSH_PUBKEY}"
+  artifacts:
+    reports:
+      dotenv: vmdevip.env
+
+ansible-deploy:
+  stage: ansible_deploy
+  before_script:
+    - cd ${ANSIBLE_ROOT}
+    - mkdir -p .ssh && chmod 0700 .ssh
+    - echo "$SSH_PRIVATE_KEY" | base64 -d > .ssh/id_rsa && chmod 0400 .ssh/id_rsa
+  script:
+    - ansible-playbook -i inventory/vm.yml vault-playbook.yml -e "ansible_host=${VM_DEV_ADDRESS} ansible_user=${SERVER_USER} ansible_ssh_private_key_file=.ssh/id_rsa"
+  rules:
+    - if: $OPERATION == "ansible"
+      when: manual
+  needs:
+    - job: ansible-vmdevip
+      artifacts: true
+  dependencies:
+    - ansible-vmdevip
+
+# Удаление инфраструктуры Terraform
+destroy:
+  stage: destroy
+  image: hashicorp/terraform:latest
+  script:
+    - terraform init
+    - terraform apply -destroy -auto-approve
+  # https://developer.hashicorp.com/terraform/cli/commands/destroy
+  rules:
+    - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH == "main"
+      when: manual
+    - when: never
+  variables:
+    TF_LOG: INFO
+    TF_VAR_cloud_id: ${CLOUD_ID}
+    TF_VAR_folder_id: ${FOLDER_ID}
+    TF_VAR_vm_user: "${SERVER_USER}"
+    TF_VAR_ssh_key: "${SERVER_SSH_PUBKEY}"
+
+# Сборка и пуш Docker-образов в DockerHub
+build-and-push-images:
+  stage: build
+  before_script:
+    - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+  script:
+    - docker build --build-arg VERSION=$CI_COMMIT_SHA --push -t $DOCKER_USER/sausage-backend:latest ./backend/
+    - docker build --push -t $DOCKER_USER/sausage-frontend:latest ./frontend/
+    - docker build --push -t $DOCKER_USER/sausage-backend-report:latest ./backend-report/
+  rules:
+    - if: $OPERATION == "k8s"
+      when: always
+
+# Упаковка и пуш Helm-чарта в Nexus
+package-helm-chart:
+  stage: package
+  image: 
+    name: alpine/helm:3.12.0
+    entrypoint: [""]
+  before_script:    
+    - apk add curl
+  script: # CI_PIPELINE_IID -internal ID that starts at 1 for each project and increments by 1 with every new pipeline
+    - export CUR_VER=$(helm show chart ./sausage-store-chart/ | grep "^version:" | awk '{print $2}')
+    - export NEW_VER=$(echo "$CUR_VER" | awk -F. -v iid="$CI_PIPELINE_IID" '{print $1"."$2"."iid}')
+    - >
+      sed -i -e "s/^version:.*$/version: $NEW_VER/" ./sausage-store-chart/Chart.yaml
+    - helm package ./sausage-store-chart/
+    - curl -u "$NEXUS_HELM_REPO_USER:$NEXUS_HELM_REPO_PASSWORD" $NEXUS_HELM_REPO --upload-file *.tgz
+  needs:
+    - build-and-push-images
+  rules:
+    - if: $OPERATION == "k8s"
+      when: manual
+  tags:
+    - docker

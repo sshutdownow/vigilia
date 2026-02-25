@@ -1,0 +1,13 @@
+metadata:
+  id: ensure_yandex_instance_has_labels
+  name: ensure_yandex_instance_has_labels
+  category: yandex
+  severity: MEDIUM
+scope:
+  provider: yandex
+definition:
+  cond_type: attribute
+  resource_types:
+    - yandex_compute_instance
+  attribute: labels
+  operator: exists

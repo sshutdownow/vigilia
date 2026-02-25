@@ -1,0 +1,124 @@
+global:
+  imagePullPolicy: Always
+  vault:
+    host: <your-vault-host-ip>
+    name: vault
+    vaultToken: someToken
+
+frontend:
+  replicas: 1
+  revisionHistoryLimit: 15
+  strategy:
+    type: Recreate
+  service:
+    port: 80
+  ingress:
+    host: <your-id-or-login>.2sem.students-projects.ru
+    path: /
+    pathType: Prefix
+  containerPort: 80
+  image: <your-dockerhub>/sausage-frontend:latest
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "128Mi"
+      cpu: "1"
+  nginxConf: nginx.conf
+
+backend:
+  annotations:
+    path: /actuator/prometheus
+    port: "8080"
+    scrape: "true"
+  env:
+    postgresUri: jdbc:postgresql://postgresql:5432/sausage-store
+    reportPath: /logs/reports
+    logPath: /logs
+  service:
+    port: 8080
+  revisionHistoryLimit: 15
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 50%
+      maxSurge: 20%
+  image: <your-dockerhub>/sausage-backend:latest
+  imagePullPolicy: Always
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "1"
+  containerPort: 8080
+  livenessProbe:
+    httpGet:
+      path: /actuator/health
+      port: 8080
+    initialDelaySeconds: 15
+    periodSeconds: 30
+    timeoutSeconds: 1
+    failureThreshold: 6
+  vpa:
+    updatePolicy:
+      updateMode: "Auto"
+    resourcePolicy:
+      containerPolicies:
+        - containerName: "*"
+          minAllowed:
+            cpu: 0m
+            memory: 0Mi
+          maxAllowed:
+            cpu: 1
+            memory: 1Gi
+          controlledResources: ["cpu", "memory"]
+          controlledValues: RequestsAndLimits
+
+backend-report:
+  replicas: 1
+  revisionHistoryLimit: 15
+  strategy:
+    type: Recreate
+  env:
+    port: 8080
+    db: mongodb://reports:reportspassword@mongodb:27017/sausage-store
+  image: <your-dockerhub>/sausage-backend-report:latest
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "0.1"
+    limits:
+      memory: "256Mi"
+      cpu: "0.2"
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 75
+  containerPort: 8080
+
+
+infra:
+  postgresql:
+    env:
+      POSTGRES_DB: "sausage-store"
+      POSTGRES_USER: "store"
+      POSTGRES_PASSWORD: "passwordstore"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    containerPort: 5432
+  mongodb:
+    env:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+      MONGO_REPORTS_DATABASE: sausage-store
+      MONGO_REPORTS_USERNAME: reports
+      MONGO_REPORTS_PASSWORD: reportspassword
+    containerPort: 27017

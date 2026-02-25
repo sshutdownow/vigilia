@@ -1,0 +1,8 @@
+---
+# https://developer.hashicorp.com/vault/tutorials/get-started/setup
+- name: Deploy Dev mode Vault for dev environment
+  hosts: all
+  become: yes
+  roles:
+    - docker
+    - vault

@@ -1,0 +1,58 @@
+---
+- name: Create dirs for Vault volumes
+  file:
+    path: "{{ item.split(':') | first }}"
+    state: directory
+    mode: '0755'
+    owner: '100'
+  loop: "{{ vault_volumes }}"
+
+- name: Run Vault in Dev Mode
+  community.docker.docker_container:
+    name: vault-dev
+    image: hashicorp/vault:latest
+    state: started
+    restart_policy: always
+    ports:
+      - "{{ vault_port }}:8200"
+    volumes: "{{ vault_volumes }}"
+    env:
+      VAULT_DEV_ROOT_TOKEN_ID: "{{ vault_root_token }}"
+      VAULT_ADDR: "http://0.0.0.0:8200"
+      VAULT_LOCAL_CONFIG: '{"storage": {"file": {"path": "/vault/file"}}}'
+    capabilities:
+      - IPC_LOCK
+
+- name: Wait for Vault becomes available
+  uri:
+    url: "http://localhost:{{ vault_port }}/v1/sys/health"
+    status_code: [200]
+  register: vault_health
+  until: vault_health.status == 200
+  retries: 10
+  delay: 5
+
+- name: Check if sausage-store secrets exist
+  command: >
+    docker exec -e VAULT_TOKEN={{ vault_root_token }} vault-dev 
+    vault kv get kv/sausage-store
+  register: secret_check
+  failed_when: false
+  changed_when: false
+
+- name: Initialize sausage-store secrets
+  when: secret_check.rc != 0
+  block:
+    - name: Enable KV-v2 engine
+      command: >
+        docker exec -e VAULT_TOKEN={{ vault_root_token }} vault-dev 
+        vault secrets enable -path=kv kv-v2
+      failed_when: false
+
+    - name: Write sausage-store secrets
+      command: >
+        docker exec -e VAULT_TOKEN={{ vault_root_token }} vault-dev 
+        vault kv put kv/sausage-store 
+        spring.datasource.username="{{ spring_datasource_user }}" 
+        spring.datasource.password="{{ spring_datasource_pass }}" 
+        spring.data.mongodb.uri="{{ spring_mongo_uri }}"
