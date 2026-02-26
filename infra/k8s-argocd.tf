@@ -6,9 +6,9 @@
 # Set the configuration of Managed Service for Kubernetes cluster and Container Registry
 locals {
   cloud_id      = var.cloud_id
-  folder_id     = var.folder_id # Your cloud folder ID, same as for provider
-  k8s_version   = var.k8s_version # Desired version of Kubernetes. For available versions, see the documentation main page: https://cloud.yandex.com/en/docs/managed-kubernetes/concepts/release-channels-and-updates.
-  sa_k8s        = var.sa_k8s # Service account name for Kubernetes cluster. It must be unique in a cloud.
+  folder_id     = var.folder_id               # Your cloud folder ID, same as for provider
+  k8s_version   = var.k8s_version             # Desired version of Kubernetes. For available versions, see the documentation main page: https://cloud.yandex.com/en/docs/managed-kubernetes/concepts/release-channels-and-updates.
+  sa_k8s        = var.sa_k8s                  # Service account name for Kubernetes cluster. It must be unique in a cloud.
   registry_name = var.container_registry_name # Container Registry name.
 
   # The following settings are predefined. Change them only if necessary.

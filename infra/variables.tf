@@ -23,7 +23,7 @@ variable "k8s_version" {
   description = "Desired version of Kubernetes. See man page: https://cloud.yandex.com/en/docs/managed-kubernetes/concepts/release-channels-and-updates."
 }
 
-variable "sa_k8s"  {
+variable "sa_k8s" {
   type        = string
   default     = ""
   description = "Service account name for Kubernetes cluster. It must be unique in a cloud"
