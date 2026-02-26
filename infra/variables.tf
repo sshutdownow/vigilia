@@ -31,7 +31,7 @@ variable "sa_k8s" {
 
 variable "registry_name" {
   type        = string
-  default     = ""
+  default     = "diploma"
   description = "Container Registry name"
 }
 
