@@ -29,7 +29,7 @@ variable "sa_k8s" {
   description = "Service account name for Kubernetes cluster. It must be unique in a cloud"
 }
 
-variable "registry_name" {
+variable "container_registry_name" {
   type        = string
   default     = "diploma"
   description = "Container Registry name"
