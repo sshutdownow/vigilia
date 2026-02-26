@@ -25,7 +25,7 @@ variable "k8s_version" {
 
 variable "sa_k8s" {
   type        = string
-  default     = ""
+  default     = "k8s-mcluster-cce"
   description = "Service account name for Kubernetes cluster. It must be unique in a cloud"
 }
 
