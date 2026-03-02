@@ -110,7 +110,26 @@ terratest:
   rules:
     - if: $OPERATION == "terraform"
       when: on_success
-  allow_failure: true
+  allow_failure: false
+  variables:
+    TF_LOG: INFO
+    TF_VAR_cloud_id: ${CLOUD_ID}
+    TF_VAR_folder_id: ${FOLDER_ID}
+    TF_VAR_vm_user: "${SERVER_USER}"
+    TF_VAR_ssh_key: "${SERVER_SSH_PUBKEY}"
+
+# Удаление инфраструктуры Terraform
+destroy:
+  stage: destroy
+  image: hashicorp/terraform:latest
+  script:
+    - terraform init
+    - terraform apply -destroy -auto-approve
+  # https://developer.hashicorp.com/terraform/cli/commands/destroy
+  rules:
+    - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH == "main"
+      when: manual
+    - when: never
   variables:
     TF_LOG: INFO
     TF_VAR_cloud_id: ${CLOUD_ID}
@@ -153,25 +172,6 @@ ansible-deploy:
       artifacts: true
   dependencies:
     - ansible-vmdevip
-
-# Удаление инфраструктуры Terraform
-destroy:
-  stage: destroy
-  image: hashicorp/terraform:latest
-  script:
-    - terraform init
-    - terraform apply -destroy -auto-approve
-  # https://developer.hashicorp.com/terraform/cli/commands/destroy
-  rules:
-    - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH == "main"
-      when: manual
-    - when: never
-  variables:
-    TF_LOG: INFO
-    TF_VAR_cloud_id: ${CLOUD_ID}
-    TF_VAR_folder_id: ${FOLDER_ID}
-    TF_VAR_vm_user: "${SERVER_USER}"
-    TF_VAR_ssh_key: "${SERVER_SSH_PUBKEY}"
 
 # Сборка и пуш Docker-образов в DockerHub
 build-and-push-images:
