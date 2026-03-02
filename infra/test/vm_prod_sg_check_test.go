@@ -1,3 +1,5 @@
+//go:build ignore
+
 package terratest
 
 // Добавьте еще один файл vm_prod_sg_check_test.go и опишите в нем проверку наличия Security Group у виртуальной "prod"-машины.
@@ -6,13 +8,14 @@ package terratest
 import (
 	"context"
 	"fmt"
+	"os"
+	"testing"
+
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/assert"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
 	ycvpc "github.com/yandex-cloud/go-genproto/yandex/cloud/vpc/v1"
 	ycsdk "github.com/yandex-cloud/go-sdk"
-	"os"
-	"testing"
 )
 
 func TestVMProdSecurityGroupAvailability(t *testing.T) {

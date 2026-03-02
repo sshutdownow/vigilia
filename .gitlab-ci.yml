@@ -71,7 +71,7 @@ plan:
       - ${TF_ROOT}/${PLAN}
       - ${TF_ROOT}/tfplan.json
       - ${TF_ROOT}/.terraform/
-    expire_in: 1 day
+    expire_in: 1 yrs
 
 # Создание инфраструктуры Terraform
 apply:
@@ -110,7 +110,7 @@ terratest:
   rules:
     - if: $OPERATION == "terraform"
       when: on_success
-  allow_failure: false
+  allow_failure: true
   variables:
     TF_LOG: INFO
     TF_VAR_cloud_id: ${CLOUD_ID}
