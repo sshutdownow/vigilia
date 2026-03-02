@@ -33,7 +33,13 @@ func TestYandexK8sExistsAndRunning(t *testing.T) {
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 		TerraformDir: "..",
 	})
+
+	// Инициализация и применение Terraform
+	terraform.InitAndApply(t, terraformOptions)
+
+	// Получение выходных данных
 	clusterID := terraform.Output(t, terraformOptions, "k8s_cluster_id")
+	assert.NotEmpty(t, clusterID, "k8s_cluster_id should not be empty")
 
 	ctx := context.Background()
 	yc, err := ycsdk.Build(ctx, ycsdk.Config{
