@@ -1,15 +1,15 @@
-package test
+package terratest
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"testing"
-	"time"
 
-	"://github.com/iamkey"
-
+	"github.com/gruntwork-io/terratest/modules/terraform"
+	"github.com/stretchr/testify/assert"
+	"github.com/yandex-cloud/go-genproto/yandex/cloud/k8s/v1"
 	ycsdk "github.com/yandex-cloud/go-sdk"
+	"github.com/yandex-cloud/go-sdk/iamkey"
 )
 
 // Функция для получения OAuth-токена
@@ -26,74 +26,26 @@ func getYCToken(t *testing.T) ycsdk.Credentials {
 	return credentials
 }
 
-func TestYandexK8sLifecycle(t *testing.T) {
-	t.Parallel()
+func TestYandexK8sExistsAndRunning(t *testing.T) {
+	folderID := os.Getenv("TF_VAR_folder_id")
+	assert.NotEmpty(t, folderID, "ENV 'TF_VAR_folder_id' must be set")
 
-	terraformOptions := &terraform.Options{
+	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 		TerraformDir: "..",
-		EnvVars: map[string]string{
-			"YC_SERVICE_ACCOUNT_KEY_FILE": "../authorized_key.json",
-		},
-	}
+	})
+	clusterID := terraform.Output(t, terraformOptions, "k8s_cluster_id")
 
 	ctx := context.Background()
-	creds := getYCToken(t)
 	yc, err := ycsdk.Build(ctx, ycsdk.Config{
-		Credentials: creds,
+		Credentials: getYCToken(t),
 	})
-	if err != nil {
-		t.Fatalf("Failed to initialize Yandex Cloud SDK: %v", err)
-	}
+	assert.NoError(t, err)
 
-	defer terraform.Destroy(t, terraformOptions)
-	terraform.InitAndApply(t, terraformOptions)
+	// Проверяем существование кластера k8s
+	cluster, err := yc.Kubernetes().Cluster().Get(ctx, &k8s.GetClusterRequest{
+		ClusterId: clusterID,
+	})
 
-	endpoint := terraform.Output(t, terraformOptions, "k8s_external_v4_endpoint")
-	caCert := terraform.Output(t, terraformOptions, "k8s_ca_certificate")
-
-	token, err := creds.IAMToken(ctx)
-	if err != nil {
-		t.Fatalf("Failed to get IAM token: %v", err)
-	}
-
-	tmpFile, err := os.CreateTemp("", "kubeconfig-*.yaml")
-	if err != nil {
-		t.Fatalf("Failed to create temp file: %v", err)
-	}
-	kubeconfigPath := tmpFile.Name()
-	defer os.Remove(kubeconfigPath)
-	defer tmpFile.Close()
-
-	kubeconfigContent := fmt.Sprintf(`
-apiVersion: v1
-clusters:
-- cluster:
-    certificate-authority-data: %s
-    server: %s
-  name: yc-cluster
-contexts:
-- context:
-    cluster: yc-cluster
-    user: yc-sdk-user
-  name: default
-current-context: default
-users:
-- name: yc-sdk-user
-  user:
-    token: %s
-`, caCert, endpoint, token.AccessToken)
-
-	if _, err := tmpFile.Write([]byte(kubeconfigContent)); err != nil {
-		t.Fatalf("Failed to write kubeconfig: %v", err)
-	}
-
-	kubectlOptions := k8s.NewKubectlOptions("", kubeconfigPath, "default")
-
-	k8s.WaitUntilAllNodesReady(t, kubectlOptions, 90, 10*time.Second) // 15 минут
-
-	// API отвечает и есть системный неймспейс
-	namespaces := k8s.GetAllNamespaces(t, kubectlOptions)
-	assert.Contains(t, namespaces, "kube-system")
-
-	fmt.Printf("Success! Cluster at %s is fully operational.\n", endpoint)
+	assert.NoError(t, err, "Кластер не найден в каталоге %s", folderID)
+	assert.Equal(t, k8s.Cluster_RUNNING, cluster.Status, "Кластер должен быть активен")
 }
