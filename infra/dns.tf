@@ -2,10 +2,9 @@
 resource "yandex_cm_certificate" "le_cert" {
   name      = "sausage-store-le"
   folder_id = var.folder_id
-
+  domains   = [var.domain_name, "*.${var.domain_name}"]
   managed {
     challenge_type = "DNS_CNAME" # Самый надежный способ для автоматизации
-    domains        = [var.domain_name, "*.${var.domain_name}"]
   }
 }
 
