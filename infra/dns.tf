@@ -33,5 +33,5 @@ resource "yandex_dns_recordset" "observability_records" {
   type     = "A"
   ttl      = 600
 
-  data     = [yandex_kubernetes_cluster.k8s-cluster.master[0].external_v4_address]
+  data = [yandex_kubernetes_cluster.k8s-cluster.master[0].external_v4_address]
 }

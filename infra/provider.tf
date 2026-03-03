@@ -5,10 +5,10 @@
 terraform {
   required_providers {
     yandex = {
-      source = "yandex-cloud/yandex"
+      source  = "yandex-cloud/yandex"
       version = ">= 0.80.0"
     }
-    helm   = {
+    helm = {
       source = "hashicorp/helm"
     }
     kubernetes = {
