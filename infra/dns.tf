@@ -1,8 +1,6 @@
 # Существующая публичная DNS-зона
 data "yandex_dns_zone" "sausage_store_public_zone" {
   name   = "vigilia-site"
-  zone   = "${var.domain_name}."
-  public = true
 }
 
 # Запрос на управляемый сертификат Let's Encrypt
