@@ -55,7 +55,7 @@ plan:
     - terraform plan -out=${PLAN}
     - terraform show -json ${PLAN} > tfplan.json
   rules:
-    - if: $OPERATION == "terraform"
+    - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
       when: always
   variables:
     TF_LOG: INFO
@@ -81,7 +81,7 @@ apply:
     - terraform init
     - terraform apply -auto-approve ${PLAN}
   rules:
-    - if: $OPERATION == "terraform"
+    - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
       when: manual
     - when: never
   variables:
@@ -127,7 +127,7 @@ destroy:
     - terraform apply -destroy -auto-approve
   # https://developer.hashicorp.com/terraform/cli/commands/destroy
   rules:
-    - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH == "main"
+    - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
       when: manual
     - when: never
   variables:
