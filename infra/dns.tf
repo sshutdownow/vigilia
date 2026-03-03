@@ -9,7 +9,7 @@ resource "yandex_cm_certificate" "le_cert" {
 }
 
 # 2. Публичная DNS-зона
-resource "yandex_dns_zone" "sausage_store_public_zone" {
+data "yandex_dns_zone" "sausage_store_public_zone" {
   name   = "sausage-store-public-zone"
   zone   = "${var.domain_name}."
   public = true
