@@ -16,7 +16,7 @@ resource "yandex_cm_certificate" "le_cert" {
 # АВТОМАТИЧЕСКАЯ ВАЛИДАЦИЯ
 # Terraform берет данные из запроса сертификата и создает запись в DNS
 resource "yandex_dns_recordset" "validation_record" {
-  zone_id = yandex_dns_zone.sausage_store_public_zone.id
+  zone_id = data.yandex_dns_zone.sausage_store_public_zone.id
   name    = yandex_cm_certificate.le_cert.challenges[0].dns_name
   type    = yandex_cm_certificate.le_cert.challenges[0].dns_type
   data    = [yandex_cm_certificate.le_cert.challenges[0].dns_value]
@@ -25,7 +25,7 @@ resource "yandex_dns_recordset" "validation_record" {
 
 resource "yandex_dns_recordset" "observability_records" {
   for_each = toset(["grafana", "jaeger", "pyroscope", "argocd", "k8s"])
-  zone_id  = yandex_dns_zone.sausage_store_public_zone.id
+  zone_id  = data.yandex_dns_zone.sausage_store_public_zone.id
   name     = "${each.value}.${var.domain_name}."
   type     = "A"
   ttl      = 600
