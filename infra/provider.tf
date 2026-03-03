@@ -6,9 +6,15 @@ terraform {
   required_providers {
     yandex = {
       source = "yandex-cloud/yandex"
+      version = ">= 0.80.0"
+    }
+    helm   = {
+      source = "hashicorp/helm"
+    }
+    kubernetes = {
+      source = "hashicorp/kubernetes"
     }
   }
-  required_version = ">= 0.13"
 
   #
   # https://docs.gitlab.com/ci/variables/predefined_variables/

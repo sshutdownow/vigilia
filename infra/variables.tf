@@ -56,6 +56,11 @@ variable "net_cidr" {
   ]
 }
 
+variable "domain_name" {
+  type    = string
+  default = "vigilia.site"
+}
+
 variable "vm_prod_name" {
   type    = string
   default = "vm-prod"
