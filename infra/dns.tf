@@ -1,4 +1,11 @@
-# 1. Запрос на управляемый сертификат Let's Encrypt
+# Существующая публичная DNS-зона
+data "yandex_dns_zone" "sausage_store_public_zone" {
+  name   = "vigilia-site"
+  zone   = "${var.domain_name}."
+  public = true
+}
+
+# Запрос на управляемый сертификат Let's Encrypt
 resource "yandex_cm_certificate" "le_cert" {
   name      = "sausage-store-le"
   folder_id = var.folder_id
@@ -8,14 +15,7 @@ resource "yandex_cm_certificate" "le_cert" {
   }
 }
 
-# 2. Публичная DNS-зона
-data "yandex_dns_zone" "sausage_store_public_zone" {
-  name   = "sausage-store-public-zone"
-  zone   = "${var.domain_name}."
-  public = true
-}
-
-# 3. АВТОМАТИЧЕСКАЯ ВАЛИДАЦИЯ
+# АВТОМАТИЧЕСКАЯ ВАЛИДАЦИЯ
 # Terraform берет данные из запроса сертификата и создает запись в DNS
 resource "yandex_dns_recordset" "validation_record" {
   zone_id = yandex_dns_zone.sausage_store_public_zone.id
