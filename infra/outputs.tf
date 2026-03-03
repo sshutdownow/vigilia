@@ -9,3 +9,8 @@ output "k8s_ca_certificate" {
 output "k8s_cluster_id" {
   value = yandex_kubernetes_cluster.k8s-cluster.id
 }
+
+output "cert-id" {
+  description = "Certificate ID"
+  value       = data.yandex_cm_certificate.vigilia-site.id
+}

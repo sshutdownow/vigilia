@@ -13,7 +13,7 @@ resource "yandex_cm_certificate" "le_cert" {
   }
   lifecycle {
     # Запрещает удаление сертификата через terraform destroy
-    prevent_destroy = true
+    prevent_destroy = false
 
     # Игнорирует изменения в доменах, чтобы не инициировать перевыпуск
     ignore_changes = [domains]
@@ -28,6 +28,12 @@ resource "yandex_dns_recordset" "validation_record" {
   type    = yandex_cm_certificate.le_cert.challenges[0].dns_type
   data    = [yandex_cm_certificate.le_cert.challenges[0].dns_value]
   ttl     = 60
+}
+
+data "yandex_cm_certificate" "vigilia-site" {
+  depends_on      = [yandex_dns_recordset.validation_record]
+  certificate_id  = yandex_cm_certificate.le_cert.id
+  wait_validation = true
 }
 
 resource "yandex_dns_recordset" "observability_records" {
