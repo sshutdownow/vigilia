@@ -11,6 +11,13 @@ resource "yandex_cm_certificate" "le_cert" {
   managed {
     challenge_type = "DNS_CNAME" # Самый надежный способ для автоматизации
   }
+  lifecycle {
+    # Запрещает удаление сертификата через terraform destroy
+    prevent_destroy = true
+
+    # Игнорирует изменения в доменах, чтобы не инициировать перевыпуск
+    ignore_changes = [domains]
+  }
 }
 
 # АВТОМАТИЧЕСКАЯ ВАЛИДАЦИЯ
