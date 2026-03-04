@@ -67,6 +67,12 @@ variable "argocd_admin_password" {
   sensitive = true
 }
 
+variable "gitlab_access_token" {
+  type      = string
+  default   = ""
+  sensitive = true
+}
+
 variable "vm_prod_name" {
   type    = string
   default = "vm-prod"
