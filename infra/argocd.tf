@@ -17,6 +17,7 @@ resource "helm_release" "argocd" {
       value = var.argocd_admin_password
     }
   ]
+  
   depends_on = [yandex_kubernetes_cluster.k8s-cluster]
 }
 
