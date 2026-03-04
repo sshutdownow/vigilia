@@ -6,15 +6,16 @@ resource "helm_release" "argocd" {
   namespace        = "argocd"
   create_namespace = true
 
-  set {
-    name  = "configs.params.server\\.insecure"
-    value = "true"
-  }
-
-  set {
-    name  = "configs.secret.argocdServerAdminPassword"
-    value = var.argocd_admin_password
-  }
+  set = [
+    {
+      name  = "configs.params.server\\.insecure"
+      value = "true"
+    },
+    {
+      name  = "configs.secret.argocdServerAdminPassword"
+      value = var.argocd_admin_password
+    }
+  ]
 }
 
 # 2. Регистрация Yandex Container Registry как OCI-репозитория для чартов

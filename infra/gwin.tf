@@ -4,15 +4,16 @@ resource "helm_release" "gwin" {
   chart      = "gwin-ingress-controller"
   namespace  = "kube-system"
 
-  set {
-    name  = "folderId"
-    value = var.folder_id
-  }
-
-  set {
-    name  = "clusterId"
-    value = yandex_kubernetes_cluster.k8s_cluster.id
-  }
+  set = [
+    {
+      name  = "folderId"
+      value = var.folder_id
+    },
+    {
+      name  = "clusterId"
+      value = yandex_kubernetes_cluster.k8s-cluster.id
+    }
+  ]
 
   depends_on = [yandex_kubernetes_node_group.k8s-node-group]
 }
