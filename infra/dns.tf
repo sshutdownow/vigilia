@@ -51,5 +51,5 @@ resource "yandex_dns_recordset" "app_record" {
   name    = "${var.domain_name}."
   type    = "A"
   ttl     = 900
-  data    = [yandex_kubernetes_cluster.k8s_cluster.master[0].external_v4_address]
+  data    = [yandex_kubernetes_cluster.k8s-cluster.master[0].external_v4_address]
 }
