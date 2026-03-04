@@ -17,6 +17,7 @@ resource "helm_release" "argocd" {
       value = var.argocd_admin_password
     }
   ]
+  depends_on = [yandex_kubernetes_cluster.k8s-cluster]
 }
 
 # 2. Регистрация Yandex Container Registry как OCI-репозитория для чартов
@@ -35,7 +36,7 @@ resource "kubernetes_manifest" "yc_registry_oci" {
       type      = "helm"
       name      = "yc-oci"
       enableOCI = "true"
-      # Ссылка на твой существующий реестр
+      # существующий реестр
       url      = "cr.yandex/${yandex_container_registry.container-registry.id}"
       username = "json_key"
       password = file("authorized_key.json")
@@ -44,7 +45,7 @@ resource "kubernetes_manifest" "yc_registry_oci" {
   depends_on = [helm_release.argocd]
 }
 
-# 3. Регистрация твоего Managed GitLab для доступа к коду
+# 3. Регистрация GitLab для доступа к коду
 resource "kubernetes_manifest" "sausage_repo_gitlab" {
   manifest = {
     apiVersion = "v1"
