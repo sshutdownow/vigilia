@@ -6,16 +6,16 @@ resource "helm_release" "argocd" {
   namespace        = "argocd"
   create_namespace = true
 
-  set = [
-    { # Отключаем TLS на самом сервере, так как его терминирует Gwin
-      name  = "configs.params.server\\.insecure"
-      value = "true"
-    },
-    { # Установка пароля администратора из переменной (bcrypt хеш)
-      name  = "configs.secret.argocdServerAdminPassword"
-      value = var.argocd_admin_password
+  dynamic "set" {
+    for_each = {
+      "configs.params.server\\.insecure"         = "true"
+      "configs.secret.argocdServerAdminPassword" = var.argocd_admin_password
     }
-  ]
+    content {
+      name  = set.key
+      value = set.value
+    }
+  }
 }
 
 # 2. Регистрация Yandex Container Registry как OCI-репозитория для чартов
