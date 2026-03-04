@@ -6,15 +6,14 @@ resource "helm_release" "argocd" {
   namespace        = "argocd"
   create_namespace = true
 
-  dynamic "set" {
-    for_each = {
-      "configs.params.server\\.insecure"         = "true"
-      "configs.secret.argocdServerAdminPassword" = var.argocd_admin_password
-    }
-    content {
-      name  = set.key
-      value = set.value
-    }
+  set {
+    name  = "configs.params.server\\.insecure"
+    value = "true"
+  }
+
+  set {
+    name  = "configs.secret.argocdServerAdminPassword"
+    value = var.argocd_admin_password
   }
 }
 

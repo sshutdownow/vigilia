@@ -4,16 +4,14 @@ resource "helm_release" "gwin" {
   chart      = "gwin-ingress-controller"
   namespace  = "kube-system"
 
-  # Используем динамические блоки set (это самый надежный способ)
-  dynamic "set" {
-    for_each = {
-      "folderId"  = var.folder_id
-      "clusterId" = yandex_kubernetes_cluster.k8s-cluster.id
-    }
-    content {
-      name  = set.key
-      value = set.value
-    }
+  set {
+    name  = "folderId"
+    value = var.folder_id
+  }
+
+  set {
+    name  = "clusterId"
+    value = yandex_kubernetes_cluster.k8s_cluster.id
   }
 
   depends_on = [yandex_kubernetes_node_group.k8s-node-group]
