@@ -1,6 +1,6 @@
 resource "helm_release" "gwin" {
   name       = "gwin-ingress-controller"
-  repository = "https://charts.yc-market.yandex.net"
+  repository = "https://charts.marketplace.yandexcloud.net"
   chart      = "gwin-ingress-controller"
   namespace  = "kube-system"
 
