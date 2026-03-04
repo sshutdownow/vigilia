@@ -62,9 +62,9 @@ variable "domain_name" {
 }
 
 variable "argocd_admin_password" {
-  type    = string
-  default = "$2a$10$6v/vR.XvC8.7Y6H8H6H8HeYjR7F5F5F5F5F5F5F5F5F5F5F5F5F5G"
-  sensitive   = true
+  type      = string
+  default   = "$2a$10$6v/vR.XvC8.7Y6H8H6H8HeYjR7F5F5F5F5F5F5F5F5F5F5F5F5F5G"
+  sensitive = true
 }
 
 variable "vm_prod_name" {

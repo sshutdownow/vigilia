@@ -36,9 +36,9 @@ resource "kubernetes_manifest" "yc_registry_oci" {
       name      = "yc-oci"
       enableOCI = "true"
       # Ссылка на твой существующий реестр
-      url       = "cr.yandex/${yandex_container_registry.container-registry.id}"
-      username  = "json_key"
-      password  = file("authorized_key.json")
+      url      = "cr.yandex/${yandex_container_registry.container-registry.id}"
+      username = "json_key"
+      password = file("authorized_key.json")
     }
   }
   depends_on = [helm_release.argocd]
