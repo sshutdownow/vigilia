@@ -10,10 +10,7 @@ resource "helm_release" "gwin" {
     {
       name  = "controller.folderId"
       value = var.folder_id
-    }
-  ]
-
-  set = [
+    },
     {
       name  = "controller.ycServiceAccount.secret.value"
       value = file("${path.module}/authorized_key.json")
