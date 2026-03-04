@@ -14,5 +14,5 @@ resource "yandex_resourcemanager_folder_iam_member" "k8s_roles" {
   ])
   folder_id = var.folder_id
   role      = each.key
-  member    = "serviceAccount:${data.yandex_iam_service_account.k8s_sa.id}"
+  member    = "serviceAccount:${yandex_iam_service_account.k8s-sa.id}"
 }
