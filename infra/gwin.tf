@@ -1,6 +1,7 @@
 resource "helm_release" "gwin" {
-  name       = "gwin-ingress-controller"
-  repository = "https://charts.marketplace.yandexcloud.net"
+  name       = "gwin"
+  repository = "oci://cr.yandex/yc-marketplace/yandex-cloud/gwin/gwin-chart"
+  version    = "v1.0.10"
   chart      = "gwin-ingress-controller"
   namespace  = "kube-system"
 
@@ -23,7 +24,8 @@ resource "yandex_resourcemanager_folder_iam_member" "gwin_roles" {
     "alb.editor",
     "certificate-manager.downloader",
     "compute.viewer",
-    "vpc.publicAdmin"
+    "vpc.publicAdmin",
+    "k8s.viewer" 
   ])
   folder_id = var.folder_id
   role      = each.key

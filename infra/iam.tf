@@ -1,8 +1,3 @@
-# Находим существующий SA по имени
-data "yandex_iam_service_account" "k8s_sa" {
-  name = var.sa_k8s
-}
-
 # Назначаем необходимые роли существующему SA
 resource "yandex_resourcemanager_folder_iam_member" "k8s_roles" {
   for_each = toset([
