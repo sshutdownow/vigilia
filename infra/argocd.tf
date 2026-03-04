@@ -65,7 +65,7 @@ resource "kubernetes_secret_v1" "sausage_repo_gitlab" {
 resource "kubernetes_manifest" "sausage_app" {
   # Forces Terraform to wait until the cluster is provisioned and secrets are created
   depends_on = [
-    yandex_kubernetes_cluster.k8s_cluster,
+    yandex_kubernetes_cluster.k8s-cluster,
     kubernetes_secret_v1.yc_registry_oci
   ]
 
