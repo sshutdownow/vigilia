@@ -20,7 +20,6 @@ resource "yandex_cm_certificate" "le_cert" {
   }
 }
 
-# АВТОМАТИЧЕСКАЯ ВАЛИДАЦИЯ
 # Terraform берет данные из запроса сертификата и создает запись в DNS
 resource "yandex_dns_recordset" "validation_record" {
   zone_id = data.yandex_dns_zone.sausage_store_public_zone.id
@@ -30,6 +29,7 @@ resource "yandex_dns_recordset" "validation_record" {
   ttl     = 60
 }
 
+# АВТОМАТИЧЕСКАЯ ВАЛИДАЦИЯ
 data "yandex_cm_certificate" "vigilia-site" {
   depends_on      = [yandex_dns_recordset.validation_record]
   certificate_id  = yandex_cm_certificate.le_cert.id
@@ -41,7 +41,15 @@ resource "yandex_dns_recordset" "observability_records" {
   zone_id  = data.yandex_dns_zone.sausage_store_public_zone.id
   name     = "${each.value}.${var.domain_name}."
   type     = "A"
-  ttl      = 600
+  ttl      = 900
 
   data = [yandex_kubernetes_cluster.k8s-cluster.master[0].external_v4_address]
+}
+
+resource "yandex_dns_recordset" "app_record" {
+  zone_id = data.yandex_dns_zone.sausage_store_public_zone.id
+  name    = "${var.domain_name}."
+  type    = "A"
+  ttl     = 900
+  data    = [yandex_kubernetes_cluster.k8s_cluster.master[0].external_v4_address]
 }

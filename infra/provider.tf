@@ -38,3 +38,20 @@ provider "yandex" {
   folder_id                = var.folder_id
   zone                     = "ru-central1-a"
 }
+
+# Используем временный токен, который Terraform может получить из контекста авторизации самого провайдера Yandex
+data "yandex_client_config" "client" {}
+
+provider "helm" {
+  kubernetes {
+    host                   = yandex_kubernetes_cluster.k8s_cluster.master[0].external_v4_endpoint
+    cluster_ca_certificate = yandex_kubernetes_cluster.k8s_cluster.master[0].cluster_ca_certificate
+    token                  = data.yandex_client_config.client.iam_token
+  }
+}
+
+provider "kubernetes" {
+  host                   = yandex_kubernetes_cluster.k8s_cluster.master[0].external_v4_endpoint
+  cluster_ca_certificate = yandex_kubernetes_cluster.k8s_cluster.master[0].cluster_ca_certificate
+  token                  = data.yandex_client_config.client.iam_token
+}
