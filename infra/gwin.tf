@@ -13,10 +13,10 @@ resource "helm_release" "gwin" {
     }
   ]
 
-  set_file = [
+  set = [
     {
       name  = "controller.ycServiceAccount.secret.value"
-      value = "authorized_key.json"
+      value = file("${path.module}/authorized_key.json")
     }
   ]
 
