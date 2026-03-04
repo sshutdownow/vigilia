@@ -1,11 +1,9 @@
-# 1. Установка ArgoCD через Helm
 resource "helm_release" "argocd" {
   name             = "argocd"
-  repository       = "https://argoproj.github.io/argo-helm"
+  repository       = "https://argoproj.github.io"
   chart            = "argo-cd"
   namespace        = "argocd"
   create_namespace = true
-  wait             = true
 
   set = [
     {
@@ -17,11 +15,9 @@ resource "helm_release" "argocd" {
       value = var.argocd_admin_password
     }
   ]
-
-  depends_on = [yandex_kubernetes_cluster.k8s-cluster]
 }
 
-resource "kubernetes_secret" "yc_registry_oci" {
+resource "kubernetes_secret_v1" "yc_registry_oci" {
   metadata {
     name      = "yc-registry-oci"
     namespace = "argocd"
@@ -36,6 +32,7 @@ resource "kubernetes_secret" "yc_registry_oci" {
     type      = "helm"
     name      = "yc-oci"
     enableOCI = "true"
+    # Reference your existing registry resource
     url       = "cr.yandex/${yandex_container_registry.container-registry.id}"
     username  = "json_key"
     password  = file("authorized_key.json")
@@ -44,7 +41,7 @@ resource "kubernetes_secret" "yc_registry_oci" {
   depends_on = [helm_release.argocd]
 }
 
-resource "kubernetes_secret" "sausage_repo_gitlab" {
+resource "kubernetes_secret_v1" "sausage_repo_gitlab" {
   metadata {
     name      = "sausage-repo-gitlab"
     namespace = "argocd"
@@ -65,9 +62,13 @@ resource "kubernetes_secret" "sausage_repo_gitlab" {
   depends_on = [helm_release.argocd]
 }
 
-
-# 4. Root Application: Деплой Sausage Store из OCI-чарта
 resource "kubernetes_manifest" "sausage_app" {
+  # Forces Terraform to wait until the cluster is provisioned and secrets are created
+  depends_on = [
+    yandex_kubernetes_cluster.k8s_cluster,
+    kubernetes_secret_v1.yc_registry_oci
+  ]
+
   manifest = {
     apiVersion = "argoproj.io/v1alpha1"
     kind       = "Application"
@@ -78,7 +79,7 @@ resource "kubernetes_manifest" "sausage_app" {
     spec = {
       project = "default"
       source = {
-        # Тянем чарт из Container Registry (OCI)
+        # Pulls the chart from the Yandex OCI Registry
         repoURL        = "cr.yandex/${yandex_container_registry.container-registry.id}"
         chart          = "sausage-store"
         targetRevision = "1.0.0"
@@ -105,5 +106,4 @@ resource "kubernetes_manifest" "sausage_app" {
       }
     }
   }
-  depends_on = [kubernetes_manifest.yc_registry_oci]
 }
