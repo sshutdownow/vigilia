@@ -25,7 +25,7 @@ resource "yandex_resourcemanager_folder_iam_member" "gwin_roles" {
     "certificate-manager.downloader",
     "compute.viewer",
     "vpc.publicAdmin",
-    "k8s.viewer" 
+    "k8s.viewer"
   ])
   folder_id = var.folder_id
   role      = each.key
