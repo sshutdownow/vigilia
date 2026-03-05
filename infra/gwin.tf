@@ -37,6 +37,7 @@ resource "helm_release" "gwin" {
   ]
 
   depends_on = [
+    yandex_kubernetes_cluster.k8s-cluster,
     yandex_kubernetes_node_group.k8s-node-group,
     yandex_resourcemanager_folder_iam_member.gwin_roles
   ]
