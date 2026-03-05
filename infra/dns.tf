@@ -46,14 +46,6 @@ resource "yandex_dns_recordset" "observability_records" {
   data = [yandex_kubernetes_cluster.k8s-cluster.master[0].external_v4_address]
 }
 
-resource "yandex_dns_recordset" "app_record" {
-  zone_id = data.yandex_dns_zone.sausage_store_public_zone.id
-  name    = "${var.domain_name}."
-  type    = "A"
-  ttl     = 900
-  data    = [yandex_kubernetes_cluster.k8s-cluster.master[0].external_v4_address]
-}
-
 # Отдельная запись для ArgoCD, привязанная к Gwin IP
 resource "yandex_dns_recordset" "argocd_dns" {
   zone_id = data.yandex_dns_zone.sausage_store_public_zone.id
