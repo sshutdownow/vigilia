@@ -70,6 +70,6 @@ resource "yandex_dns_recordset" "app_record" {
   name    = "${var.domain_name}."
   type    = "A"
   ttl     = 900
-  data    = [data.kubernetes_resource.gw_status.object.status.addresses[0].value]
+  data    = [try(data.kubernetes_resource.gw_status.object.status.addresses[0].value, "127.0.0.1")]
   depends_on = [helm_release.gwin]
 }
