@@ -1,5 +1,5 @@
 resource "helm_release" "sausage_store_app" {
-  count      = false # TODO
+  count      = 0 # TODO
   name       = "sausage-store-app"
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argocd-apps"
