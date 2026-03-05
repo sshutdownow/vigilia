@@ -55,7 +55,7 @@ plan:
     - terraform init
     - terraform fmt -check -recursive -diff || true
     - terraform validate
-    - terraform plan -out=${PLAN} -target=yandex_kubernetes_cluster.k8s-cluster -target=yandex_kubernetes_node_group.k8s-node-group
+    - terraform plan -out=${PLAN} -target=yandex_kubernetes_cluster.k8s-cluster -target=yandex_kubernetes_node_group.k8s-node-group -target=yandex_cm_certificate.vigilia-site
     - terraform show -json ${PLAN} > tfplan.json
   rules:
     - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH =~ /^(main|master)$/

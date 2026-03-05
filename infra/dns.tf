@@ -62,7 +62,7 @@ data "kubernetes_resource" "gw_status" {
     name      = "argocd-gateway"
     namespace = "argocd"
   }
-  depends_on = [kubernetes_manifest.argocd_gateway]
+  depends_on = [helm_release.argocd]
 }
 
 resource "yandex_dns_recordset" "app_record" {
