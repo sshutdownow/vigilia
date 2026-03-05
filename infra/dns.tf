@@ -71,4 +71,5 @@ resource "yandex_dns_recordset" "app_record" {
   type    = "A"
   ttl     = 900
   data    = [data.kubernetes_resource.gw_status.object.status.addresses[0].value]
+  depends_on = [helm_release.gwin]
 }
