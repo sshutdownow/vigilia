@@ -131,7 +131,7 @@ argocdplan:
     - terraform init
     - terraform fmt -check -recursive -diff || true
     - terraform validate
-    - terraform plan -out=${PLAN2} -target=yandex_kubernetes_cluster.k8s-cluster -target=yandex_kubernetes_node_group.nodes
+    - terraform plan -out=${PLAN2}
     - terraform show -json ${PLAN2} > tfplan.json
   rules:
     - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
