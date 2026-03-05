@@ -6,16 +6,16 @@ resource "helm_release" "gwin" {
   namespace        = "gwin-ns"
   create_namespace = true
 
-#  set = [
-#    {
-#      name  = "controller.folderId"
-#      value = var.folder_id
-#    },
-#    {
-#      name  = "controller.ycServiceAccount.secret.value"
-#      value = file("${path.module}/authorized_key.json")
-#    }
-#  ]
+  #  set = [
+  #    {
+  #      name  = "controller.folderId"
+  #      value = var.folder_id
+  #    },
+  #    {
+  #      name  = "controller.ycServiceAccount.secret.value"
+  #      value = file("${path.module}/authorized_key.json")
+  #    }
+  #  ]
 
   values = [
     yamlencode({
