@@ -37,7 +37,7 @@ data "yandex_cm_certificate" "vigilia-site" {
 }
 
 resource "yandex_dns_recordset" "observability_records" {
-  for_each = toset(["grafana", "jaeger", "pyroscope", "argocd", "k8s"])
+  for_each = toset(["grafana", "jaeger", "pyroscope", "k8s"])
   zone_id  = data.yandex_dns_zone.sausage_store_public_zone.id
   name     = "${each.value}.${var.domain_name}."
   type     = "A"
@@ -52,4 +52,31 @@ resource "yandex_dns_recordset" "app_record" {
   type    = "A"
   ttl     = 900
   data    = [yandex_kubernetes_cluster.k8s-cluster.master[0].external_v4_address]
+}
+
+# Отдельная запись для ArgoCD, привязанная к Gwin IP
+resource "yandex_dns_recordset" "argocd_dns" {
+  zone_id = data.yandex_dns_zone.sausage_store_public_zone.id
+  name    = "argocd.${var.domain_name}."
+  type    = "A"
+  ttl     = 300
+  data    = [data.kubernetes_resource.gw_status.object.status.addresses[0].value]
+}
+
+data "kubernetes_resource" "gw_status" {
+  api_version = "gateway.networking.k8s.io/v1"
+  kind        = "Gateway"
+  metadata {
+    name      = "argocd-gateway"
+    namespace = "argocd"
+  }
+  depends_on = [kubernetes_manifest.argocd_gateway]
+}
+
+resource "yandex_dns_recordset" "app_record" {
+  zone_id = data.yandex_dns_zone.sausage_store_public_zone.id
+  name    = "${var.domain_name}."
+  type    = "A"
+  ttl     = 900
+  data    = [data.kubernetes_resource.gw_status.object.status.addresses[0].value]
 }

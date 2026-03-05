@@ -26,29 +26,52 @@ resource "helm_release" "gwin" {
   create_namespace = true
 
   set = [
-    {
-      name  = "serviceAccount.id"
-      value = yandex_iam_service_account.gwin_sa.id
-    },
-    {
-      name  = "controller.folderId"
-      value = var.folder_id
-    }
+    { name = "serviceAccount.id", value = yandex_iam_service_account.gwin_sa.id },
+    { name = "controller.folderId", value = var.folder_id },
+    { name = "gatewayClass.create", value = "true" },
+    { name = "gatewayClass.name",   value = "yc-l7-gw" }
   ]
-
-  depends_on = [
-    yandex_kubernetes_cluster.k8s-cluster,
-    yandex_kubernetes_node_group.k8s-node-group,
-    yandex_resourcemanager_folder_iam_member.gwin_roles
-  ]
+  depends_on = [yandex_resourcemanager_folder_iam_member.gwin_roles]
 }
 
-resource "kubernetes_manifest" "gateway_class" {
+resource "kubernetes_manifest" "argocd_gateway" {
   manifest = {
     apiVersion = "gateway.networking.k8s.io/v1"
-    kind       = "GatewayClass"
-    metadata   = { name = "yc-l7-gw" }
-    spec       = { controllerName = "gateway.yc.io/gwin" }
+    kind       = "Gateway"
+    metadata = {
+      name      = "argocd-gateway"
+      namespace = "argocd"
+      annotations = {
+        "gateway.yc.io/certificate-id" = yandex_cm_certificate.le_cert.id
+      }
+    }
+    spec = {
+      gatewayClassName = "yc-l7-gw"
+      listeners = [
+        { name = "https", protocol = "HTTPS", port = 443, allowedRoutes = { namespaces = { from = "Same" } } },
+        { name = "http",  protocol = "HTTP",  port = 80,  allowedRoutes = { namespaces = { from = "Same" } } }
+      ]
+    }
   }
-  depends_on = [helm_release.gwin]
+  depends_on = [helm_release.gwin, data.yandex_cm_certificate.vigilia-site]
+}
+
+resource "kubernetes_manifest" "argocd_route" {
+  manifest = {
+    apiVersion = "gateway.networking.k8s.io/v1"
+    kind       = "HTTPRoute"
+    metadata = {
+      name      = "argocd-route"
+      namespace = "argocd"
+    }
+    spec = {
+      parentRefs = [{ name = "argocd-gateway" }]
+      hostnames  = ["argocd.${var.domain_name}"]
+      rules = [{
+        matches = [{ path = { type = "PathPrefix", value = "/" } }]
+        backendRefs = [{ name = "argocd-server", port = 80 }]
+      }]
+    }
+  }
+  depends_on = [kubernetes_manifest.argocd_gateway]
 }

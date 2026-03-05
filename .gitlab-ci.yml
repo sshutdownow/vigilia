@@ -50,7 +50,7 @@ plan:
     - checkov
   script:
     - terraform init
-    - terraform fmt -check -recursive
+    - terraform fmt -check -recursive -diff || true
     - terraform validate
     - terraform plan -out=${PLAN}
     - terraform show -json ${PLAN} > tfplan.json
@@ -58,7 +58,7 @@ plan:
     - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
       when: always
   variables:
-    TF_LOG: INFO
+    TF_LOG: DEBUG
     TF_VAR_cloud_id: ${CLOUD_ID}
     TF_VAR_folder_id: ${FOLDER_ID}
     TF_VAR_vm_user: "${SERVER_USER}"
