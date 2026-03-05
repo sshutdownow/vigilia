@@ -17,7 +17,7 @@ resource "helm_release" "argocd" {
     { # GWIN
       name  = "server.service.type"
       value = "NodePort"
-    }    
+    }
   ]
 }
 
@@ -81,9 +81,9 @@ resource "kubernetes_manifest" "argocd_gateway" {
     spec = {
       gatewayClassName = "yc-l7-gw"
       listeners = [{
-        name     = "https"
-        protocol = "HTTPS"
-        port     = 443
+        name          = "https"
+        protocol      = "HTTPS"
+        port          = 443
         allowedRoutes = { namespaces = { from = "Same" } }
       }]
     }

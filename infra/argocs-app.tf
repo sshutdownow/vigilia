@@ -38,7 +38,7 @@ resource "helm_release" "sausage_store_app" {
             namespace = "sausage-store"
           }
           syncPolicy = {
-            automated = { prune = true, selfHeal = true }
+            automated   = { prune = true, selfHeal = true }
             syncOptions = ["CreateNamespace=true"]
           }
         }
