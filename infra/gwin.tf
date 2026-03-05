@@ -13,7 +13,7 @@ resource "helm_release" "gwin" {
     },
     {
       name  = "controller.ycServiceAccount.secret.value"
-      value = file("/authorized_key.json")
+      value = file("authorized_key.json")
     }
   ]
 
