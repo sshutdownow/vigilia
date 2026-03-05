@@ -19,6 +19,45 @@ resource "helm_release" "argocd" {
       value = "NodePort"
     }
   ]
+
+  values = [
+    yamlencode({
+      server = {
+        extraObjects = [
+          {
+            apiVersion = "gateway.networking.k8s.io/v1"
+            kind       = "Gateway"
+            metadata = {
+              name        = "argocd-gateway"
+              annotations = { "gateway.yc.io/certificate-id" = yandex_cm_certificate.le_cert.id }
+            }
+            spec = {
+              gatewayClassName = "yc-l7-gw"
+              listeners = [{
+                name     = "https"
+                protocol = "HTTPS"
+                port     = 443
+                allowedRoutes = { namespaces = { from = "Same" } }
+              }]
+            }
+          },
+          {
+            apiVersion = "gateway.networking.k8s.io/v1"
+            kind       = "HTTPRoute"
+            metadata = { name = "argocd-route" }
+            spec = {
+              parentRefs = [{ name = "argocd-gateway" }]
+              hostnames  = ["argocd.${var.domain_name}"]
+              rules = [{
+                backendRefs = [{ name = "argocd-server", port = 80 }]
+              }]
+            }
+          }
+        ]
+      }
+    })
+  ]
+
   depends_on = [yandex_kubernetes_cluster.k8s-cluster]
 }
 
