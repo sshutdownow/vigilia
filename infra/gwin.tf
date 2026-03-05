@@ -24,7 +24,7 @@ resource "helm_release" "gwin" {
 resource "yandex_resourcemanager_folder_iam_member" "gwin_roles" {
   for_each = toset([
     "alb.editor",
-    "certificate-manager.downloader",
+    "certificate-manager.certificates.downloader",
     "compute.viewer",
     "vpc.publicAdmin",
     "k8s.viewer"

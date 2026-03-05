@@ -7,7 +7,7 @@ resource "yandex_resourcemanager_folder_iam_member" "k8s_roles" {
     "ydb.editor",
     "storage.editor",
     "lockbox.payloadViewer",
-    "certificate-manager.downloader",
+    "certificate-manager.certificates.downloader",
     "container-registry.images.puller",
     "alb.editor",
     "vpc.publicAdmin"
