@@ -2,10 +2,10 @@ stages:
   - tests
   - plan
   - apply
-  - destroy
   - terratest
   - argocdplan
   - argocdapply
+  - destroy
   - ansible_deploy
   - build
   - package
