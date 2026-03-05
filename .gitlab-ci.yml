@@ -4,6 +4,8 @@ stages:
   - apply
   - destroy
   - terratest
+  - argocd_plan
+  - argocd_apply
   - ansible_deploy
   - build
   - package
@@ -12,6 +14,7 @@ variables:
   ANSIBLE_ROOT: ${CI_PROJECT_DIR}/ansible
   TF_ROOT: ${CI_PROJECT_DIR}/infra
   PLAN: infra_plan.cache
+  PLAN2: argo_plan.cache
   GITLAB_ACCESS_TOKEN: ${TF_HTTP_PASSWORD}
   OPERATION:
     description: "Select CI/CD-operation"
@@ -52,7 +55,7 @@ plan:
     - terraform init
     - terraform fmt -check -recursive -diff || true
     - terraform validate
-    - terraform plan -out=${PLAN}
+    - terraform plan -out=${PLAN} -target=yandex_kubernetes_cluster.k8s-cluster -target=yandex_kubernetes_node_group.nodes
     - terraform show -json ${PLAN} > tfplan.json
   rules:
     - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
@@ -117,6 +120,56 @@ terratest:
     TF_VAR_folder_id: ${FOLDER_ID}
     TF_VAR_vm_user: "${SERVER_USER}"
     TF_VAR_ssh_key: "${SERVER_SSH_PUBKEY}"
+
+# Terraform plan для argo
+argocd_plan:
+  stage: argocd_plan
+  image: hashicorp/terraform:latest
+  needs:
+    - terratest
+  script:
+    - terraform init
+    - terraform fmt -check -recursive -diff || true
+    - terraform validate
+    - terraform plan -out=${PLAN2} -target=yandex_kubernetes_cluster.k8s-cluster -target=yandex_kubernetes_node_group.nodes
+    - terraform show -json ${PLAN2} > tfplan.json
+  rules:
+    - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
+      when: always
+  variables:
+    TF_LOG: DEBUG
+    TF_VAR_cloud_id: ${CLOUD_ID}
+    TF_VAR_folder_id: ${FOLDER_ID}
+    TF_VAR_vm_user: "${SERVER_USER}"
+    TF_VAR_ssh_key: "${SERVER_SSH_PUBKEY}"
+    TF_VAR_ssh_private_key: "${SSH_PRIVATE_KEY}"
+  artifacts:
+    reports: # GitLab displays the details of the Terraform plan within the merge request widget.
+      terraform: ${TF_ROOT}/tfplan.json
+    paths:
+      - ${TF_ROOT}/${PLAN2}
+      - ${TF_ROOT}/tfplan.json
+      - ${TF_ROOT}/.terraform/
+    expire_in: 1 yrs
+
+# установка argo
+argocd_apply:
+  stage: argocd_apply
+  image: hashicorp/terraform:latest
+  script:
+    - terraform init
+    - terraform apply -auto-approve ${PLAN2}
+  rules:
+    - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
+      when: manual
+    - when: never
+  variables:
+    TF_LOG: INFO
+    TF_VAR_cloud_id: ${CLOUD_ID}
+    TF_VAR_folder_id: ${FOLDER_ID}
+    TF_VAR_vm_user: "${SERVER_USER}"
+    TF_VAR_ssh_key: "${SERVER_SSH_PUBKEY}"
+    TF_VAR_ssh_private_key: "${SSH_PRIVATE_KEY}"
 
 # Удаление инфраструктуры Terraform
 destroy:
