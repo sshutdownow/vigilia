@@ -19,7 +19,6 @@ resource "helm_release" "argocd" {
       value = "NodePort"
     }
   ]
-  
   depends_on = [yandex_kubernetes_cluster.k8s-cluster]
 }
 
