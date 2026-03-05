@@ -4,8 +4,8 @@ stages:
   - apply
   - destroy
   - terratest
-  - argocd_plan
-  - argocd_apply
+  - argocdplan
+  - argocdapply
   - ansible_deploy
   - build
   - package
@@ -122,8 +122,8 @@ terratest:
     TF_VAR_ssh_key: "${SERVER_SSH_PUBKEY}"
 
 # Terraform plan для argo
-argocd_plan:
-  stage: argocd_plan
+argocdplan:
+  stage: argocdplan
   image: hashicorp/terraform:latest
   needs:
     - terratest
@@ -153,8 +153,8 @@ argocd_plan:
     expire_in: 1 yrs
 
 # установка argo
-argocd_apply:
-  stage: argocd_apply
+argocdapply:
+  stage: argocdapply
   image: hashicorp/terraform:latest
   script:
     - terraform init
