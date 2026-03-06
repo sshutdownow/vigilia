@@ -3,8 +3,6 @@ stages:
   - plan
   - apply
   - terratest
-  - argocdplan
-  - argocdapply
   - destroy
   - ansible_deploy
   - build
@@ -55,7 +53,7 @@ plan:
     - terraform init
     - terraform fmt -check -recursive -diff || true
     - terraform validate
-    - terraform plan -out=${PLAN} -target=yandex_kubernetes_cluster.k8s-cluster -target=yandex_kubernetes_node_group.k8s-node-group -target=yandex_cm_certificate.vigilia-site
+    - terraform plan -out=${PLAN}
     - terraform show -json ${PLAN} > tfplan.json
   rules:
     - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
@@ -83,56 +81,6 @@ apply:
   script:
     - terraform init
     - terraform apply -auto-approve ${PLAN}
-  rules:
-    - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
-      when: manual
-    - when: never
-  variables:
-    TF_LOG: INFO
-    TF_VAR_cloud_id: ${CLOUD_ID}
-    TF_VAR_folder_id: ${FOLDER_ID}
-    TF_VAR_vm_user: "${SERVER_USER}"
-    TF_VAR_ssh_key: "${SERVER_SSH_PUBKEY}"
-    TF_VAR_ssh_private_key: "${SSH_PRIVATE_KEY}"
-
-# Terraform plan для argo
-argocdplan:
-  stage: argocdplan
-  image: hashicorp/terraform:latest
-  needs:
-    - terratest
-  script:
-    - terraform init
-    - terraform fmt -check -recursive -diff || true
-    - terraform validate
-    - terraform plan -out=${PLAN2}
-    - terraform show -json ${PLAN2} > tfplan.json
-  rules:
-    - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
-      when: always
-  variables:
-    TF_LOG: DEBUG
-    TF_VAR_cloud_id: ${CLOUD_ID}
-    TF_VAR_folder_id: ${FOLDER_ID}
-    TF_VAR_vm_user: "${SERVER_USER}"
-    TF_VAR_ssh_key: "${SERVER_SSH_PUBKEY}"
-    TF_VAR_ssh_private_key: "${SSH_PRIVATE_KEY}"
-  artifacts:
-    reports: # GitLab displays the details of the Terraform plan within the merge request widget.
-      terraform: ${TF_ROOT}/tfplan.json
-    paths:
-      - ${TF_ROOT}/${PLAN2}
-      - ${TF_ROOT}/tfplan.json
-      - ${TF_ROOT}/.terraform/
-    expire_in: 1 yrs
-
-# установка argo
-argocdapply:
-  stage: argocdapply
-  image: hashicorp/terraform:latest
-  script:
-    - terraform init
-    - terraform apply -auto-approve ${PLAN2}
   rules:
     - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
       when: manual
