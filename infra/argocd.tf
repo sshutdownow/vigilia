@@ -1,3 +1,7 @@
+resource "bcrypt_hash" "argocd_password" {
+  cleartext = var.argocd_admin_password
+}
+
 resource "helm_release" "argocd" {
   name             = "argocd"
   repository       = "https://argoproj.github.io/argo-helm"
@@ -12,7 +16,7 @@ resource "helm_release" "argocd" {
     },
     {
       name  = "configs.secret.argocdServerAdminPassword"
-      value = var.argocd_admin_password
+      value = bcrypt_hash.argocd_password.id
     },
     { # GWIN
       name  = "server.service.type"
@@ -61,7 +65,7 @@ resource "helm_release" "argocd" {
     })
   ]
 
-  depends_on = [yandex_kubernetes_cluster.k8s-cluster]
+  depends_on = [yandex_kubernetes_cluster.k8s-cluster, helm_release.gwin]
 }
 
 resource "kubernetes_secret_v1" "yc_registry_oci" {

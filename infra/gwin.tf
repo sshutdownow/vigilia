@@ -31,5 +31,8 @@ resource "helm_release" "gwin" {
     { name = "gatewayClass.create", value = "true" },
     { name = "gatewayClass.name",   value = "yc-l7-gw" }
   ]
-  depends_on = [yandex_resourcemanager_folder_iam_member.gwin_roles]
+  depends_on = [
+    yandex_resourcemanager_folder_iam_member.gwin_roles,
+    yandex_kubernetes_cluster.k8s-cluster
+  ]
 }

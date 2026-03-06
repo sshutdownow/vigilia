@@ -14,6 +14,9 @@ terraform {
     kubernetes = {
       source = "hashicorp/kubernetes"
     }
+    bcrypt = {
+      source = "viktorradnai/bcrypt"
+    }
   }
 
   #
