@@ -46,23 +46,13 @@ resource "yandex_dns_recordset" "observability_records" {
   data = [yandex_kubernetes_cluster.k8s-cluster.master[0].external_v4_address]
 }
 
-# Отдельная запись для ArgoCD, привязанная к Gwin IP
+# запись для ArgoCD, привязанная к Gwin IP
 resource "yandex_dns_recordset" "argocd_dns" {
   zone_id = data.yandex_dns_zone.sausage_store_public_zone.id
   name    = "argocd.${var.domain_name}."
   type    = "A"
   ttl     = 300
-  data    = [data.kubernetes_resource.gw_status.object.status.addresses[0].value]
-}
-
-data "kubernetes_resource" "gw_status" {
-  api_version = "gateway.networking.k8s.io/v1"
-  kind        = "Gateway"
-  metadata {
-    name      = "argocd-gateway"
-    namespace = "argocd"
-  }
-  depends_on = [helm_release.argocd]
+  data    = [yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address]
 }
 
 resource "yandex_dns_recordset" "app_record" {
@@ -70,6 +60,5 @@ resource "yandex_dns_recordset" "app_record" {
   name    = "${var.domain_name}."
   type    = "A"
   ttl     = 900
-  data    = [try(data.kubernetes_resource.gw_status.object.status.addresses[0].value, "127.0.0.1")]
-  depends_on = [helm_release.gwin]
+  data    = [yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address]
 }

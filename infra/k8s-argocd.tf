@@ -34,6 +34,13 @@ resource "yandex_vpc_subnet" "subnet-a" {
   v4_cidr_blocks = [local.zone_a_v4_cidr_blocks]
 }
 
+resource "yandex_vpc_address" "gwin_static_ip" {
+  name = "gwin-static-ip"
+  external_ipv4_address {
+    zone_id = "ru-central1-a"
+  }
+}
+
 resource "yandex_vpc_security_group" "k8s-main-sg" {
   description = "Security group ensure the basic performance of the cluster. Apply it to the cluster and node groups."
   name        = local.main_security_group_name

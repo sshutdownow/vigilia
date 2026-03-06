@@ -29,7 +29,10 @@ resource "helm_release" "argocd" {
             kind       = "Gateway"
             metadata = {
               name        = "argocd-gateway"
-              annotations = { "gateway.yc.io/certificate-id" = yandex_cm_certificate.le_cert.id }
+              annotations = {
+                "gateway.yc.io/certificate-id"        = yandex_cm_certificate.le_cert.id
+                "gateway.yc.io/external-ipv4-address" = yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address
+              }
             }
             spec = {
               gatewayClassName = "yc-l7-gw"
