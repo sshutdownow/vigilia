@@ -140,31 +140,31 @@ resource "yandex_iam_service_account" "k8s-sa" {
 }
 
 # Assign "editor" role to Kubernetes service account
-resource "yandex_resourcemanager_folder_iam_binding" "editor" {
-  folder_id = local.folder_id
-  role      = "editor"
-  members = [
-    "serviceAccount:${yandex_iam_service_account.k8s-sa.id}"
-  ]
-}
+#resource "yandex_resourcemanager_folder_iam_binding" "editor" {
+#  folder_id = local.folder_id
+#  role      = "editor"
+#  members = [
+#    "serviceAccount:${yandex_iam_service_account.k8s-sa.id}"
+#  ]
+#}
 
 # Assign "container-registry.images.puller" role to Kubernetes service account
-resource "yandex_resourcemanager_folder_iam_binding" "images-puller" {
-  folder_id = local.folder_id
-  role      = "container-registry.images.puller"
-  members = [
-    "serviceAccount:${yandex_iam_service_account.k8s-sa.id}"
-  ]
-}
+#resource "yandex_resourcemanager_folder_iam_binding" "images-puller" {
+#  folder_id = local.folder_id
+#  role      = "container-registry.images.puller"
+#  members = [
+#    "serviceAccount:${yandex_iam_service_account.k8s-sa.id}"
+#  ]
+#}
 
 # Assign "container-registry.images.pusher" role to Kubernetes service account
-resource "yandex_resourcemanager_folder_iam_binding" "images-pusher" {
-  folder_id = local.folder_id
-  role      = "container-registry.images.pusher"
-  members = [
-    "serviceAccount:${yandex_iam_service_account.k8s-sa.id}"
-  ]
-}
+#resource "yandex_resourcemanager_folder_iam_binding" "images-pusher" {
+#  folder_id = local.folder_id
+#  role      = "container-registry.images.pusher"
+#  members = [
+#    "serviceAccount:${yandex_iam_service_account.k8s-sa.id}"
+#  ]
+#}
 
 resource "yandex_kubernetes_cluster" "k8s-cluster" {
   description = "Managed Service for Kubernetes cluster"
@@ -186,9 +186,10 @@ resource "yandex_kubernetes_cluster" "k8s-cluster" {
   service_account_id      = yandex_iam_service_account.k8s-sa.id # Cluster service account ID
   node_service_account_id = yandex_iam_service_account.k8s-sa.id # Node group service account ID
   depends_on = [
-    yandex_resourcemanager_folder_iam_binding.editor,
-    yandex_resourcemanager_folder_iam_binding.images-puller,
-    yandex_resourcemanager_folder_iam_binding.images-pusher
+    yandex_resourcemanager_folder_iam_member.k8s_roles
+ #   yandex_resourcemanager_folder_iam_binding.editor,
+ #   yandex_resourcemanager_folder_iam_binding.images-puller,
+ #   yandex_resourcemanager_folder_iam_binding.images-pusher
   ]
 }
 

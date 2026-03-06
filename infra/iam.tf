@@ -1,4 +1,3 @@
-# Назначаем необходимые роли существующему SA
 resource "yandex_resourcemanager_folder_iam_member" "k8s_roles" {
   for_each = toset([
     "k8s.clusters.agent",
@@ -9,6 +8,7 @@ resource "yandex_resourcemanager_folder_iam_member" "k8s_roles" {
     "lockbox.payloadViewer",
     "certificate-manager.certificates.downloader",
     "container-registry.images.puller",
+    "container-registry.images.pusher",
     "alb.editor",
     "vpc.publicAdmin"
   ])
