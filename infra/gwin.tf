@@ -35,6 +35,7 @@ resource "helm_release" "gwin" {
   values = [<<-EOF
     controller:
       folderId: ${var.folder_id}
+      defaultBalancerSubnets: ["${yandex_vpc_subnet.subnet-a.id}"]
       ycServiceAccount:
         secret:
           value: |
