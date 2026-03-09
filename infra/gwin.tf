@@ -1,6 +1,7 @@
 # Сервисный аккаунт для Gwin
 resource "yandex_iam_service_account" "gwin_sa" {
   name = "gwin-sa"
+  description = "service account for gwin"
 }
 
 # Назначение ролей
@@ -17,6 +18,12 @@ resource "yandex_resourcemanager_folder_iam_member" "gwin_roles" {
   member    = "serviceAccount:${yandex_iam_service_account.gwin_sa.id}"
 }
 
+resource "yandex_iam_service_account_key" "gwin_sa_key" {
+  service_account_id = yandex_iam_service_account.gwin_sa.id
+  description        = "Key for Gwin controller"
+  key_algorithm      = "RSA_2048"
+}
+
 resource "helm_release" "gwin" {
   name             = "gwin"
   repository       = "oci://cr.yandex/yc-marketplace/yandex-cloud/gwin"
@@ -25,14 +32,28 @@ resource "helm_release" "gwin" {
   namespace        = "gwin-ns"
   create_namespace = true
 
-  set = [
-    { name = "serviceAccount.id", value = yandex_iam_service_account.gwin_sa.id },
-    { name = "controller.folderId", value = var.folder_id },
-    { name = "gatewayClass.create", value = "true" },
-    { name = "gatewayClass.name",   value = "yc-l7-gw" }
+  values = [<<-EOF
+    controller:
+      folderId: ${var.folder_id}
+      ycServiceAccount:
+        secret:
+          value: |
+            ${jsonencode({
+              "id"                 : yandex_iam_service_account_key.gwin_sa_key.id,
+              "service_account_id" : yandex_iam_service_account_key.gwin_sa_key.service_account_id,
+              "created_at"         : yandex_iam_service_account_key.gwin_sa_key.created_at,
+              "key_algorithm"      : yandex_iam_service_account_key.gwin_sa_key.key_algorithm,
+              "public_key"         : yandex_iam_service_account_key.gwin_sa_key.public_key,
+              "private_key"        : yandex_iam_service_account_key.gwin_sa_key.private_key
+            })}
+    gatewayClass:
+      create: true
+      name: yc-l7-gw
+  EOF
   ]
+
   depends_on = [
-    yandex_resourcemanager_folder_iam_member.gwin_roles,
+    yandex_iam_service_account_key.gwin_sa_key,
     yandex_kubernetes_cluster.k8s-cluster
   ]
 }
