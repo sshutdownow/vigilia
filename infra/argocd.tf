@@ -36,9 +36,9 @@ resource "helm_release" "argocd" {
               annotations = {
                 "gwin.yandex.cloud/groupName"           = "ingress"
                 "gwin.yandex.cloud/subnets"             = yandex_vpc_subnet.subnet-a.id
-                "gwin.yandex.cloud/externalIPv4Address" = yandex_vpc_address.gwin_static_ip.external_ipv4_address.address
+                "gwin.yandex.cloud/externalIPv4Address" = yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address
                 "gwin.yandex.cloud/certificateId"       = yandex_cm_certificate.le_cert.id
-                "gwin.yandex.cloud/securityGroups"      = yandex_vpc_security_group.gwin[0].id
+                "gwin.yandex.cloud/securityGroups"      = yandex_vpc_security_group.gwin.id
                 "gwin.yandex.cloud/redirect.argo-redirect.replaceScheme" = "https"
               }
             }
