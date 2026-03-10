@@ -29,7 +29,7 @@ resource "helm_release" "gwin" {
   repository       = "oci://cr.yandex/yc-marketplace/yandex-cloud/gwin"
   version          = "v1.0.10"
   chart            = "gwin-chart"
-  namespace        = "gwin-ns"
+  namespace        = "gwin"
   create_namespace = true
 
   values = [<<-EOF
@@ -47,9 +47,6 @@ resource "helm_release" "gwin" {
               "public_key"         : yandex_iam_service_account_key.gwin_sa_key.public_key,
               "private_key"        : yandex_iam_service_account_key.gwin_sa_key.private_key
             })}
-    gatewayClass:
-      create: true
-      name: yc-l7-gw
   EOF
   ]
 
@@ -57,4 +54,55 @@ resource "helm_release" "gwin" {
     yandex_iam_service_account_key.gwin_sa_key,
     yandex_kubernetes_cluster.k8s-cluster
   ]
+}
+
+resource "yandex_vpc_security_group" "gwin" {
+  name        = "k8s-gwin-ingress"
+  description = "gwin ingress controller security group"
+  network_id  = var.network_id
+  folder_id   = var.folder_id
+
+  ingress {
+    protocol       = "ICMP"
+    description    = "ping"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    protocol       = "TCP"
+    description    = "http"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+    port           = 80
+  }
+
+  ingress {
+    protocol       = "TCP"
+    description    = "https"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+    port           = 443
+  }
+
+  ingress {
+    protocol          = "TCP"
+    description       = "Availability checks of load balancer"
+    predefined_target = "loadbalancer_healthchecks"
+#    v4_cidr_blocks = [ "198.18.235.0/24", "198.18.248.0/24" ]
+    port              = -1
+  }
+
+
+  egress {
+    protocol       = "TCP"
+    description    = "Enable traffic from GWIN to K8s services"
+    v4_cidr_blocks = local.zone_a_v4_cidr_blocks
+    from_port      = 30000
+    to_port        = 32767
+  }
+
+  egress {
+    protocol       = "TCP"
+    description    = "Enable probes from GWIN to K8s"
+    v4_cidr_blocks = local.zone_a_v4_cidr_blocks
+    port           = 10501
+  }
 }

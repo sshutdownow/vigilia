@@ -29,34 +29,35 @@ resource "helm_release" "argocd" {
       server = {
         extraObjects = [
           {
-            apiVersion = "gateway.networking.k8s.io/v1"
-            kind       = "Gateway"
+            apiVersion = "networking.k8s.io/v1"
+            kind       = "Ingress"
             metadata = {
-              name        = "argocd-gateway"
+              name = "argocd-ingress"
               annotations = {
-                "gateway.yc.io/certificate-id"        = yandex_cm_certificate.le_cert.id
-                "gateway.yc.io/external-ipv4-address" = yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address
+                "gwin.yandex.cloud/groupName"           = "ingress"
+                "gwin.yandex.cloud/subnets"             = yandex_vpc_subnet.subnet-a.id
+                "gwin.yandex.cloud/externalIPv4Address" = yandex_vpc_address.gwin_static_ip.external_ipv4_address.address
+                "gwin.yandex.cloud/certificateId"       = yandex_cm_certificate.le_cert.id
+                "gwin.yandex.cloud/securityGroups"      = yandex_vpc_security_group.gwin[0].id
+                "gwin.yandex.cloud/redirect.argo-redirect.replaceScheme" = "https"
               }
             }
             spec = {
-              gatewayClassName = "yc-l7-gw"
-              listeners = [{
-                name     = "https"
-                protocol = "HTTPS"
-                port     = 443
-                allowedRoutes = { namespaces = { from = "Same" } }
-              }]
-            }
-          },
-          {
-            apiVersion = "gateway.networking.k8s.io/v1"
-            kind       = "HTTPRoute"
-            metadata = { name = "argocd-route" }
-            spec = {
-              parentRefs = [{ name = "argocd-gateway" }]
-              hostnames  = ["argocd.${var.domain_name}"]
+              ingressClassName = "alb"
               rules = [{
-                backendRefs = [{ name = "argocd-server", port = 80 }]
+                host = "argocd.${var.domain_name}"
+                http = {
+                  paths = [{
+                    path     = "/"
+                    pathType = "Prefix"
+                    backend = {
+                      service = {
+                        name = "argocd-server"
+                        port = { number = 80 }
+                      }
+                    }
+                  }]
+                }
               }]
             }
           }
