@@ -93,14 +93,16 @@ apply:
     TF_VAR_ssh_key: "${SERVER_SSH_PUBKEY}"
     TF_VAR_ssh_private_key: "${SSH_PRIVATE_KEY}"
 
-# Удаление инфраструктуры Terraform
+# Удаление инфраструктуры Terraform за исключением LE-сертификата
 destroy:
   stage: destroy
   image: hashicorp/terraform:latest
   script:
     - terraform init
+    - CERT_ID=$(terraform output -raw cert-id)
+    - terraform state rm yandex_cm_certificate.le_cert
     - terraform apply -destroy -auto-approve
-  # https://developer.hashicorp.com/terraform/cli/commands/destroy
+    - terraform import yandex_cm_certificate.le_cert $CERT_ID
   rules:
     - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
       when: manual

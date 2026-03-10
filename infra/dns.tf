@@ -13,7 +13,7 @@ resource "yandex_cm_certificate" "le_cert" {
   }
   lifecycle {
     # Запрещает удаление сертификата через terraform destroy
-    prevent_destroy = false
+    prevent_destroy = true
 
     # Игнорирует изменения в доменах, чтобы не инициировать перевыпуск
     ignore_changes = [domains]
