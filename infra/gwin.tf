@@ -59,7 +59,7 @@ resource "helm_release" "gwin" {
 resource "yandex_vpc_security_group" "gwin" {
   name        = "k8s-gwin-ingress"
   description = "gwin ingress controller security group"
-  network_id  = var.network_id
+  network_id  = yandex_vpc_subnet.subnet-a.id
   folder_id   = var.folder_id
 
   ingress {
