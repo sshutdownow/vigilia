@@ -25,7 +25,13 @@ variable "k8s_version" {
 
 variable "sa_k8s" {
   type        = string
-  default     = "k8s-mcluster-cce"
+  default     = "k8s-cluster-argo"
+  description = "Service account name for Kubernetes cluster. It must be unique in a cloud"
+}
+
+variable "sa_k8s_node_group" {
+  type        = string
+  default     = "k8s-node-group-argo"
   description = "Service account name for Kubernetes cluster. It must be unique in a cloud"
 }
 
