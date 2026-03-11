@@ -33,6 +33,7 @@ resource "helm_release" "argocd" {
             kind       = "Ingress"
             metadata = {
               name = "argocd-ingress"
+              namespace = "argocd"
               annotations = {
                 "gwin.yandex.cloud/groupName"           = "ingress"
 #                "gwin.yandex.cloud/subnets"             = yandex_vpc_subnet.subnet-a.id

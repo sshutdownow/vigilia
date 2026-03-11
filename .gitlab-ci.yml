@@ -100,8 +100,8 @@ destroy:
   script:
     - terraform init
     - CERT_ID=$(terraform output -raw cert-id)
-    - terraform state rm yandex_cm_certificate.le_cert
-    - terraform apply -destroy -auto-approve
+    - terraform state rm yandex_cm_certificate.le_cert || true
+    - terraform destroy -auto-approve
     - terraform import yandex_cm_certificate.le_cert $CERT_ID
   rules:
     - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
