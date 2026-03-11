@@ -9,9 +9,11 @@ resource "yandex_resourcemanager_folder_iam_member" "gwin_roles" {
   for_each = toset([
     "alb.editor",
     "certificate-manager.certificates.downloader",
+    "certificate-manager.editor",
     "compute.viewer",
     "vpc.publicAdmin",
-    "k8s.viewer"
+    "k8s.viewer",
+    "logging.writer"
   ])
   folder_id = var.folder_id
   role      = each.key
@@ -47,6 +49,8 @@ resource "helm_release" "gwin" {
               "public_key"         : yandex_iam_service_account_key.gwin_sa_key.public_key,
               "private_key"        : yandex_iam_service_account_key.gwin_sa_key.private_key
             })}
+    gatewayClass:
+      create: true
   EOF
   ]
 
@@ -87,7 +91,8 @@ resource "yandex_vpc_security_group" "gwin" {
     description       = "Availability checks of load balancer"
     predefined_target = "loadbalancer_healthchecks"
 #    v4_cidr_blocks = [ "198.18.235.0/24", "198.18.248.0/24" ]
-    port              = -1
+    from_port         = 0
+    to_port           = 65535
   }
 
 

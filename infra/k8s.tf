@@ -9,6 +9,7 @@ locals {
   folder_id     = var.folder_id               # Your cloud folder ID, same as for provider
   k8s_version   = var.k8s_version             # Desired version of Kubernetes. For available versions, see the documentation main page: https://cloud.yandex.com/en/docs/managed-kubernetes/concepts/release-channels-and-updates.
   sa_k8s        = var.sa_k8s                  # Service account name for Kubernetes cluster. It must be unique in a cloud.
+  sa_k8s_node   = var.sa_k8s_node_group
   registry_name = var.container_registry_name # Container Registry name.
 
   # The following settings are predefined. Change them only if necessary.
@@ -139,32 +140,10 @@ resource "yandex_iam_service_account" "k8s-sa" {
   name        = local.sa_k8s
 }
 
-# Assign "editor" role to Kubernetes service account
-#resource "yandex_resourcemanager_folder_iam_binding" "editor" {
-#  folder_id = local.folder_id
-#  role      = "editor"
-#  members = [
-#    "serviceAccount:${yandex_iam_service_account.k8s-sa.id}"
-#  ]
-#}
-
-# Assign "container-registry.images.puller" role to Kubernetes service account
-#resource "yandex_resourcemanager_folder_iam_binding" "images-puller" {
-#  folder_id = local.folder_id
-#  role      = "container-registry.images.puller"
-#  members = [
-#    "serviceAccount:${yandex_iam_service_account.k8s-sa.id}"
-#  ]
-#}
-
-# Assign "container-registry.images.pusher" role to Kubernetes service account
-#resource "yandex_resourcemanager_folder_iam_binding" "images-pusher" {
-#  folder_id = local.folder_id
-#  role      = "container-registry.images.pusher"
-#  members = [
-#    "serviceAccount:${yandex_iam_service_account.k8s-sa.id}"
-#  ]
-#}
+resource "yandex_iam_service_account" "k8s-node-group-sa" {
+	description = "Service account to manage the Kubernetes node group"
+  name        = local.sa_k8s_node
+}
 
 resource "yandex_kubernetes_cluster" "k8s-cluster" {
   description = "Managed Service for Kubernetes cluster"
@@ -184,12 +163,10 @@ resource "yandex_kubernetes_cluster" "k8s-cluster" {
 
   }
   service_account_id      = yandex_iam_service_account.k8s-sa.id # Cluster service account ID
-  node_service_account_id = yandex_iam_service_account.k8s-sa.id # Node group service account ID
+  node_service_account_id = yandex_iam_service_account.k8s-node-group-sa.id # Node group service account ID
   depends_on = [
-    yandex_resourcemanager_folder_iam_member.k8s_roles
- #   yandex_resourcemanager_folder_iam_binding.editor,
- #   yandex_resourcemanager_folder_iam_binding.images-puller,
- #   yandex_resourcemanager_folder_iam_binding.images-pusher
+    yandex_resourcemanager_folder_iam_member.k8s_roles,
+    yandex_resourcemanager_folder_iam_member.k8s_node_roles
   ]
 }
 
@@ -230,10 +207,4 @@ resource "yandex_kubernetes_node_group" "k8s-node-group" {
       size = 64 # GB
     }
   }
-}
-
-# Container Registry
-resource "yandex_container_registry" "container-registry" {
-  name      = local.registry_name
-  folder_id = local.folder_id
 }

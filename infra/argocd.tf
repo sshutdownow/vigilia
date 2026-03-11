@@ -35,7 +35,7 @@ resource "helm_release" "argocd" {
               name = "argocd-ingress"
               annotations = {
                 "gwin.yandex.cloud/groupName"           = "ingress"
-                "gwin.yandex.cloud/subnets"             = yandex_vpc_subnet.subnet-a.id
+#                "gwin.yandex.cloud/subnets"             = yandex_vpc_subnet.subnet-a.id
                 "gwin.yandex.cloud/externalIPv4Address" = yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address
                 "gwin.yandex.cloud/certificateId"       = yandex_cm_certificate.le_cert.id
                 "gwin.yandex.cloud/securityGroups"      = yandex_vpc_security_group.gwin.id
@@ -43,7 +43,7 @@ resource "helm_release" "argocd" {
               }
             }
             spec = {
-              ingressClassName = "alb"
+              ingressClassName = "gwin-default"
               rules = [{
                 host = "argocd.${var.domain_name}"
                 http = {

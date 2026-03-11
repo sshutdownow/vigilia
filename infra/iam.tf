@@ -16,3 +16,13 @@ resource "yandex_resourcemanager_folder_iam_member" "k8s_roles" {
   role      = each.key
   member    = "serviceAccount:${yandex_iam_service_account.k8s-sa.id}"
 }
+
+resource "yandex_resourcemanager_folder_iam_member" "k8s_node_roles" {
+  for_each = toset([ 
+    "container-registry.images.pusher",
+    "container-registry.images.puller"
+  ])
+  folder_id = var.folder_id
+  role      = each.key
+  member    = "serviceAccount:${yandex_iam_service_account.k8s-node-group-sa.id}"
+}
