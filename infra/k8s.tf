@@ -208,3 +208,9 @@ resource "yandex_kubernetes_node_group" "k8s-node-group" {
     }
   }
 }
+
+# Container Registry
+resource "yandex_container_registry" "container-registry" {
+  name      = local.registry_name
+  folder_id = local.folder_id
+}
