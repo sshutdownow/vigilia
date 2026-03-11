@@ -3,20 +3,13 @@ data "yandex_dns_zone" "sausage_store_public_zone" {
   name = "vigilia-site"
 }
 
-resource "random_string" "rnd_name" {
-  length  = 6
-  upper   = false
-  special = false
-}
-
 # Запрос на управляемый сертификат Let's Encrypt
 resource "yandex_cm_certificate" "le_cert" {
   name      = "sausage-store-le"
   folder_id = var.folder_id
   domains   = [
     var.domain_name,
-    "*.${var.domain_name}",
-    "${random_string.rnd_name.result}.${var.domain_name}"
+    "*.${var.domain_name}"
   ]
 
   managed {

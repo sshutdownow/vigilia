@@ -59,6 +59,10 @@ resource "helm_release" "argocd" {
                   }]
                 }
               }]
+              tls = [{
+                hosts = ["argocd.${var.domain_name}"]
+                secretName = "yc-certmgr-cert-id-${yandex_cm_certificate.le_cert.id}"
+              }]
             }
           }
         ]

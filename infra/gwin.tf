@@ -51,6 +51,7 @@ resource "helm_release" "gwin" {
             })}
     gatewayClass:
       create: true
+      name: gwin-default
   EOF
   ]
 
