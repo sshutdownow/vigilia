@@ -27,7 +27,7 @@ resource "helm_release" "sausage_store_app" {
                 }
                 ingress = {
                   annotations = {
-                    "gwin.ingress.kubernetes.io/certificate-id" = yandex_cm_certificate.le_cert.id
+                    "gwin.ingress.kubernetes.io/certificate-id" = data.yandex_cm_certificate.le_cert.id
                   }
                 }
               })
