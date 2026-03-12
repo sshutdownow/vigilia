@@ -69,7 +69,7 @@ variable "domain_name" {
 
 variable "argocd_admin_password" {
   type      = string
-  default   = "$2a$10$6v/vR.XvC8.7Y6H8H6H8HeYjR7F5F5F5F5F5F5F5F5F5F5F5F5F5G"
+  default   = "7Y6H8H6H8HeYjR7F5"
   sensitive = true
 }
 
