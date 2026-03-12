@@ -18,18 +18,6 @@ resource "helm_release" "argocd" {
       name  = "configs.params.server\\.insecure"
       value = "true"
     },
-#    {
-#      name  = "server.extraArgs"
-#      value = "{--insecure}"
-#    },
-#    {
-#      name  = "repoServer.extraArgs"
-#      value = "{--disable-tls}"
-#    },
-#    {
-#      name  = "configs.params.repo.server.disable.tls"
-#      value = "true"
-#    },    
     {
       name  = "configs.secret.argocdServerAdminPassword"
       value = bcrypt_hash.argocd_password.id

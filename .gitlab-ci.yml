@@ -256,25 +256,35 @@ ansible-deploy:
   dependencies:
     - ansible-vmdevip
 
-# Сборка и пуш Docker-образов в DockerHub
+# Сборка и пуш Docker-образов в GitLAB
 build-and-push-images:
   stage: build
+  image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
+  variables:
+    DOCKER_IMAGE_BASE: $CI_REGISTRY_IMAGE
   before_script:
-    - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
-    - docker build --build-arg VERSION=$CI_COMMIT_SHA --push -t $DOCKER_USER/sausage-backend:latest ./backend/
-    - docker build --push -t $DOCKER_USER/sausage-frontend:latest ./frontend/
-    - docker build --push -t $DOCKER_USER/sausage-backend-report:latest ./backend-report/
+    - docker build --build-arg VERSION=$CI_COMMIT_SHA -t $DOCKER_IMAGE_BASE/sausage-backend:latest ./backend/
+    - docker push $DOCKER_IMAGE_BASE/sausage-backend:latest
+    - docker build -t $DOCKER_IMAGE_BASE/sausage-frontend:latest ./frontend/
+    - docker push $DOCKER_IMAGE_BASE/sausage-frontend:latest
+    - docker build -t $DOCKER_IMAGE_BASE/sausage-backend-report:latest ./backend-report/
+    - docker push $DOCKER_IMAGE_BASE/sausage-backend-report:latest
   rules:
     - if: $OPERATION == "k8s"
       when: always
 
-# Упаковка и пуш Helm-чарта в Nexus
+# Упаковка и пуш Helm-чарта в GitLAB
 package-helm-chart:
   stage: package
   image: 
     name: alpine/helm:3.12.0
     entrypoint: [""]
+  variables:
+    HELM_PACKAGE_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/api/stable/charts"
   before_script:    
     - apk add curl
   script: # CI_PIPELINE_IID -internal ID that starts at 1 for each project and increments by 1 with every new pipeline
@@ -283,7 +293,11 @@ package-helm-chart:
     - >
       sed -i -e "s/^version:.*$/version: $NEW_VER/" ./sausage-store-chart/Chart.yaml
     - helm package ./sausage-store-chart/
-    - curl -u "$NEXUS_HELM_REPO_USER:$NEXUS_HELM_REPO_PASSWORD" $NEXUS_HELM_REPO --upload-file *.tgz
+    - |
+      curl --request POST \
+           --user gitlab-ci-token:$CI_JOB_TOKEN \
+           --form "chart=@$(ls *.tgz)" \
+           $HELM_PACKAGE_URL
   needs:
     - build-and-push-images
   rules:
