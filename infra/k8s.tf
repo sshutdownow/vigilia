@@ -221,7 +221,7 @@ resource "yandex_kubernetes_node_group" "k8s-node-group" {
     }
   }
 
-  depens_on = [yandex_vpc_security_group.gwin]
+  depends_on = [yandex_vpc_security_group.gwin]
 }
 
 # Container Registry
