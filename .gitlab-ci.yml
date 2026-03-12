@@ -12,12 +12,13 @@ variables:
   ANSIBLE_ROOT: ${CI_PROJECT_DIR}/ansible
   TF_ROOT: ${CI_PROJECT_DIR}/infra
   PLAN: infra_plan.cache
-  PLAN2: argo_plan.cache
+  BTPLAN: bootstrap.tfplan
   GITLAB_ACCESS_TOKEN: ${TF_HTTP_PASSWORD}
   OPERATION:
     description: "Select CI/CD-operation"
     value: "terraform"
     options:
+      - "terraform_bootstrap"
       - "terraform"
       - "ansible"
       - "k8s"
@@ -26,6 +27,75 @@ before_script:
   - cd ${TF_ROOT}
   - touch ./authorized_key.json && chmod 0600 ./authorized_key.json && echo ${AUTHORIZED_KEY} | base64 -d > ./authorized_key.json
   - sed -i -e "s/\${CI_PROJECT_ID}/${CI_PROJECT_ID}/g" -e "s/\${GITLAB_USER_NAME}/${GITLAB_USER_NAME}/g" -e "s/\${TF_HTTP_PASSWORD}/${TF_HTTP_PASSWORD}/g" provider.tf
+
+# TEMPLATE FOR TERRAFORM JOBS ONLY
+.terraform_setup:
+  image: hashicorp/terraform:latest
+  before_script:
+    - cd ${TF_ROOT}
+    - touch ./authorized_key.json && chmod 0600 ./authorized_key.json && echo ${AUTHORIZED_KEY} | base64 -d > ./authorized_key.json
+    - sed -i -e "s/\${CI_PROJECT_ID}/${CI_PROJECT_ID}/g" -e "s/\${GITLAB_USER_NAME}/${GITLAB_USER_NAME}/g" -e "s/\${TF_HTTP_PASSWORD}/${TF_HTTP_PASSWORD}/g" provider.tf
+    - terraform init
+
+# Terraform plan для LE-сертификата
+bootstrap_plan:
+  extends: .terraform_setup
+  stage: plan
+  variables:
+    TF_ROOT: ${CI_PROJECT_DIR}/infra/bootstrap
+    TF_LOG: DEBUG
+    TF_VAR_cloud_id: ${CLOUD_ID}
+    TF_VAR_folder_id: ${FOLDER_ID}
+  script:
+    - terraform fmt -check -recursive -diff || true
+    - terraform validate
+    - terraform plan -var-file="../variables.tf" -out=${BTPLAN}
+    - terraform show -json ${BTPLAN} > ${BTPLAN}.json
+  rules:
+    - if: $OPERATION == "terraform_bootstrap" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
+      when: always
+  artifacts:
+    reports: # GitLab displays the details of the Terraform plan within the merge request widget.
+      terraform: ${TF_ROOT}/${BTPLAN}.json
+    paths:
+      - ${TF_ROOT}/${BTPLAN}
+      - ${TF_ROOT}/${BTPLAN}.json
+    expire_in: 1 yrs
+
+# Terraform cоздание LE-сертификата 
+bootstrap_apply:
+  extends: .terraform_setup
+  stage: apply
+  variables:
+    TF_ROOT: ${CI_PROJECT_DIR}/infra/bootstrap
+    TF_LOG: INFO
+    TF_VAR_cloud_id: ${CLOUD_ID}
+    TF_VAR_folder_id: ${FOLDER_ID}
+  needs: ["bootstrap_plan"]
+  script:
+    - terraform apply -auto-approve ${PLAN}
+  rules:
+    - if: $OPERATION == "terraform_bootstrap" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
+      when: manual
+    - when: never
+
+# Terraform удаление LE-сертификата
+bootstrap_destroy:
+  extends: .terraform_setup
+  stage: destroy
+  variables:
+    TF_ROOT: ${CI_PROJECT_DIR}/infra/bootstrap
+    TF_LOG: INFO
+    TF_VAR_cloud_id: ${CLOUD_ID}
+    TF_VAR_folder_id: ${FOLDER_ID}
+  script:
+    - terraform init
+    - terraform destroy -auto-approve
+  rules:
+    - if: $OPERATION == "terraform_bootstrap" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
+      when: manual
+    - when: never
+
 
 # Выполнение тестов checkov
 checkov:
@@ -99,10 +169,7 @@ destroy:
   image: hashicorp/terraform:latest
   script:
     - terraform init
-    - CERT_ID=$(terraform output -raw cert-id)
-    - terraform state rm yandex_cm_certificate.le_cert || true
     - terraform destroy -auto-approve
-    - terraform import yandex_cm_certificate.le_cert $CERT_ID
   rules:
     - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
       when: manual
