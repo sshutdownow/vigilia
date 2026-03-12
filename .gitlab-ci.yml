@@ -49,7 +49,7 @@ bootstrap_plan:
   script:
     - terraform fmt -check -recursive -diff || true
     - terraform validate
-    - terraform plan -var-file="../variables.tf" -out=${BTPLAN}
+    - terraform plan -out=${BTPLAN}
     - terraform show -json ${BTPLAN} > ${BTPLAN}.json
   rules:
     - if: $OPERATION == "terraform_bootstrap" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
@@ -73,7 +73,7 @@ bootstrap_apply:
     TF_VAR_folder_id: ${FOLDER_ID}
   needs: ["bootstrap_plan"]
   script:
-    - terraform apply -auto-approve ${PLAN}
+    - terraform apply -auto-approve ${BTPLAN}
   rules:
     - if: $OPERATION == "terraform_bootstrap" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
       when: manual
