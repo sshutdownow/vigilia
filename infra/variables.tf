@@ -75,7 +75,7 @@ variable "argocd_admin_password" {
 
 variable "gitlab_access_token" {
   type      = string
-  default   = ""
+  default   = "glpat-grwoDPW7SZhGb_qyTQDC2W86MQp1OjZpCA.01.0y1v71z69"
   sensitive = true
 }
 
