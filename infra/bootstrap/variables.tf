@@ -16,3 +16,8 @@ variable "zone" {
   type    = string
   default = "ru-central1-a"
 }
+
+variable "domain_name" {
+  type    = string
+  default = "vigilia.site"
+}
