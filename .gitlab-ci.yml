@@ -88,6 +88,7 @@ bootstrap_destroy:
     TF_LOG: INFO
     TF_VAR_cloud_id: ${CLOUD_ID}
     TF_VAR_folder_id: ${FOLDER_ID}
+  needs: ["bootstrap_apply"]    
   script:
     - terraform init
     - terraform destroy -auto-approve
