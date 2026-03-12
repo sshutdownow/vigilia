@@ -54,7 +54,7 @@ resource "helm_release" "argocd" {
                 "gwin.yandex.cloud/groupName"           = "ingress"
 #                "gwin.yandex.cloud/subnets"             = yandex_vpc_subnet.subnet-a.id
                 "gwin.yandex.cloud/externalIPv4Address" = yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address
-                "gwin.yandex.cloud/certificateId"       = yandex_cm_certificate.le_cert.id
+                "gwin.yandex.cloud/certificateId"       = data.yandex_cm_certificate.le_cert.id
                 "gwin.yandex.cloud/securityGroups"      = yandex_vpc_security_group.gwin.id
                 "gwin.yandex.cloud/backend-protocol"    = "http"
                 "gwin.yandex.cloud/redirect.argo-redirect.replaceScheme" = "https"
@@ -79,7 +79,7 @@ resource "helm_release" "argocd" {
               }]
               tls = [{
                 hosts = ["argocd.${var.domain_name}"]
-                secretName = "yc-certmgr-cert-id-${yandex_cm_certificate.le_cert.id}"
+                secretName = "yc-certmgr-cert-id-${data.yandex_cm_certificate.le_cert.id}"
               }]
             }
           }
