@@ -52,6 +52,6 @@ func TestYandexK8sExistsAndRunning(t *testing.T) {
 		ClusterId: clusterID,
 	})
 
-	assert.NoError(t, err, "Кластер не найден в каталоге %s", folderID)
-	assert.Equal(t, k8s.Cluster_RUNNING, cluster.Status, "Кластер должен быть активен")
+	assert.NoError(t, err, "k8s cluster not found in YC folder %s", folderID)
+	assert.Equal(t, k8s.Cluster_RUNNING, cluster.Status, "k8s cluster not in RUNNING state")
 }
