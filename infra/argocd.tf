@@ -88,7 +88,7 @@ resource "helm_release" "argocd" {
   depends_on = [
     yandex_kubernetes_cluster.k8s-cluster,
     helm_release.gwin,
-    yandex_vpc_security_group.gwin.id]
+    yandex_vpc_security_group.gwin]
 }
 
 resource "kubernetes_secret_v1" "yc_registry_oci" {
