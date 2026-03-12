@@ -18,18 +18,18 @@ resource "helm_release" "argocd" {
       name  = "configs.params.server\\.insecure"
       value = "true"
     },
-    {
-      name  = "server.extraArgs"
-      value = "{--insecure}"
-    },
-    {
-      name  = "repoServer.extraArgs"
-      value = "{--disable-tls}"
-    },
-    {
-      name  = "configs.params.repo.server.disable.tls"
-      value = "true"
-    },    
+#    {
+#      name  = "server.extraArgs"
+#      value = "{--insecure}"
+#    },
+#    {
+#      name  = "repoServer.extraArgs"
+#      value = "{--disable-tls}"
+#    },
+#    {
+#      name  = "configs.params.repo.server.disable.tls"
+#      value = "true"
+#    },    
     {
       name  = "configs.secret.argocdServerAdminPassword"
       value = bcrypt_hash.argocd_password.id
@@ -55,6 +55,7 @@ resource "helm_release" "argocd" {
               "gwin.yandex.cloud/certificateId"       = data.yandex_cm_certificate.le_cert.id
               "gwin.yandex.cloud/securityGroups"      = yandex_vpc_security_group.gwin.id
               "gwin.yandex.cloud/backend-protocol"    = "http"
+              "gwin.yandex.cloud/logs.logGroupId"     = yandex_logging_group.log_group_main.id
             }
           }
           spec = {
