@@ -73,12 +73,22 @@ variable "argocd_admin_password" {
   sensitive = true
 }
 
-variable "gitlab_access_token" {
+variable "gitlab_username" {
   type      = string
-  default   = "glpat-grwoDPW7SZhGb_qyTQDC2W86MQp1OjZpCA.01.0y1v71z69"
+  default   = null
   sensitive = true
 }
 
+variable "gitlab_token" {
+  type      = string
+  default   = null
+  sensitive = true
+}
+
+variable "gitlab_url" {
+  type    = string
+  default = "https://cloud-services-engineer.gitlab.yandexcloud.net/s2633401/vigilia.git"
+}
 variable "vm_prod_name" {
   type    = string
   default = "vm-prod"

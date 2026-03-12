@@ -128,9 +128,9 @@ resource "kubernetes_secret_v1" "sausage_repo_gitlab" {
 
   data = {
     type     = "git"
-    url      = "https://cloud-services-engineer.gitlab.yandexcloud.net"
-    password = var.gitlab_access_token
-    username = "gitops-bot"
+    url      = var.gitlab_url
+    password = var.gitlab_token
+    username = var.gitlab_username
   }
 
   depends_on = [helm_release.argocd]
