@@ -161,9 +161,22 @@ resource "yandex_kubernetes_cluster" "k8s-cluster" {
 
     security_group_ids = [yandex_vpc_security_group.k8s-main-sg.id]
 
+    master_logging {
+      enabled = true
+      log_group_id = "${yandex_logging_group.log_group_main.id}"
+      audit_enabled = true
+      kube_apiserver_enabled = false
+      cluster_autoscaler_enabled = false
+      events_enabled = true
+    }
   }
   service_account_id      = yandex_iam_service_account.k8s-sa.id # Cluster service account ID
   node_service_account_id = yandex_iam_service_account.k8s-node-group-sa.id # Node group service account ID
+  
+  kms_provider {
+    key_id = yandex_kms_symmetric_key.kms-key.id
+  }
+  
   depends_on = [
     yandex_resourcemanager_folder_iam_member.k8s_roles,
     yandex_resourcemanager_folder_iam_member.k8s_node_roles
@@ -207,10 +220,12 @@ resource "yandex_kubernetes_node_group" "k8s-node-group" {
       size = 64 # GB
     }
   }
+
+  depens_on = [yandex_vpc_security_group.gwin]
 }
 
 # Container Registry
 resource "yandex_container_registry" "container-registry" {
   name      = local.registry_name
-  folder_id = local.folder_id
+  folder_id = var.folder_id
 }

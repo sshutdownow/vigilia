@@ -10,7 +10,8 @@ resource "yandex_resourcemanager_folder_iam_member" "k8s_roles" {
     "container-registry.images.puller",
     "container-registry.images.pusher",
     "alb.editor",
-    "vpc.publicAdmin"
+    "vpc.publicAdmin",
+    "kms.keys.encrypterDecrypter"
   ])
   folder_id = var.folder_id
   role      = each.key

@@ -53,6 +53,8 @@ resource "helm_release" "gwin" {
     gatewayClass:
       create: true
       name: gwin-default
+      annotations:
+        gwin.yandex.cloud/logs.logGroupId: "${yandex_logging_group.log_group_main.id}"
   EOF
   ]
  
@@ -68,10 +70,7 @@ resource "yandex_vpc_security_group" "gwin" {
   description = "gwin ingress controller security group"
   network_id  = yandex_vpc_network.k8s-network.id
   folder_id   = var.folder_id
-  depends_on  = [ 
-    yandex_kubernetes_node_group.k8s-node-group
-  ]
-
+ 
   ingress {
     protocol       = "ICMP"
     description    = "ping"
