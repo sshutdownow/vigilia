@@ -12,5 +12,5 @@ output "k8s_cluster_id" {
 
 output "cert-id" {
   description = "Certificate ID"
-  value       = yandex_cm_certificate.le_cert.id
+  value       = data.yandex_cm_certificate.le_cert.id
 }
