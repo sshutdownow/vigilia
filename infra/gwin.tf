@@ -69,7 +69,7 @@ resource "yandex_vpc_security_group" "gwin" {
   network_id  = yandex_vpc_network.k8s-network.id
   folder_id   = var.folder_id
   depends_on  = [ 
-    yandex_kubernetes_cluster.k8s-cluster
+    yandex_kubernetes_node_group.k8s-node-group
   ]
 
   ingress {
