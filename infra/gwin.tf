@@ -8,10 +8,11 @@ resource "yandex_iam_service_account" "gwin_sa" {
 resource "yandex_resourcemanager_folder_iam_member" "gwin_roles" {
   for_each = toset([
     "alb.editor",
+    "load-balancer.admin",
     "certificate-manager.certificates.downloader",
     "certificate-manager.editor",
     "compute.viewer",
-    "vpc.publicAdmin",
+    "vpc.user",
     "k8s.viewer",
     "logging.writer"
   ])

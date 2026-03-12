@@ -42,51 +42,48 @@ resource "helm_release" "argocd" {
 
   values = [
     yamlencode({
-      server = {
-        extraObjects = [
-          {
-            apiVersion = "networking.k8s.io/v1"
-            kind       = "Ingress"
-            metadata = {
-              name = "argocd-ingress"
-              namespace = "argocd"
-              annotations = {
-                "gwin.yandex.cloud/groupName"           = "ingress"
-#                "gwin.yandex.cloud/subnets"             = yandex_vpc_subnet.subnet-a.id
-                "gwin.yandex.cloud/externalIPv4Address" = yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address
-                "gwin.yandex.cloud/certificateId"       = data.yandex_cm_certificate.le_cert.id
-                "gwin.yandex.cloud/securityGroups"      = yandex_vpc_security_group.gwin.id
-                "gwin.yandex.cloud/backend-protocol"    = "http"
-                "gwin.yandex.cloud/redirect.argo-redirect.replaceScheme" = "https"
-              }
-            }
-            spec = {
-              ingressClassName = "gwin-default"
-              rules = [{
-                host = "argocd.${var.domain_name}"
-                http = {
-                  paths = [{
-                    path     = "/"
-                    pathType = "Prefix"
-                    backend = {
-                      service = {
-                        name = "argocd-server"
-                        port = { number = 80 }
-                      }
-                    }
-                  }]
-                }
-              }]
-              tls = [{
-                hosts = ["argocd.${var.domain_name}"]
-                secretName = "yc-certmgr-cert-id-${data.yandex_cm_certificate.le_cert.id}"
-              }]
+      extraObjects = [
+        {
+          apiVersion = "networking.k8s.io/v1"
+          kind       = "Ingress"
+          metadata = {
+            name      = "argocd-ingress"
+            namespace = "argocd"
+            annotations = {
+              "gwin.yandex.cloud/groupName"           = "ingress"
+              "gwin.yandex.cloud/externalIPv4Address" = yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address
+              "gwin.yandex.cloud/certificateId"       = data.yandex_cm_certificate.le_cert.id
+              "gwin.yandex.cloud/securityGroups"      = yandex_vpc_security_group.gwin.id
+              "gwin.yandex.cloud/backend-protocol"    = "http"
             }
           }
-        ]
-      }
+          spec = {
+            ingressClassName = "gwin-default"
+            rules = [{
+              host = "argocd.${var.domain_name}"
+              http = {
+                paths = [{
+                  path     = "/"
+                  pathType = "Prefix"
+                  backend = {
+                    service = {
+                      name = "argocd-server"
+                      port = { number = 80 }
+                    }
+                  }
+                }]
+              }
+            }]
+            tls = [{
+              hosts      = ["argocd.${var.domain_name}"]
+              secretName = "yc-certmgr-cert-id-${data.yandex_cm_certificate.le_cert.id}"
+            }]
+          }
+        }
+      ]
     })
   ]
+
 
   depends_on = [yandex_kubernetes_cluster.k8s-cluster, helm_release.gwin]
 }
