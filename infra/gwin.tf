@@ -67,6 +67,9 @@ resource "yandex_vpc_security_group" "gwin" {
   description = "gwin ingress controller security group"
   network_id  = yandex_vpc_network.k8s-network.id
   folder_id   = var.folder_id
+  depends_on  = [ 
+    yandex_kubernetes_cluster.k8s-cluster
+  ]
 
   ingress {
     protocol       = "ICMP"
