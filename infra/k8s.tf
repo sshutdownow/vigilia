@@ -66,11 +66,12 @@ resource "yandex_vpc_security_group" "k8s-main-sg" {
   network_id  = yandex_vpc_network.k8s-network.id
 
   ingress {
-    description    = "The rule allows availability checks from the load balancer's range of addresses. It is required for the operation of a fault-tolerant cluster and load balancer services."
-    protocol       = "TCP"
-    v4_cidr_blocks = ["198.18.235.0/24", "198.18.248.0/24"] # The load balancer's address range
-    from_port      = 0
-    to_port        = 65535
+    description       = "The rule allows availability checks from the load balancer's range of addresses. It is required for the operation of a fault-tolerant cluster and load balancer services."
+    protocol          = "TCP"
+    # v4_cidr_blocks = ["198.18.235.0/24", "198.18.248.0/24"]
+    predefined_target = "loadbalancer_healthchecks"
+    from_port         = 0
+    to_port           = 65535
   }
 
   ingress {

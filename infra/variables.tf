@@ -69,7 +69,7 @@ variable "domain_name" {
 
 variable "argocd_admin_password" {
   type      = string
-  default   = "7Y6H8H6H8HeYjR7F5"
+  default   = null
   sensitive = true
 }
 
@@ -89,15 +89,6 @@ variable "gitlab_url" {
   type    = string
   default = "https://cloud-services-engineer.gitlab.yandexcloud.net/s2633401/vigilia.git"
 }
-variable "vm_prod_name" {
-  type    = string
-  default = "vm-prod"
-}
-
-variable "vm_dev_name" {
-  type    = string
-  default = "vm-dev"
-}
 
 variable "vm_user" {
   description = "VM user"
@@ -108,6 +99,15 @@ variable "vm_user" {
 variable "ssh_key" {
   description = "SSH Public Key"
   type        = string
+  sensitive   = true
+  default     = null
+}
+
+variable "ssh_private_key" {
+  type        = string
+  description = "SSH private key"
+  sensitive   = true
+  default     = null
 }
 
 variable "image_family" {
@@ -127,7 +127,7 @@ variable "disk_type" {
 
 variable "disk_size" {
   type    = number
-  default = 64
+  default = 64 # min 30
 }
 
 variable "cores" {
@@ -153,11 +153,4 @@ variable "nat" {
 variable "vm_preemptible" {
   type    = bool
   default = false
-}
-
-variable "ssh_private_key" {
-  type        = string
-  description = "SSH private key"
-  sensitive   = true
-  default     = ""
 }

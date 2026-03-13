@@ -285,6 +285,7 @@ package-helm-chart:
     entrypoint: [""]
   variables:
     HELM_PACKAGE_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/api/stable/charts"
+    HELM_OCI_REGISTRY: "oci://${CI_REGISTRY}/${CI_PROJECT_PATH}/charts"
   before_script:    
     - apk add curl
   script: # CI_PIPELINE_IID -internal ID that starts at 1 for each project and increments by 1 with every new pipeline
@@ -292,12 +293,9 @@ package-helm-chart:
     - export NEW_VER=$(echo "$CUR_VER" | awk -F. -v iid="$CI_PIPELINE_IID" '{print $1"."$2"."iid}')
     - >
       sed -i -e "s/^version:.*$/version: $NEW_VER/" ./sausage-store-chart/Chart.yaml
+    - echo $CI_JOB_TOKEN | helm registry login $CI_REGISTRY --username gitlab-ci-token --password-stdin
     - helm package ./sausage-store-chart/
-    - |
-      curl --request POST \
-           --user gitlab-ci-token:$CI_JOB_TOKEN \
-           --form "chart=@$(ls *.tgz)" \
-           $HELM_PACKAGE_URL
+    - helm push sausage-store-*.tgz $HELM_OCI_REGISTRY
   needs:
     - build-and-push-images
   rules:
