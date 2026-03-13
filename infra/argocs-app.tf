@@ -55,6 +55,7 @@ resource "helm_release" "sausage_store_app" {
 
   depends_on = [
     helm_release.argocd,
+    kubernetes_secret_v1.sausage_repo_gitlab,
     kubernetes_secret_v1.sausage_helm_gitlab,
     kubernetes_secret_v1.gitlab_pull_secret
   ]

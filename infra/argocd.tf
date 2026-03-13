@@ -120,6 +120,8 @@ resource "kubernetes_secret_v1" "sausage_helm_gitlab" {
     password  = var.gitlab_token
     username  = var.gitlab_username
   }
+
+  depends_on = [helm_release.argocd]
 }
 
 resource "kubernetes_secret_v1" "gitlab_pull_secret" {
@@ -137,5 +139,6 @@ resource "kubernetes_secret_v1" "gitlab_pull_secret" {
       }
     })
   }
+  depends_on = [helm_release.argocd]
 }
 
