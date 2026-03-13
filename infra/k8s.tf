@@ -38,13 +38,13 @@ resource "yandex_vpc_subnet" "subnet-a" {
 
 resource "yandex_vpc_gateway" "nat_gateway" {
   folder_id = var.folder_id
-  name      = "NAT-gateway-{local.subnet_name}"
+  name      = "NAT-gateway"
   shared_egress_gateway {}
 }
 
 resource "yandex_vpc_route_table" "rt" {
   folder_id = var.folder_id
-  name      = "NAT-route-table-{local.subnet_name}"
+  name      = "NAT-route-table"
   network_id = yandex_vpc_network.k8s-network.id
 
   static_route {
