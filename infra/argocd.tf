@@ -112,7 +112,7 @@ resource "kubernetes_secret_v1" "sausage_helm_gitlab" {
 
   type = "Opaque"
 
-  string_data = {
+  data = {
     name      = "gitlab-helm-oci"
     type      = "helm"
     enableOCI = "true"
@@ -128,7 +128,7 @@ resource "kubernetes_secret_v1" "gitlab_pull_secret" {
     namespace = "sausage-store"
   }
   type = "kubernetes.io/dockerconfigjson"
-  string_data = {
+  data = {
     ".dockerconfigjson" = jsonencode({
       auths = {
         (urlparse(var.gitlab_image_url).host) = {
