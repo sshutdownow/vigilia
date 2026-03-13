@@ -36,20 +36,20 @@ resource "yandex_vpc_subnet" "subnet-a" {
   route_table_id = yandex_vpc_route_table.rt.id
 }
 
-resource "yandex_vpc_gateway" "nat-gateway" {
+resource "yandex_vpc_gateway" "natg_ateway" {
   folder_id = var.folder_id
-  name      = "NAT-gateway"
+  name      = "nat-gateway-{local.subnet_name}"
   shared_egress_gateway {}
 }
 
 resource "yandex_vpc_route_table" "rt" {
   folder_id = var.folder_id
-  name      = "NAT-route-table"
+  name      = "nat-route-table-{local.subnet_name}"
   network_id = yandex_vpc_network.k8s-network.id
 
   static_route {
     destination_prefix = "0.0.0.0/0"
-    gateway_id         = yandex_vpc_gateway.nat-gateway.id
+    gateway_id         = yandex_vpc_gateway.nat_gateway.id
   }
 }
 
