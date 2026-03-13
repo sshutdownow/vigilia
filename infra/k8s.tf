@@ -220,7 +220,7 @@ resource "yandex_kubernetes_node_group" "k8s-node-group" {
   }
 
   instance_template {
-    name        = "${local.k8s_cluster_name}-${instance.short_id}-${instance_group.id}"
+    name        = "${local.k8s_cluster_name}-{instance.short_id}-{instance_group.id}"
     platform_id = var.platform_id
 
     network_interface {
