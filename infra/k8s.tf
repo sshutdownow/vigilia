@@ -36,20 +36,20 @@ resource "yandex_vpc_subnet" "subnet-a" {
   route_table_id = yandex_vpc_route_table.rt.id
 }
 
-resource "yandex_vpc_gateway" "nat_gateway" {
+resource "yandex_vpc_gateway" "nat-gateway" {
   folder_id = var.folder_id
-  name      = "nat-gateway-{local.subnet_name}"
+  name      = "nat-gateway-${local.subnet_name}"
   shared_egress_gateway {}
 }
 
 resource "yandex_vpc_route_table" "rt" {
   folder_id = var.folder_id
-  name      = "nat-route-table-{local.subnet_name}"
+  name      = "nat-route-table-${local.subnet_name}"
   network_id = yandex_vpc_network.k8s-network.id
 
   static_route {
     destination_prefix = "0.0.0.0/0"
-    gateway_id         = yandex_vpc_gateway.nat_gateway.id
+    gateway_id         = yandex_vpc_gateway.nat-gateway.id
   }
 }
 
@@ -220,7 +220,7 @@ resource "yandex_kubernetes_node_group" "k8s-node-group" {
   }
 
   instance_template {
-    name        = "{local.k8s_cluster_name}-{instance.short_id}-{instance_group.id}"
+    name        = "${local.k8s_cluster_name}-${instance.short_id}-${instance_group.id}"
     platform_id = var.platform_id
 
     network_interface {
