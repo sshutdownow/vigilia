@@ -10,7 +10,7 @@ resource "helm_release" "sausage_store_app" {
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argocd-apps"
   namespace  = "argocd"
-  version    = "1.0.161"
+  version    = "2.0.4"
   
   values = [
     templatefile("${path.module}/argocd-app-values.yaml", {
