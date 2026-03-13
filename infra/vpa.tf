@@ -6,10 +6,12 @@ resource "helm_release" "metrics_server" {
   version    = "3.13.0"
   namespace  = "kube-system"
 
-  set {
-    name  = "args"
-    value = "{--kubelet-insecure-tls}"
-  }
+  set = [
+    {
+      name  = "args"
+      value = "{--kubelet-insecure-tls}"
+    }
+  ]
 
   depends_on = [yandex_kubernetes_cluster.k8s-cluster]
 }
