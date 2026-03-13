@@ -5,7 +5,7 @@ resource "kubernetes_namespace_v1" "sausage_store" {
 }
 
 resource "helm_release" "sausage_store_app" {
-  count      = 0
+  count      = 1
   name       = "sausage-store-app"
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argocd-apps"
