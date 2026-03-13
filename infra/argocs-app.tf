@@ -5,7 +5,7 @@ resource "kubernetes_namespace_v1" "sausage_store" {
 }
 
 resource "helm_release" "sausage_store_app" {
-  count = 0
+  count = 1
   name       = "sausage-store-app"
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argocd-apps"
@@ -20,6 +20,7 @@ resource "helm_release" "sausage_store_app" {
         source = {
           # Репозиторий чарта (OCI)
           repoURL        = "oci://${var.gitlab_helm_url}"
+          path           = "sausage-store"
           chart          = "sausage-store"
           targetRevision = "1.0.161" # Версия чарта из CI
           
@@ -42,7 +43,7 @@ resource "helm_release" "sausage_store_app" {
 
               ingress = {
                 annotations = {
-                  "gwin.yandex.cloud/certificateId" = tostring(data.yandex_cm_certificate.le_cert.id)
+                  "gwin.yandex.cloud/certificateId" = data.yandex_cm_certificate.le_cert.id
                 }
               }
             })
