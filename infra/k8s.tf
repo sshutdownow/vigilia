@@ -33,6 +33,24 @@ resource "yandex_vpc_subnet" "subnet-a" {
   zone           = "ru-central1-a"
   network_id     = yandex_vpc_network.k8s-network.id
   v4_cidr_blocks = [local.zone_a_v4_cidr_blocks]
+  route_table_id = yandex_vpc_route_table.rt.id
+}
+
+resource "yandex_vpc_gateway" "nat_gateway" {
+  folder_id = var.folder_id
+  name      = "NAT-gateway-${local.subnet_name}"
+  shared_egress_gateway {}
+}
+
+resource "yandex_vpc_route_table" "rt" {
+  folder_id = var.folder_id
+  name      = "NAT-route-table-${local.subnet_name}"
+  network_id = yandex_vpc_network.k8s-network.id
+
+  static_route {
+    destination_prefix = "0.0.0.0/0"
+    gateway_id         = yandex_vpc_gateway.nat_gateway.id
+  }
 }
 
 resource "yandex_vpc_address" "gwin_static_ip" {
@@ -202,22 +220,28 @@ resource "yandex_kubernetes_node_group" "k8s-node-group" {
   }
 
   instance_template {
-    platform_id = "standard-v3"
+    name        = "{local.k8s_cluster_name}-{instance.short_id}-{instance_group.id}"
+    platform_id = var.platform_id
 
     network_interface {
-      nat                = true
+      nat                = var.nat
       subnet_ids         = [yandex_vpc_subnet.subnet-a.id]
       security_group_ids = [yandex_vpc_security_group.k8s-main-sg.id, yandex_vpc_security_group.k8s-public-services.id]
     }
 
     resources {
-      memory = 4 # RAM quantity in GB
-      cores  = 2 # Number of CPU cores
+      memory        = var.memory # RAM quantity in GB
+      cores         = var.cores  # Number of CPU cores
+      core_fraction = var.core_fraction
     }
 
     boot_disk {
-      type = "network-hdd"
-      size = 64 # GB
+      type = var.disk_type
+      size = var.disk_size
+    }
+
+    scheduling_policy {
+      preemptible = var.vm_preemptible
     }
   }
 

@@ -137,7 +137,7 @@ variable "cores" {
 
 variable "memory" {
   type    = string
-  default = "8"
+  default = "4"
 }
 
 variable "core_fraction" {
@@ -147,7 +147,7 @@ variable "core_fraction" {
 
 variable "nat" {
   type    = bool
-  default = true
+  default = false
 }
 
 variable "vm_preemptible" {
