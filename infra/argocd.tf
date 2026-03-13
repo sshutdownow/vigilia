@@ -94,7 +94,9 @@ resource "helm_release" "argocd" {
   depends_on = [
     yandex_kubernetes_cluster.k8s-cluster,
     helm_release.gwin,
-    yandex_vpc_security_group.gwin]
+    yandex_vpc_security_group.gwin,
+    helm_release.vpa
+  ]
 }
 
 resource "kubernetes_secret_v1" "sausage_repo_gitlab" {

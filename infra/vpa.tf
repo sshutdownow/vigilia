@@ -1,21 +1,3 @@
-# Metrics Server, без него VPA не работает
-resource "helm_release" "metrics_server" {
-  name       = "metrics-server"
-  repository = "https://kubernetes-sigs.github.io/metrics-server/"
-  chart      = "metrics-server"
-  version    = "3.13.0"
-  namespace  = "kube-system"
-
-  set = [
-    {
-      name  = "args"
-      value = "{--kubelet-insecure-tls}"
-    }
-  ]
-
-  depends_on = [yandex_kubernetes_cluster.k8s-cluster]
-}
-
 # VPA Controller
 resource "helm_release" "vpa" {
   name       = "vpa"
@@ -40,5 +22,5 @@ resource "helm_release" "vpa" {
     })
   ]
 
-  depends_on = [yandex_kubernetes_cluster.k8s-cluster, helm_release.metrics_server]
+  depends_on = [yandex_kubernetes_cluster.k8s-cluster]
 }
