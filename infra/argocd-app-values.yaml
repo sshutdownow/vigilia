@@ -1,0 +1,31 @@
+applications:
+- name: sausage-store
+  namespace: argocd
+  project: default
+  source:
+    repoURL: oci://${gitlab_helm_url}
+    chart: sausage-store
+    targetRevision: "1.0.161"
+    helm:
+      values: |
+        global:
+          imagePullSecrets:
+          - name: gitlab-pull-secret
+        backend:
+          image: ${gitlab_image_url}/sausage-backend
+        frontend:
+          image: ${gitlab_image_url}/sausage-frontend
+        backend-report:
+          image: ${gitlab_image_url}/sausage-backend-report
+        ingress:
+          annotations:
+            gwin.yandex.cloud/certificateId: ${certificate_id}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: sausage-store
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
