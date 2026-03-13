@@ -36,7 +36,7 @@ resource "yandex_vpc_subnet" "subnet-a" {
   route_table_id = yandex_vpc_route_table.rt.id
 }
 
-resource "yandex_vpc_gateway" "natg_ateway" {
+resource "yandex_vpc_gateway" "nat_gateway" {
   folder_id = var.folder_id
   name      = "nat-gateway-{local.subnet_name}"
   shared_egress_gateway {}
