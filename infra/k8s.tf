@@ -190,10 +190,6 @@ resource "yandex_kubernetes_cluster" "k8s-cluster" {
     }
   }
 
-  vertical_pod_autoscaler {
-    enabled = true
-  }
-
   service_account_id      = yandex_iam_service_account.k8s-sa.id # Cluster service account ID
   node_service_account_id = yandex_iam_service_account.k8s-node-group-sa.id # Node group service account ID
   

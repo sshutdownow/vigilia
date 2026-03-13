@@ -68,11 +68,28 @@ resource "helm_release" "argocd" {
               secretName = "yc-certmgr-cert-id-${data.yandex_cm_certificate.le_cert.id}"
             }]
           }
+        },
+        {
+          apiVersion = "autoscaling.k8s.io/v1"
+          kind       = "VerticalPodAutoscaler"
+          metadata = {
+            name      = "argocd-server-vpa"
+            namespace = "argocd"
+          }
+          spec = {
+            targetRef = {
+              apiVersion = "apps/v1"
+              kind       = "Deployment"
+              name       = "argocd-server"
+            }
+            updatePolicy = {
+              updateMode = "Auto"
+            }
+          }
         }
       ]
     })
   ]
-
 
   depends_on = [
     yandex_kubernetes_cluster.k8s-cluster,
