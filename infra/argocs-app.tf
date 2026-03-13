@@ -41,7 +41,7 @@ resource "helm_release" "sausage_store_app" {
 
               ingress = {
                 annotations = {
-                  "gwin.yandex.cloud/certificateId" = data.yandex_cm_certificate.le_cert.id
+                  "gwin.yandex.cloud/certificateId" = tostring(data.yandex_cm_certificate.le_cert.id)
                 }
               }
             })
