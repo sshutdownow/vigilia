@@ -131,7 +131,7 @@ resource "kubernetes_secret_v1" "gitlab_pull_secret" {
   data = {
     ".dockerconfigjson" = jsonencode({
       auths = {
-        (urlparse(var.gitlab_image_url).host) = {
+        (replace(var.gitlab_image_url, "/^https?:\\/\\/|(\\/.*)$/", "")) = {
           auth = base64encode("${var.gitlab_username}:${var.gitlab_token}")
         }
       }
