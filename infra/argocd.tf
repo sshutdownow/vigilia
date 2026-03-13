@@ -127,7 +127,7 @@ resource "kubernetes_secret_v1" "sausage_helm_gitlab" {
 resource "kubernetes_secret_v1" "gitlab_pull_secret" {
   metadata {
     name      = "gitlab-pull-secret"
-    namespace = "sausage-store"
+    namespace = kubernetes_namespace_v1.sausage_store.metadata[0].name
   }
   type = "kubernetes.io/dockerconfigjson"
   data = {

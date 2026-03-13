@@ -1,3 +1,9 @@
+resource "kubernetes_namespace_v1" "sausage_store" {
+  metadata {
+    name = "sausage-store"
+  }
+}
+
 resource "helm_release" "sausage_store_app" {
   name       = "sausage-store-app"
   repository = "https://argoproj.github.io/argo-helm"
