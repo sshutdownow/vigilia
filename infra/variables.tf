@@ -127,7 +127,7 @@ variable "disk_type" {
 
 variable "disk_size" {
   type    = number
-  default = 20
+  default = 64
 }
 
 variable "cores" {
