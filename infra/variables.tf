@@ -85,9 +85,19 @@ variable "gitlab_token" {
   sensitive = true
 }
 
-variable "gitlab_url" {
+variable "gitlab_git_url" {
   type    = string
   default = "https://cloud-services-engineer.gitlab.yandexcloud.net/s2633401/vigilia.git"
+}
+
+variable "gitlab_helm_url" {
+  type    = string
+  default = "cloud-services-engineer.gitlab.yandexcloud.net:5050/s2633401/vigilia/charts"
+}
+
+variable "gitlab_image_url" {
+  type    = string
+  default = "cloud-services-engineer.gitlab.yandexcloud.net:5050/s2633401/vigilia"
 }
 
 variable "vm_user" {

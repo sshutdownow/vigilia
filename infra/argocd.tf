@@ -80,30 +80,6 @@ resource "helm_release" "argocd" {
     yandex_vpc_security_group.gwin]
 }
 
-resource "kubernetes_secret_v1" "yc_registry_oci" {
-  metadata {
-    name      = "yc-registry-oci"
-    namespace = "argocd"
-    labels = {
-      "argocd.argoproj.io/secret-type" = "repository"
-    }
-  }
-
-  type = "Opaque"
-
-  data = {
-    type      = "helm"
-    name      = "yc-oci"
-    enableOCI = "true"
-    # Reference your existing registry resource
-    url      = "cr.yandex/${yandex_container_registry.container-registry.id}"
-    username = "json_key"
-    password = file("authorized_key.json")
-  }
-
-  depends_on = [helm_release.argocd]
-}
-
 resource "kubernetes_secret_v1" "sausage_repo_gitlab" {
   metadata {
     name      = "sausage-repo-gitlab"
@@ -117,10 +93,49 @@ resource "kubernetes_secret_v1" "sausage_repo_gitlab" {
 
   data = {
     type     = "git"
-    url      = var.gitlab_url
+    url      = var.gitlab_git_url
     password = var.gitlab_token
     username = var.gitlab_username
   }
 
   depends_on = [helm_release.argocd]
 }
+
+resource "kubernetes_secret_v1" "sausage_helm_gitlab" {
+  metadata {
+    name      = "sausage-helm-gitlab"
+    namespace = "argocd"
+    labels = {
+      "argocd.argoproj.io/secret-type" = "repository"
+    }
+  }
+
+  type = "Opaque"
+
+  string_data = {
+    name      = "gitlab-helm-oci"
+    type      = "helm"
+    enableOCI = "true"
+    url       = var.gitlab_helm_url
+    password  = var.gitlab_token
+    username  = var.gitlab_username
+  }
+}
+
+resource "kubernetes_secret_v1" "gitlab_pull_secret" {
+  metadata {
+    name      = "gitlab-pull-secret"
+    namespace = "sausage-store"
+  }
+  type = "kubernetes.io/dockerconfigjson"
+  string_data = {
+    ".dockerconfigjson" = jsonencode({
+      auths = {
+        (urlparse(var.gitlab_image_url).host) = {
+          auth = base64encode("${var.gitlab_username}:${var.gitlab_token}")
+        }
+      }
+    })
+  }
+}
+
