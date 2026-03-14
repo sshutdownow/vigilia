@@ -17,7 +17,7 @@ resource "helm_release" "sausage_store_app" {
         "namespace" = "argocd"
         "project"   = "default"
         "source" = {
-          "repoURL"        = var.gitlab_git_url
+          "repoURL"        = "${var.gitlab_git_url}"
           "path"           = "deploy-yandex-cloud" 
           "targetRevision" = "master"
           "helm" = {
