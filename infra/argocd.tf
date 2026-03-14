@@ -40,9 +40,7 @@ resource "helm_release" "argocd" {
             annotations = {
               "gwin.yandex.cloud/groupName"           = "ingress"
               "gwin.yandex.cloud/externalIPv4Address" = yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address
-              "gwin.yandex.cloud/certificateId"       = data.yandex_cm_certificate.le_cert.id
               "gwin.yandex.cloud/securityGroups"      = yandex_vpc_security_group.gwin.id
-              "gwin.yandex.cloud/backend-protocol"    = "http"
               "gwin.yandex.cloud/logs.logGroupId"     = yandex_logging_group.log_group_main.id
             }
           }

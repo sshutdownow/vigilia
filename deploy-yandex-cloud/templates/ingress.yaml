@@ -7,7 +7,6 @@ metadata:
     gwin.yandex.cloud/groupName: "ingress"
     gwin.yandex.cloud/externalIPv4Address: "89.169.150.67"
     gwin.yandex.cloud/securityGroups: "enp7o89i6v83mr7tnemg"
-    gwin.yandex.cloud/backend-protocol: "http"
 spec:
   ingressClassName: "gwin-default"
   tls:
