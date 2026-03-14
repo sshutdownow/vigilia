@@ -14,7 +14,7 @@ spec:
   tls:
     - hosts:
         - "sausage-store.vigilia.site"
-      secretName: "sausage-store-cert-secret" # any
+      secretName: "yc-certmgr-cert-id-fpqhargr86st8fdmp74q"
   rules:
     - host: "sausage-store.vigilia.site"
       http:
