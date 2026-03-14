@@ -4,10 +4,9 @@ resource "kubernetes_namespace_v1" "sausage_store" {
   }
 }
 
-
 resource "helm_release" "sausage_store_app" {
   name       = "sausage-store-app"
-  repository = "https://argoproj.github.io"
+  repository = "https://argoproj.github.io/argo-helm"
   chart      = "argocd-apps"
   namespace  = "argocd"
 
