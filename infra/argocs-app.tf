@@ -4,6 +4,23 @@ resource "kubernetes_namespace_v1" "sausage_store" {
   }
 }
 
+resource "time_sleep" "wait_infra" {
+  depends_on = [
+    yandex_kubernetes_cluster.k8s-cluster, 
+    helm_release.gwin,
+    helm_release.vpa,                      
+    yandex_cm_certificate.le_cert
+  ]
+
+  create_duration = "120s" 
+}
+
+resource "null_resource" "infra" {
+  depends_on = [
+    time_sleep.wait_infra,
+  ]
+}
+
 resource "kubernetes_manifest" "sausage_store_app" {
   manifest = {
     "apiVersion" = "argoproj.io/v1alpha1"
