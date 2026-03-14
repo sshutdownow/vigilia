@@ -5,7 +5,7 @@ resource "kubernetes_namespace_v1" "sausage_store" {
 }
 
 resource "kubernetes_manifest" "sausage_store_app" {
-  count = 0
+  count = 1
   manifest = {
     "apiVersion" = "argoproj.io/v1alpha1"
     "kind"       = "Application"
