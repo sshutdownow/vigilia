@@ -8,8 +8,8 @@ resource "time_sleep" "wait_infra" {
   depends_on = [
     yandex_kubernetes_cluster.k8s-cluster, 
     helm_release.gwin,
-    helm_release.vpa,                      
-    yandex_cm_certificate.le_cert
+    helm_release.vpa,
+    helm_release.argocd                      
   ]
 
   create_duration = "120s" 
