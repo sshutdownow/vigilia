@@ -5,8 +5,10 @@ sausage-store:
       - name: gitlab-pull-secret
     vault:
       enabled: false
-
+ 
   frontend:
+    ingress:
+      enabled: false    
     replicas: 1
     image: cloud-services-engineer.gitlab.yandexcloud.net:5050/s2633401/vigilia/sausage-frontend
     tag: latest
@@ -14,22 +16,6 @@ sausage-store:
     service:
       type: NodePort
       port: 80
-    
-    # Gwin
-    ingress:
-      enabled: true
-      ingressClassName: "gwin-default"
-      annotations:
-        "gwin.yandex.cloud/groupName": "sausage-store"
-        "gwin.yandex.cloud/certificateId": "fpqhargr86st8fdmp74q"
-        "gwin.yandex.cloud/backend-protocol": "http"
-      hosts:
-        - host: "sausage-store.vigilia.site"
-          paths:
-            - path: /
-              pathType: Prefix
-              component: frontend
-              port: 80
     resources:
       requests:
         memory: "128Mi"
