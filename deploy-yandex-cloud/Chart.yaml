@@ -1,0 +1,10 @@
+apiVersion: v2
+name: sausage-store-yс
+type: application
+version: 1.0.0
+
+dependencies:
+  - name: sausage-store
+    # основной чарт
+    repository: "file://../sausage-store-chart" 
+    version: "0.1.0"

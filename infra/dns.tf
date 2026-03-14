@@ -18,19 +18,17 @@ resource "yandex_dns_recordset" "observability_records" {
   data = [yandex_kubernetes_cluster.k8s-cluster.master[0].external_v4_address]
 }
 
-# запись для ArgoCD, привязанная к Gwin IP
-resource "yandex_dns_recordset" "argocd_dns" {
+# записи, привязанные к Gwin IP
+resource "yandex_dns_recordset" "public_dns_records" {
+  for_each = toset([
+    "argocd.${var.domain_name}.",
+    "sausage-store.${var.domain_name}.",
+    "${var.domain_name}."
+  ])
+
   zone_id = data.yandex_dns_zone.sausage_store_public_zone.id
-  name    = "argocd.${var.domain_name}."
+  name    = each.value
   type    = "A"
   ttl     = 300
-  data    = [yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address]
-}
-
-resource "yandex_dns_recordset" "app_record" {
-  zone_id = data.yandex_dns_zone.sausage_store_public_zone.id
-  name    = "${var.domain_name}."
-  type    = "A"
-  ttl     = 900
   data    = [yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address]
 }
