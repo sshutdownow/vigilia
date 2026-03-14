@@ -4,9 +4,11 @@ metadata:
   name: sausage-store-frontend-ingress
   namespace: sausage-store
   annotations:
-    "gwin.yandex.cloud/groupName": "sausage-store"
-    "gwin.yandex.cloud/certificateId": "fpqhargr86st8fdmp74q"
-    "gwin.yandex.cloud/backend-protocol": "http"
+    gwin.yandex.cloud/groupName: "sausage-store"
+    gwin.yandex.cloud/externalIPv4Address: auto
+    gwin.yandex.cloud/certificateId: "fpqhargr86st8fdmp74q"
+    gwin.yandex.cloud/backend-protocol: "http"
+    gwin.yandex.cloud/securityGroups: "k8s-gwin-ingress"
 spec:
   ingressClassName: "gwin-default"
   rules:
