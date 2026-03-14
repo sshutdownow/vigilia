@@ -4,24 +4,8 @@ resource "kubernetes_namespace_v1" "sausage_store" {
   }
 }
 
-resource "time_sleep" "wait_infra" {
-  depends_on = [
-    yandex_kubernetes_cluster.k8s-cluster, 
-    helm_release.gwin,
-    helm_release.vpa,
-    helm_release.argocd                      
-  ]
-
-  create_duration = "120s" 
-}
-
-resource "null_resource" "infra" {
-  depends_on = [
-    time_sleep.wait_infra,
-  ]
-}
-
 resource "kubernetes_manifest" "sausage_store_app" {
+  count = 0
   manifest = {
     "apiVersion" = "argoproj.io/v1alpha1"
     "kind"       = "Application"
@@ -54,7 +38,6 @@ resource "kubernetes_manifest" "sausage_store_app" {
   }
 
   depends_on = [
-    resource.null_resource.infra,
     helm_release.argocd,
     kubernetes_secret_v1.sausage_repo_gitlab,
     kubernetes_secret_v1.gitlab_pull_secret,
