@@ -1,9 +1,3 @@
-resource "kubernetes_namespace_v1" "sausage_store" {
-  metadata {
-    name = "sausage-store"
-  }
-}
-
 resource "kubernetes_manifest" "sausage_store_app" {
   count = 0
   manifest = {

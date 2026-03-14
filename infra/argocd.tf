@@ -2,6 +2,12 @@ resource "bcrypt_hash" "argocd_password" {
   cleartext = var.argocd_admin_password
 }
 
+#resource "kubernetes_namespace_v1" "sausage_store" {
+#  metadata {
+#    name = "sausage-store"
+#  }
+#}
+
 resource "helm_release" "argocd" {
   name             = "argocd"
   repository       = "https://argoproj.github.io/argo-helm"
@@ -128,6 +134,25 @@ resource "helm_release" "argocd" {
   ]
 }
 
+# login/password for k8s to download images from GitLab 
+resource "kubernetes_secret_v1" "gitlab_pull_secret" {
+  metadata {
+    name      = "gitlab-pull-secret"
+    namespace = "sausage-store"
+    # namespace = kubernetes_namespace_v1.sausage_store.metadata[0].name
+  }
+  type = "kubernetes.io/dockerconfigjson"
+  data = {
+    ".dockerconfigjson" = jsonencode({
+      auths = {
+        (replace(var.gitlab_image_url, "/^https?:\\/\\/|(\\/.*)$/", "")) = {
+          auth = base64encode("${var.gitlab_username}:${var.gitlab_token}")
+        }
+      }
+    })
+  }
+}
+
 resource "kubernetes_secret_v1" "sausage_repo_gitlab" {
   metadata {
     name      = "sausage-repo-gitlab"
@@ -146,22 +171,8 @@ resource "kubernetes_secret_v1" "sausage_repo_gitlab" {
     username = var.gitlab_username
   }
 
-  depends_on = [helm_release.argocd]
-}
-
-resource "kubernetes_secret_v1" "gitlab_pull_secret" {
-  metadata {
-    name      = "gitlab-pull-secret"
-    namespace = kubernetes_namespace_v1.sausage_store.metadata[0].name
-  }
-  type = "kubernetes.io/dockerconfigjson"
-  data = {
-    ".dockerconfigjson" = jsonencode({
-      auths = {
-        (replace(var.gitlab_image_url, "/^https?:\\/\\/|(\\/.*)$/", "")) = {
-          auth = base64encode("${var.gitlab_username}:${var.gitlab_token}")
-        }
-      }
-    })
-  }
+  depends_on = [
+    helm_release.argocd,
+    kubernetes_secret_v1.gitlab_pull_secret
+  ]
 }
