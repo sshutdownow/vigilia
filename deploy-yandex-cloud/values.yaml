@@ -8,7 +8,8 @@ sausage-store:
 
   frontend:
     replicas: 1
-    image: cloud-services-engineer.gitlab.yandexcloud.net:5050/s2633401/vigilia/sausage-frontend:latest
+    image: cloud-services-engineer.gitlab.yandexcloud.net:5050/s2633401/vigilia/sausage-frontend
+    tag: latest
     containerPort: 80
     service:
       type: NodePort
@@ -36,7 +37,8 @@ sausage-store:
 
   backend:
     replicas: 1
-    image: cloud-services-engineer.gitlab.yandexcloud.net:5050/s2633401/vigilia/sausage-backend:latest
+    image: cloud-services-engineer.gitlab.yandexcloud.net:5050/s2633401/vigilia/sausage-backend
+    tag: latest
     containerPort: 8080
     service:
       type: ClusterIP
@@ -56,7 +58,8 @@ sausage-store:
 
   backend-report:
     replicas: 1
-    image: cloud-services-engineer.gitlab.yandexcloud.net:5050/s2633401/vigilia/sausage-backend-report:latest
+    image: cloud-services-engineer.gitlab.yandexcloud.net:5050/s2633401/vigilia/sausage-backend-report
+    tag: latest
     containerPort: 8080
     env:
       port: 8080
