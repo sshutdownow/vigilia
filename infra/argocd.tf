@@ -120,6 +120,41 @@ resource "helm_release" "argocd" {
               syncOptions = ["CreateNamespace=true"]
             }
           }
+        },
+        {
+          apiVersion = "networking.k8s.io/v1"
+          kind       = "Ingress"
+          metadata = {
+            name      = "sausage-store-frontend-ingress"
+            namespace = "sausage-store"
+            annotations = {
+              "gwin.yandex.cloud/groupName"           = "ingress"
+              "gwin.yandex.cloud/externalIPv4Address" = yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address
+              "gwin.yandex.cloud/securityGroups"      = yandex_vpc_security_group.gwin.id
+            }
+          }
+          spec = {
+            ingressClassName = "gwin-default"
+            tls = [{
+              hosts      = ["sausage-store.${var.domain_name}"]
+              secretName = "yc-certmgr-cert-id-${data.yandex_cm_certificate.le_cert.id}"
+            }]
+            rules = [{
+              host = "sausage-store.${var.domain_name}"
+              http = {
+                paths = [{
+                  path     = "/"
+                  pathType = "Prefix"
+                  backend = {
+                    service = {
+                      name = "sausage-store-frontend-service"
+                      port = { number = 80 }
+                    }
+                  }
+                }]
+              }
+            }]
+          }
         }
       ]
     })
