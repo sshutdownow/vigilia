@@ -12,25 +12,28 @@ resource "helm_release" "sausage_store_app" {
 
   values = [
     yamlencode({
-      "applications" = [{
-        "name"      = "sausage-store"
-        "namespace" = "argocd"
-        "project"   = "default"
-        "source" = {
-          "repoURL"        = "${var.gitlab_git_url}"
-          "path"           = "deploy-yandex-cloud" 
-          "targetRevision" = "master"
-          "helm" = {
-            "valueFiles" = ["values.yaml"]
+      applications = [{
+        name      = "sausage-store"
+        namespace = "argocd"
+        project   = "default"
+        source = {
+          repoURL        = "${var.gitlab_git_url}"
+          path           = "deploy-yandex-cloud" 
+          targetRevision = "master"
+          helm = {
+            valueFiles = ["values.yaml"]
           }
         }
-        "destination" = {
-          "server"    = "https://kubernetes.default.svc"
-          "namespace" = "sausage-store"
+        destination = {
+          server    = "https://kubernetes.default.svc"
+          namespace = "sausage-store"
         }
-        "syncPolicy" = {
-          "automated" = { "prune" = true, "selfHeal" = true }
-          "syncOptions" = ["CreateNamespace=true"]
+        syncPolicy = {
+          automated = {
+            "prune" = true
+            "selfHeal" = true
+          }
+          syncOptions = ["CreateNamespace=true"]
         }
       }]
     })
