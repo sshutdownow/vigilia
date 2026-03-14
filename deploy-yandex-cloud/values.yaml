@@ -1,40 +1,83 @@
 sausage-store:
-  # 1. Секрет для скачивания образов
   global:
+    # секрет для скачивания образов
     imagePullSecrets:
       - name: gitlab-pull-secret
+    vault:
+      enabled: false
 
-  # 2. Images
   frontend:
-    image: cloud-services-engineer.gitlab.yandexcloud.net:5050/s2633401/vigilia/sausage-frontend
+    replicas: 1
+    image: cloud-services-engineer.gitlab.yandexcloud.net:5050/s2633401/vigilia/sausage-frontend:latest
+    containerPort: 80
     service:
       type: NodePort
       port: 80
+    
+    # Gwin
+    ingress:
+      enabled: true
+      ingressClassName: "gwin-default"
+      annotations:
+        "gwin.yandex.cloud/groupName": "sausage-store"
+        "gwin.yandex.cloud/certificateId": "fpqhargr86st8fdmp74q"
+        "gwin.yandex.cloud/backend-protocol": "http"
+      hosts:
+        - host: "sausage-store.vigilia.site"
+          paths:
+            - path: /
+              pathType: Prefix
+              component: frontend
+              port: 80
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
 
   backend:
-    image: cloud-services-engineer.gitlab.yandexcloud.net:5050/s2633401/vigilia/sausage-backend
-    service:
-      type: ClusterIP 
-      port: 8080
-
-  backend-report:
-    image: cloud-services-engineer.gitlab.yandexcloud.net:5050/s2633401/vigilia/sausage-backend-report
+    replicas: 1
+    image: cloud-services-engineer.gitlab.yandexcloud.net:5050/s2633401/vigilia/sausage-backend:latest
+    containerPort: 8080
     service:
       type: ClusterIP
       port: 8080
+    env:
+      postgresUri: jdbc:postgresql://postgresql:5432/sausage-store
+      spring.datasource.password: "passwordstore" 
+      reportPath: /logs/reports
+      logPath: /logs
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+    vpa:
+      updatePolicy:
+        updateMode: "Auto"
 
-  # 3. Ingress Gwin
-  ingress:
-    enabled: true
-    ingressClassName: "gwin-default"
-    annotations:
-      "gwin.yandex.cloud/groupName": "sausage-store"
-      "gwin.yandex.cloud/certificateId": "fpqhargr86st8fdmp74q"
-      "gwin.yandex.cloud/backend-protocol": "http"
-    hosts:
-      - host: "sausage-store.vigilia.site"
-        paths:
-          - path: /
-            pathType: Prefix
-            component: frontend # Nginx
-            port: 80
+  backend-report:
+    replicas: 1
+    image: cloud-services-engineer.gitlab.yandexcloud.net:5050/s2633401/vigilia/sausage-backend-report:latest
+    containerPort: 8080
+    env:
+      port: 8080
+      db: mongodb://reports:reportspassword@mongodb:27017/sausage-store
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "0.1"
+
+  infra:
+    postgresql:
+      env:
+        POSTGRES_DB: "sausage-store"
+        POSTGRES_USER: "store"
+        POSTGRES_PASSWORD: "passwordstore"
+      containerPort: 5432
+    mongodb:
+      env:
+        MONGO_INITDB_ROOT_USERNAME: root
+        MONGO_INITDB_ROOT_PASSWORD: rootpassword
+        MONGO_REPORTS_DATABASE: sausage-store
+        MONGO_REPORTS_USERNAME: reports
+        MONGO_REPORTS_PASSWORD: reportspassword
+      containerPort: 27017
