@@ -37,6 +37,7 @@ resource "kubernetes_manifest" "sausage_store_app" {
   }
 
   depends_on = [
+    resource.null_resource.infra,
     helm_release.argocd,
     kubernetes_secret_v1.sausage_repo_gitlab,
     kubernetes_secret_v1.gitlab_pull_secret,
