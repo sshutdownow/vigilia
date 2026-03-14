@@ -14,6 +14,10 @@ terraform {
     kubernetes = {
       source = "hashicorp/kubernetes"
     }
+    null = {
+      source  = "hashicorp/null"
+      version = ">= 3.2.2"
+    }
     bcrypt = {
       source = "viktorradnai/bcrypt"
     }
