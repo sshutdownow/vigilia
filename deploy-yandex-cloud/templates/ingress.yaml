@@ -4,13 +4,16 @@ metadata:
   name: sausage-store-frontend-ingress
   namespace: sausage-store
   annotations:
-    gwin.yandex.cloud/groupName: "sausage-store"
-    gwin.yandex.cloud/externalIPv4Address: "e9b4h2mblacmkr75sfkf"
-    gwin.yandex.cloud/certificateId: "fpqhargr86st8fdmp74q"
+    gwin.yandex.cloud/groupName: "ingress"
     gwin.yandex.cloud/backend-protocol: "http"
     gwin.yandex.cloud/securityGroups: "enp7o89i6v83mr7tnemg"
+    gwin.yandex.cloud/certificateId: "fpqhargr86st8fdmp74q"
 spec:
   ingressClassName: "gwin-default"
+  tls:
+    - hosts:
+        - "sausage-store.vigilia.site"
+      secretName: "sausage-store-cert-secret" # any
   rules:
     - host: "sausage-store.vigilia.site"
       http:
