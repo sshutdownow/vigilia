@@ -8,7 +8,7 @@ metadata:
     gwin.yandex.cloud/externalIPv4Address: auto
     gwin.yandex.cloud/certificateId: "fpqhargr86st8fdmp74q"
     gwin.yandex.cloud/backend-protocol: "http"
-    gwin.yandex.cloud/securityGroups: "k8s-gwin-ingress"
+    gwin.yandex.cloud/securityGroups: "enp7o89i6v83mr7tnemg"
 spec:
   ingressClassName: "gwin-default"
   rules:
