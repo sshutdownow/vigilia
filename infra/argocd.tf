@@ -129,8 +129,7 @@ resource "helm_release" "argocd" {
     yandex_kubernetes_cluster.k8s-cluster,
     helm_release.gwin,
     yandex_vpc_security_group.gwin,
-    helm_release.vpa,
-    kubernetes_namespace_v1.sausage_store
+    helm_release.vpa
   ]
 }
 
