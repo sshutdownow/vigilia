@@ -84,6 +84,36 @@ resource "helm_release" "argocd" {
               updateMode = "Auto"
             }
           }
+        },
+        {
+          apiVersion = "argoproj.io/v1alpha1"
+          kind       = "Application"
+          metadata = {
+            name      = "sausage-store"
+            namespace = "argocd"
+          }
+          spec = {
+            project = "default"
+            source = {
+              repoURL        = "${var.gitlab_git_url}"
+              path           = "deploy-yandex-cloud"
+              targetRevision = "master"
+              helm = {
+                valueFiles = ["values.yaml"]
+              }
+            }
+            destination = {
+              server    = "https://kubernetes.default.svc"
+              namespace = "sausage-store"
+            }
+            syncPolicy = {
+              automated = {
+                prune    = true
+                selfHeal = true
+              }
+              syncOptions = ["CreateNamespace=true"]
+            }
+          }
         }
       ]
     })
@@ -93,7 +123,8 @@ resource "helm_release" "argocd" {
     yandex_kubernetes_cluster.k8s-cluster,
     helm_release.gwin,
     yandex_vpc_security_group.gwin,
-    helm_release.vpa
+    helm_release.vpa,
+    kubernetes_namespace_v1.sausage_store
   ]
 }
 
@@ -118,29 +149,6 @@ resource "kubernetes_secret_v1" "sausage_repo_gitlab" {
   depends_on = [helm_release.argocd]
 }
 
-resource "kubernetes_secret_v1" "sausage_helm_gitlab" {
-  metadata {
-    name      = "sausage-helm-gitlab"
-    namespace = "argocd"
-    labels = {
-      "argocd.argoproj.io/secret-type" = "repository"
-    }
-  }
-
-  type = "Opaque"
-
-  data = {
-    name      = "gitlab-helm-oci"
-    type      = "helm"
-    enableOCI = "true"
-    url       = var.gitlab_helm_url
-    password  = var.gitlab_token
-    username  = var.gitlab_username
-  }
-
-  depends_on = [helm_release.argocd]
-}
-
 resource "kubernetes_secret_v1" "gitlab_pull_secret" {
   metadata {
     name      = "gitlab-pull-secret"
@@ -156,6 +164,4 @@ resource "kubernetes_secret_v1" "gitlab_pull_secret" {
       }
     })
   }
-  depends_on = [helm_release.argocd]
 }
-
