@@ -8,6 +8,8 @@ sausage-store:
       enabled: false
 
   frontend:
+    ingress: # disable ngnix
+      enabled: false
     replicas: 1
     imagePullSecrets:
       - name: gitlab-pull-secret
