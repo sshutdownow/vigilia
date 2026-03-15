@@ -13,6 +13,7 @@ spec:
     # чарты внутри репозитория
     path: "deploy-yandex-cloud"
     helm:
+      releaseName: sausage-store
       valueFiles:
         - "values.yaml"
   destination:

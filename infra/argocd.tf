@@ -8,6 +8,20 @@ resource "kubernetes_namespace_v1" "sausage_store" {
   }
 }
 
+resource "kubernetes_config_map_v1" "infra_info" {
+  metadata {
+    name      = "infra-info"
+    namespace = "sausage-store" 
+  }
+  data = {
+    "gwin_ip"        = tostring(yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address)
+    "gwin_sg"        = tostring(yandex_vpc_security_group.gwin.id)
+    "certificate_id" = tostring(data.yandex_cm_certificate.le_cert.id)
+  }
+  depends_on = [kubernetes_namespace_v1.sausage_store]
+}
+
+
 # login/password for k8s to download images from GitLab 
 resource "kubernetes_secret_v1" "gitlab_pull_secret" {
   metadata {
@@ -109,72 +123,7 @@ resource "helm_release" "argocd" {
               updateMode = "Auto"
             }
           }
-        }#,
-        # {
-        #   apiVersion = "argoproj.io/v1alpha1"
-        #   kind       = "Application"
-        #   metadata = {
-        #     name      = "sausage-store"
-        #     namespace = "argocd"
-        #   }
-        #   spec = {
-        #     project = "default"
-        #     source = {
-        #       repoURL        = "${var.gitlab_git_url}"
-        #       path           = "deploy-yandex-cloud"
-        #       targetRevision = "master"
-        #       helm = {
-        #         valueFiles = ["values.yaml"]
-        #       }
-        #     }
-        #     destination = {
-        #       server    = "https://kubernetes.default.svc"
-        #       namespace = "sausage-store"
-        #     }
-        #     syncPolicy = {
-        #       automated = {
-        #         prune    = true
-        #         selfHeal = true
-        #       }
-        #       syncOptions = ["CreateNamespace=true"]
-        #     }
-        #   }
-        # },
-        # {
-        #   apiVersion = "networking.k8s.io/v1"
-        #   kind       = "Ingress"
-        #   metadata = {
-        #     name      = "sausage-store-frontend-ingress"
-        #     namespace = "sausage-store"
-        #     annotations = {
-        #       "gwin.yandex.cloud/groupName"           = "ingress"
-        #       "gwin.yandex.cloud/externalIPv4Address" = yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address
-        #       "gwin.yandex.cloud/securityGroups"      = yandex_vpc_security_group.gwin.id
-        #     }
-        #   }
-        #   spec = {
-        #     ingressClassName = "gwin-default"
-        #     tls = [{
-        #       hosts      = ["sausage-store.${var.domain_name}"]
-        #       secretName = "yc-certmgr-cert-id-${data.yandex_cm_certificate.le_cert.id}"
-        #     }]
-        #     rules = [{
-        #       host = "sausage-store.${var.domain_name}"
-        #       http = {
-        #         paths = [{
-        #           path     = "/"
-        #           pathType = "Prefix"
-        #           backend = {
-        #             service = {
-        #               name = "sausage-store-frontend-service"
-        #               port = { number = 80 }
-        #             }
-        #           }
-        #         }]
-        #       }
-        #     }]
-        #   }
-        # }
+        }
       ]
     })
   ]
@@ -209,27 +158,61 @@ resource "kubernetes_secret_v1" "sausage_repo_gitlab" {
   depends_on = [helm_release.argocd]
 }
 
-resource "helm_release" "argocd_apps" {
-  name       = "argocd-apps"
-  repository = "https://argoproj.github.io/argo-helm"
-  chart      = "argocd-apps"
-  namespace  = "argocd"
-  version    = "2.0.4"
+# resource "helm_release" "argocd_apps" {
+#   name       = "argocd-apps"
+#   repository = "https://argoproj.github.io/argo-helm"
+#   chart      = "argocd-apps"
+#   namespace  = "argocd"
+#   version    = "2.0.4"
 
-  values = [
-    <<-EOT
-    applications:
-      - name: "root-management"
-        namespace: "argocd"
-        project: "default"
-        source:
-          repoURL: "${var.gitlab_git_url}"
-          path: "argocd-management"
-          targetRevision: "master"
-        destination:
-          server: "https://kubernetes.default.svc"
-          namespace: "argocd"
-    EOT
+#   values = [
+#     <<-EOT
+#     applications:
+#       - name: "root-management"
+#         namespace: "argocd"
+#         project: "default"
+#         source:
+#           repoURL: "${var.gitlab_git_url}"
+#           path: "argocd-management"
+#           targetRevision: "master"
+#         destination:
+#           server: "https://kubernetes.default.svc"
+#           namespace: "argocd"
+#     EOT
+#   ]
+#   depends_on = [helm_release.argocd]
+# }
+
+resource "kubernetes_manifest" "root_app" {
+  manifest = {
+    "apiVersion" = "argoproj.io/v1alpha1"
+    "kind"       = "Application"
+    "metadata" = {
+      "name"      = "root-management"
+      "namespace" = "argocd"
+    }
+    "spec" = {
+      "project" = "default"
+      "source" = {
+        "repoURL"        = "${var.gitlab_git_url}"
+        "path"           = "argocd-management"
+        "targetRevision" = "master"
+      }
+      "destination" = {
+        "server"    = "https://kubernetes.default.svc"
+        "namespace" = "argocd"
+      }
+      "syncPolicy" = {
+        "automated" = {
+          "prune"    = true
+          "selfHeal" = true
+        }
+      }
+    }
+  }
+
+  depends_on = [
+    helm_release.argocd,
+    kubernetes_config_map_v1.infra_info
   ]
-  depends_on = [helm_release.argocd]
 }
