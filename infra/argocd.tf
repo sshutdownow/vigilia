@@ -193,41 +193,6 @@ resource "helm_release" "argocd_apps" {
   depends_on = [helm_release.argocd]
 }
 
-# resource "kubernetes_manifest" "root_app" {
-#   count = 0
-#   manifest = {
-#     "apiVersion" = "argoproj.io/v1alpha1"
-#     "kind"       = "Application"
-#     "metadata" = {
-#       "name"      = "root-management"
-#       "namespace" = "argocd"
-#     }
-#     "spec" = {
-#       "project" = "default"
-#       "source" = {
-#         "repoURL"        = "${var.gitlab_git_url}"
-#         "path"           = "argocd-management"
-#         "targetRevision" = "master"
-#       }
-#       "destination" = {
-#         "server"    = "https://kubernetes.default.svc"
-#         "namespace" = "argocd"
-#       }
-#       "syncPolicy" = {
-#         "automated" = {
-#           "prune"    = true
-#           "selfHeal" = true
-#         }
-#       }
-#     }
-#   }
-
-#   depends_on = [
-#     helm_release.argocd,
-#     kubernetes_config_map_v1.infra_info
-#   ]
-# }
-
 resource "kubernetes_role_v1" "argocd_read_config" {
   metadata {
     name      = "argocd-read-config"
@@ -258,4 +223,56 @@ resource "kubernetes_role_binding_v1" "argocd_read_config_binding" {
     name      = "argocd-repo-server"
     namespace = "argocd"
   }
+}
+
+resource "kubernetes_manifest" "sausage_store_app" {
+  manifest = {
+    apiVersion = "argoproj.io/v1alpha1"
+    kind       = "Application"
+    metadata = {
+      name      = "sausage-store"
+      namespace = "argocd"
+    }
+    spec = {
+      project = "default"
+      source = {
+        repoURL        = tostring(var.gitlab_git_url)
+        path           = "deploy-yandex-cloud"
+        targetRevision = "master"
+        helm = {
+          releaseName = "sausage-store"
+          parameters = [
+            {
+              name  = "ingress.gwin_ip"
+              value = tostring(yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address)
+            },
+            {
+              name  = "ingress.gwin_sg"
+              value = tostring(yandex_vpc_security_group.gwin.id)
+            },
+            {
+              name  = "ingress.certificate_id"
+              value = tostring(data.yandex_cm_certificate.le_cert.id)
+            }
+          ]
+        }
+      }
+      destination = {
+        server    = "https://kubernetes.default.svc"
+        namespace = "sausage-store"
+      }
+      syncPolicy = {
+        automated = {
+          prune    = true
+          selfHeal = true
+        }
+        syncOptions = ["CreateNamespace=true"]
+      }
+    }
+  }
+
+  depends_on = [
+    kubernetes_namespace_v1.sausage_store,
+    helm_release.argocd
+  ]
 }
