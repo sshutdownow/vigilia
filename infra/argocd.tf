@@ -162,62 +162,69 @@ resource "kubernetes_secret_v1" "sausage_repo_gitlab" {
   depends_on = [helm_release.argocd]
 }
 
-# resource "helm_release" "argocd_apps" {
-#   name       = "argocd-apps"
-#   repository = "https://argoproj.github.io/argo-helm"
-#   chart      = "argocd-apps"
-#   namespace  = "argocd"
-#   version    = "2.0.4"
+resource "helm_release" "argocd_apps" {
+  name       = "argocd-apps"
+  repository = "https://argoproj.github.io/argo-helm"
+  chart      = "argocd-apps"
+  namespace  = "argocd"
+  version    = "2.0.4"
 
-#   values = [
-#     <<-EOT
-#     applications:
-#       - name: "root-management"
-#         namespace: "argocd"
-#         project: "default"
-#         source:
-#           repoURL: "${var.gitlab_git_url}"
-#           path: "argocd-management"
-#           targetRevision: "master"
-#         destination:
-#           server: "https://kubernetes.default.svc"
-#           namespace: "argocd"
-#     EOT
-#   ]
-#   depends_on = [helm_release.argocd]
-# }
-
-resource "kubernetes_manifest" "root_app" {
-  count = 0
-  manifest = {
-    "apiVersion" = "argoproj.io/v1alpha1"
-    "kind"       = "Application"
-    "metadata" = {
-      "name"      = "root-management"
-      "namespace" = "argocd"
-    }
-    "spec" = {
-      "project" = "default"
-      "source" = {
-        "repoURL"        = "${var.gitlab_git_url}"
-        "path"           = "argocd-management"
-        "targetRevision" = "master"
-      }
-      "destination" = {
-        "server"    = "https://kubernetes.default.svc"
-        "namespace" = "argocd"
-      }
-      "syncPolicy" = {
-        "automated" = {
-          "prune"    = true
-          "selfHeal" = true
-        }
-      }
-    }
-  }
-
-  depends_on = [
-    helm_release.argocd,
-    kubernetes_config_map_v1.infra_info
+  values = [
+    <<-EOT
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: root-management
+      namespace: argocd
+    spec:
+      project: default
+      source:
+        repoURL: "${var.gitlab_git_url}"
+        path: "argocd-management"
+        targetRevision: "master"
+      destination:
+        server: "https://kubernetes.default.svc"
+        namespace: "argocd"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+    EOT
   ]
+  depends_on = [helm_release.argocd]
 }
+
+# resource "kubernetes_manifest" "root_app" {
+#   count = 0
+#   manifest = {
+#     "apiVersion" = "argoproj.io/v1alpha1"
+#     "kind"       = "Application"
+#     "metadata" = {
+#       "name"      = "root-management"
+#       "namespace" = "argocd"
+#     }
+#     "spec" = {
+#       "project" = "default"
+#       "source" = {
+#         "repoURL"        = "${var.gitlab_git_url}"
+#         "path"           = "argocd-management"
+#         "targetRevision" = "master"
+#       }
+#       "destination" = {
+#         "server"    = "https://kubernetes.default.svc"
+#         "namespace" = "argocd"
+#       }
+#       "syncPolicy" = {
+#         "automated" = {
+#           "prune"    = true
+#           "selfHeal" = true
+#         }
+#       }
+#     }
+#   }
+
+#   depends_on = [
+#     helm_release.argocd,
+#     kubernetes_config_map_v1.infra_info
+#   ]
+# }
