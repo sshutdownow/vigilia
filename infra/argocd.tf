@@ -188,6 +188,7 @@ resource "kubernetes_secret_v1" "sausage_repo_gitlab" {
 # }
 
 resource "kubernetes_manifest" "root_app" {
+  count = 0
   manifest = {
     "apiVersion" = "argoproj.io/v1alpha1"
     "kind"       = "Application"
