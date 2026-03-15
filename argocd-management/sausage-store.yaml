@@ -11,22 +11,10 @@ spec:
     targetRevision: "master"
     helm:
       releaseName: sausage-store
-      parameters:
-        - name: "sausage-store.ingress.gwin_ip"
-          valueFrom:
-            configMapKeyRef:
-              name: infra-info
-              key: gwin_ip
-        - name: "sausage-store.ingress.gwin_sg"
-          valueFrom:
-            configMapKeyRef:
-              name: infra-info
-              key: gwin_sg
-        - name: "sausage-store.ingress.certificate_id"
-          valueFrom:
-            configMapKeyRef:
-              name: infra-info
-              key: certificate_id
+      valueFiles:
+        - "values.yaml"
+      values: |
+
   destination:
     server: "https://kubernetes.default.svc"
     namespace: "sausage-store"
