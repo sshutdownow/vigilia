@@ -1,3 +1,6 @@
+{{- $infra_cm := (lookup "v1" "ConfigMap" "sausage-store" "infra-info") -}}
+{{- $infra := (and $infra_cm $infra_cm.data) | default dict -}}
+
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -5,14 +8,14 @@ metadata:
   namespace: sausage-store
   annotations:
     "gwin.yandex.cloud/groupName": "ingress"
-    "gwin.yandex.cloud/externalIPv4Address": {{ .Values.ingress.gwin_ip | default "auto" | quote }}
-    "gwin.yandex.cloud/securityGroups": {{ .Values.ingress.gwin_sg | quote }}
+    "gwin.yandex.cloud/externalIPv4Address": {{ index $infra "gwin_ip" | default .Values.ingress.gwin_ip | default "auto" | quote }}
+    "gwin.yandex.cloud/securityGroups": {{ index $infra "gwin_sg" | default .Values.ingress.gwin_sg | quote }}
 spec:
   ingressClassName: "gwin-default"
   tls:
     - hosts:
         - "sausage-store.vigilia.site"
-      secretName: "yc-certmgr-cert-id-{{ .Values.ingress.certificate_id }}"
+      secretName: "yc-certmgr-cert-id-{{ index $infra "certificate_id" | default .Values.ingress.certificate_id }}"
   rules:
     - host: "sausage-store.vigilia.site"
       http:
