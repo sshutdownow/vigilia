@@ -9,7 +9,7 @@ metadata:
   annotations:
     "gwin.yandex.cloud/groupName": "ingress"
     "gwin.yandex.cloud/externalIPv4Address": {{ (index $infra "gwin_ip" | default "auto") | quote }}
-    "gwin.yandex.cloud/securityGroups": {{ (index $infra "gwin_sg") | quote }}
+    "gwin.yandex.cloud/securityGroups": {{ (index $infra "gwin_sg") | default "" | quote }}
 spec:
   ingressClassName: "gwin-default"
   tls:
