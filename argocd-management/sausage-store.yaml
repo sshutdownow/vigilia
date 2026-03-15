@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sausage-store
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: "https://cloud-services-engineer.gitlab.yandexcloud.net/s2633401/vigilia.git"
+    targetRevision: "master"
+    # чарты внутри репозитория
+    path: "deploy-yandex-cloud"
+    helm:
+      valueFiles:
+        - "values.yaml"
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: "sausage-store"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
