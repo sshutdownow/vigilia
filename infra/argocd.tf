@@ -277,3 +277,17 @@ resource "kubernetes_manifest" "sausage_store_app" {
     helm_release.argocd
   ]
 }
+
+resource "kubernetes_config_map_v1" "infra_info" {
+  metadata {
+    name      = "infra-info"
+    namespace = "argocd"
+  }
+
+  data = {
+    gwin_ip        = tostring(yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address)
+    gwin_sg        = tostring(yandex_vpc_security_group.gwin.id)
+    certificate_id = tostring(data.yandex_cm_certificate.le_cert.id)
+  }
+    depends_on = [helm_release.argocd]
+}
