@@ -1,0 +1,32 @@
+{{- /* ConfigMap с параметрами в Terraform */ -}}
+{{- $infra := (lookup "v1" "ConfigMap" "sausage-store" "gwin-info").data -}}
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sausage-store-yandex-ingress
+  namespace: sausage-store
+  annotations:
+    "gwin.yandex.cloud/groupName": "ingress"
+    {{- /* Используем gwin_ip */ -}}
+    "gwin.yandex.cloud/externalIPv4Address": {{ index $infra "gwin_ip" | default "auto" | quote }}
+    {{- /* Используем gwin_sg */ -}}
+    "gwin.yandex.cloud/securityGroups": {{ index $infra "gwin_sg" | quote }}
+spec:
+  ingressClassName: "gwin-default"
+  tls:
+    - hosts:
+        - "sausage-store.vigilia.site"
+      {{- /* ID сертификата из ConfigMap */ -}}
+      secretName: "yc-certmgr-cert-id-{{ index $infra "certificate_id" }}"
+  rules:
+    - host: "sausage-store.vigilia.site"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: sausage-store-frontend-service
+                port:
+                  number: 80

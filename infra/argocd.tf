@@ -231,6 +231,12 @@ resource "helm_release" "argocd_apps" {
             server    = "https://kubernetes.default.svc"
             namespace = "argocd"
           }
+          syncPolicy = {
+            automated = {
+              prune    = true
+              selfHeal = true
+            }
+          }
         }
       ]
     })
