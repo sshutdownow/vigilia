@@ -274,7 +274,7 @@ resource "kubernetes_config_map_v1" "infra_info" {
     "values.yaml" = <<-EOT
       sausage-store:
         ingress:
-          gwin_ip: "${yandex_vpc_address.gwin_static_ip.external_ipv4_address.address}"
+          gwin_ip: "${yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address}"
           gwin_sg: "${yandex_vpc_security_group.gwin.id}"
           certificate_id: "${data.yandex_cm_certificate.le_cert.id}"
     EOT
