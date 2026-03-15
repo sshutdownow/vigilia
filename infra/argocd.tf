@@ -217,30 +217,19 @@ resource "helm_release" "argocd_apps" {
   version    = "2.0.4"
 
   values = [
-    yamlencode({
-      applications = [
-        {
-          name      = "root-management"
-          namespace = "argocd"
-          project   = "default"
-          source = {
-            repoURL        = "${var.gitlab_git_url}"
-            path           = "argocd-management"
-            targetRevision = "master"
-          }
-          destination = {
-            server    = "https://kubernetes.default.svc"
-            namespace = "argocd"
-          }
-          syncPolicy = {
-            automated = {
-              prune    = true
-              selfHeal = true
-            }
-          }
-        }
-      ]
-    })
+    <<-EOT
+    applications:
+      - name: "root-management"
+        namespace: "argocd"
+        project: "default"
+        source:
+          repoURL: "${var.gitlab_git_url}"
+          path: "argocd-management"
+          targetRevision: "master"
+        destination:
+          server: "https://kubernetes.default.svc"
+          namespace: "argocd"
+    EOT
   ]
   depends_on = [helm_release.argocd]
 }
