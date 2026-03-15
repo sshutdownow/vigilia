@@ -226,6 +226,7 @@ resource "kubernetes_role_binding_v1" "argocd_read_config_binding" {
 }
 
 resource "kubernetes_manifest" "sausage_store_app" {
+  count = 0
   manifest = {
     apiVersion = "argoproj.io/v1alpha1"
     kind       = "Application"
