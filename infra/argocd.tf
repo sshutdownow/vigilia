@@ -8,20 +8,6 @@ resource "kubernetes_namespace_v1" "sausage_store" {
   }
 }
 
-resource "kubernetes_config_map_v1" "infra_info" {
-  metadata {
-    name      = "infra-info"
-    namespace = "sausage-store" 
-  }
-  data = {
-    "gwin_ip"        = tostring(yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address)
-    "gwin_sg"        = tostring(yandex_vpc_security_group.gwin.id)
-    "certificate_id" = tostring(data.yandex_cm_certificate.le_cert.id)
-  }
-  depends_on = [kubernetes_namespace_v1.sausage_store]
-}
-
-
 # login/password for k8s to download images from GitLab 
 resource "kubernetes_secret_v1" "gitlab_pull_secret" {
   metadata {
