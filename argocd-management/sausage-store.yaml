@@ -10,6 +10,7 @@ spec:
     path: "deploy-yandex-cloud"
     targetRevision: "master"
     helm:
+      releaseName: sausage-store
       parameters:
         - name: "ingress.gwin_ip"
           valueFrom:
