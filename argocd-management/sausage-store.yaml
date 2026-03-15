@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: "https://cloud-services-engineer.gitlab.yandexcloud.net"
+    repoURL: "https://cloud-services-engineer.gitlab.yandexcloud.net/s2633401/vigilia.git"
     path: "deploy-yandex-cloud"
     targetRevision: "master"
     helm:
