@@ -171,24 +171,23 @@ resource "helm_release" "argocd_apps" {
 
   values = [
     <<-EOT
-    apiVersion: argoproj.io/v1alpha1
-    kind: Application
-    metadata:
-      name: root-management
-      namespace: argocd
-    spec:
-      project: default
-      source:
-        repoURL: "${var.gitlab_git_url}"
-        path: "argocd-management"
-        targetRevision: "master"
-      destination:
-        server: "https://kubernetes.default.svc"
-        namespace: "argocd"
-      syncPolicy:
-        automated:
-          prune: true
-          selfHeal: true
+    applications:
+      root-management:
+        namespace: argocd
+        finalizers:
+          - resources-finalizer.argocd.argoproj.io
+        project: default
+        source:
+          repoURL: "${var.gitlab_git_url}"
+          path: argocd-management
+          targetRevision: master
+        destination:
+          server: https://kubernetes.default.svc
+          namespace: argocd
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
     EOT
   ]
   depends_on = [helm_release.argocd]
