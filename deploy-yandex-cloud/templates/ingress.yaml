@@ -1,5 +1,10 @@
-{{- /* ConfigMap с параметрами в Terraform */ -}}
-{{- $infra := (lookup "v1" "ConfigMap" "sausage-store" "infra-info").data -}}
+{{- $infra_cm := (lookup "v1" "ConfigMap" "sausage-store" "infra-info") -}}
+{{- $infra := dict -}}
+{{- if $infra_cm -}}
+  {{- if $infra_cm.data -}}
+    {{- $infra = $infra_cm.data -}}
+  {{- end -}}
+{{- end -}}
 
 apiVersion: networking.k8s.io/v1
 kind: Ingress

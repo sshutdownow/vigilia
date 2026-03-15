@@ -227,3 +227,35 @@ resource "helm_release" "argocd_apps" {
 #     kubernetes_config_map_v1.infra_info
 #   ]
 # }
+
+resource "kubernetes_role_v1" "argocd_read_config" {
+  metadata {
+    name      = "argocd-read-config"
+    namespace = "sausage-store"
+  }
+
+  rule {
+    api_groups = [""]
+    resources  = ["configmaps"]
+    verbs      = ["get", "list", "watch"]
+  }
+}
+
+resource "kubernetes_role_binding_v1" "argocd_read_config_binding" {
+  metadata {
+    name      = "argocd-read-config-binding"
+    namespace = "sausage-store"
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = "argocd-read-config"
+  }
+
+  subject {
+    kind      = "ServiceAccount"
+    name      = "argocd-repo-server"
+    namespace = "argocd"
+  }
+}
