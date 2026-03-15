@@ -8,8 +8,9 @@ sausage-store:
       enabled: false
 
   frontend:
-    ingress: # disable ngnix
+    ingress:
       enabled: false
+      host: sausage-store.vigilia.site
     replicas: 1
     imagePullSecrets:
       - name: gitlab-pull-secret
