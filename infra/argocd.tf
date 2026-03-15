@@ -167,6 +167,14 @@ resource "helm_release" "argocd_apps" {
           repoURL: "${var.gitlab_git_url}"
           path: argocd-management
           targetRevision: master
+          helm:
+            parameters:
+              - name: "global.gwin_ip"
+                value: "${yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address}"
+              - name: "global.gwin_sg"
+                value: "${yandex_vpc_security_group.gwin.id}"
+              - name: "global.certificate_id"
+                value: "${data.yandex_cm_certificate.le_cert.id}"
         destination:
           server: https://kubernetes.default.svc
           namespace: argocd

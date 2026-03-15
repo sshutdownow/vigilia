@@ -14,7 +14,11 @@ spec:
       valueFiles:
         - "values.yaml"
       values: |
-
+        sausage-store:
+          ingress:
+            gwin_ip: {{ .Values.global.gwin_ip | quote }}
+            gwin_sg: {{ .Values.global.gwin_sg | quote }}
+            certificate_id: {{ .Values.global.certificate_id | quote }}
   destination:
     server: "https://kubernetes.default.svc"
     namespace: "sausage-store"
