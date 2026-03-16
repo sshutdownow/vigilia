@@ -24,8 +24,8 @@ spec:
               value: /logs/reports
             - name: logPath
               value: /logs
-            - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://postgresql:5432/sausage-store"
+#            - name: SPRING_DATASOURCE_URL
+#              value: "jdbc:postgresql://postgresql:5432/sausage-store"
             - name: REPORT_PATH
               value: "/logs/reports"
             - name: LOG_PATH
