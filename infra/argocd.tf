@@ -120,10 +120,10 @@ resource "helm_release" "argocd" {
 
   depends_on = [
     yandex_kubernetes_cluster.k8s-cluster,
+    helm_release.external_secrets,
+    helm_release.vpa,
     helm_release.gwin,
     yandex_vpc_security_group.gwin,
-    helm_release.vpa,
-    helm_release.external_secrets,
     kubernetes_secret_v1.gitlab_pull_secret
   ]
 }
@@ -193,6 +193,6 @@ resource "helm_release" "argocd_apps" {
 
   depends_on = [
     helm_release.argocd,
-     yandex_lockbox_secret_version.v1
+    yandex_lockbox_secret_version.v1
   ]
 }

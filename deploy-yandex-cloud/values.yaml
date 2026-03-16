@@ -1,4 +1,4 @@
-sausage_store:
+sausage-store:
   global:
     imagePullPolicy: Always
     # секрет для скачивания образов
