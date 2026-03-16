@@ -136,9 +136,9 @@ plan:
     TF_VAR_gitlab_username: ${ARGO_USER}
     TF_VAR_gitlab_token: ${ARGO_PASSWD}
     TF_VAR_argocd_admin_password: ${ARGO_ADM_PASSWD}    
-    TF_VAR_vm_user: "${SERVER_USER}"
-    TF_VAR_ssh_key: "${SERVER_SSH_PUBKEY}"
-    TF_VAR_ssh_private_key: "${SSH_PRIVATE_KEY}"
+    TF_VAR_spring_datasource_user: "${POSTGRES_USER}"
+    TF_VAR_spring_datasource_pass: "${POSTGRES_PASSWORD}"
+    TF_VAR_spring_mongo_uri: "${MONGODB_URI}"
   artifacts:
     reports: # GitLab displays the details of the Terraform plan within the merge request widget.
       terraform: ${TF_ROOT}/tfplan.json
@@ -166,9 +166,9 @@ apply:
     TF_VAR_gitlab_username: ${ARGO_USER}
     TF_VAR_gitlab_token: ${ARGO_PASSWD}
     TF_VAR_argocd_admin_password: ${ARGO_ADM_PASSWD}    
-    TF_VAR_vm_user: "${SERVER_USER}"
-    TF_VAR_ssh_key: "${SERVER_SSH_PUBKEY}"
-    TF_VAR_ssh_private_key: "${SSH_PRIVATE_KEY}"
+    TF_VAR_spring_datasource_user: "${POSTGRES_USER}"
+    TF_VAR_spring_datasource_pass: "${POSTGRES_PASSWORD}"
+    TF_VAR_spring_mongo_uri: "${MONGODB_URI}"
 
 # Удаление инфраструктуры Terraform за исключением LE-сертификата
 destroy:
@@ -217,8 +217,9 @@ terratest:
     TF_VAR_gitlab_username: ${ARGO_USER}
     TF_VAR_gitlab_token: ${ARGO_PASSWD}
     TF_VAR_argocd_admin_password: ${ARGO_ADM_PASSWD}    
-    TF_VAR_vm_user: "${SERVER_USER}"
-    TF_VAR_ssh_key: "${SERVER_SSH_PUBKEY}"
+    TF_VAR_spring_datasource_user: "${POSTGRES_USER}"
+    TF_VAR_spring_datasource_pass: "${POSTGRES_PASSWORD}"
+    TF_VAR_spring_mongo_uri: "${MONGODB_URI}"
 
 # Деплой ansible-playbook
 ansible-vmdevip:
