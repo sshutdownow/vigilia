@@ -15,6 +15,16 @@ spec:
         - "values.yaml"
       values: |
         sausage-store:
+          backend:
+            serviceAccountName: "sausage-backend-sa"
+            extraEnv:
+              - name: JAVA_TOOL_OPTIONS
+                value: "-Dspring.cloud.vault.enabled=false -Dspring.config.import=optional:vault://kv/sausage-store"
+              - name: REPORT_PATH
+                value: "/tmp"
+            envFrom:
+              - secretRef:
+                  name: "sausage-kv-secret"
           lockbox:
             secret_id: {{ .Values.global.lockbox_secret_id | quote }}
           ingress:
