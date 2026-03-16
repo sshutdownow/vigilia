@@ -16,6 +16,10 @@ spec:
       serviceAccountName: sausage-backend-sa
       containers:
         - name: backend
+          imagePullSecrets:
+            - name: gitlab-pull-secret
+          image: cloud-services-engineer.gitlab.yandexcloud.net:5050/s2633401/vigilia/sausage-frontend
+          tag: latest
           env:
             - name: SPRING_CLOUD_VAULT_ENABLED
               value: "false"
