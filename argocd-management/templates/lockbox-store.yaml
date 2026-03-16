@@ -6,6 +6,4 @@ metadata:
 spec:
   provider:
     yandexlockbox:
-      auth:
-        serviceAccountRef:
-          name: sausage-backend-sa
+      auth: {}
