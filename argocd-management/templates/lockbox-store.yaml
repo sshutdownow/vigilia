@@ -7,6 +7,5 @@ spec:
   provider:
     yandexlockbox:
       auth:
-        jwt:
-          serviceAccountRef:
-            name: sausage-backend-sa
+        serviceAccountRef:
+          name: sausage-backend-sa
