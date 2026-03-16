@@ -59,6 +59,10 @@ spec:
 {{- if .Values.extraEnv }}
 {{- toYaml .Values.extraEnv | nindent 12 }}
 {{- end }}
+{{- if .Values.envFrom }}
+          envFrom:
+{{- toYaml .Values.envFrom | nindent 12 }}
+{{- end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }} 
           ports:

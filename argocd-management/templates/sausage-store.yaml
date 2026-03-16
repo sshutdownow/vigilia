@@ -21,7 +21,11 @@ spec:
               - name: JAVA_TOOL_OPTIONS
                 value: "-Dspring.cloud.vault.enabled=false -Dspring.config.import=optional:vault://kv/sausage-store"
               - name: REPORT_PATH
-                value: "/tmp"
+                value: "/logs/reports"
+              - name: LOG_PATH
+                value: "/logs"
+              - name: SPRING_DATASOURCE_URL
+                value: "jdbc:postgresql://postgresql:5432/sausage-store"
             envFrom:
               - secretRef:
                   name: "sausage-kv-secret"
