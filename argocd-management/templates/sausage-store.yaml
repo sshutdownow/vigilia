@@ -14,7 +14,9 @@ spec:
       valueFiles:
         - "values.yaml"
       values: |
-        sausage-store:
+        sausage_store:
+          lockbox:
+            secret_id: {{ .Values.global.lockbox_secret_id | quote }}
           ingress:
             gwin_ip: {{ .Values.global.gwin_ip | quote }}
             gwin_sg: {{ .Values.global.gwin_sg | quote }}

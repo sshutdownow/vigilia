@@ -1,0 +1,12 @@
+apiVersion: external-secrets.io/v1beta1
+kind: SecretStore
+metadata:
+  name: yandex-lockbox
+  namespace: sausage-store
+spec:
+  provider:
+    yandexlockbox:
+      auth:
+        jwt:
+          serviceAccountRef:
+            name: sausage-backend-sa

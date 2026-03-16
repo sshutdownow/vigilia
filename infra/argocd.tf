@@ -170,6 +170,10 @@ resource "helm_release" "argocd_apps" {
           targetRevision: master
           helm:
             parameters:
+              - name: "global.sa_id"
+                value: "${yandex_iam_service_account.sausage_backend_sa.id}"
+              - name: "global.lockbox_secret_id"
+                value: "${yandex_lockbox_secret.sausage_store_secrets.id}"
               - name: "global.gwin_ip"
                 value: "${yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address}"
               - name: "global.gwin_sg"

@@ -1,4 +1,4 @@
-sausage-store:
+sausage_store:
   global:
     imagePullPolicy: Always
     # секрет для скачивания образов
@@ -6,6 +6,9 @@ sausage-store:
       - name: gitlab-pull-secret
     vault:
       enabled: false
+
+  lockbox:
+    secret_id: ""
 
   ingress:
     gwin_ip: ""
