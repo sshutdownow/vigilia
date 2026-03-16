@@ -1,9 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sausage-store-backend
+  namespace: sausage-store
 spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sausage-store-backend
   template:
+    metadata:
+      labels:
+        app: sausage-store-backend
     spec:
       serviceAccountName: sausage-backend-sa
       containers:
         - name: backend
+          image: "{{ .Values.sausage_store.backend.image }}"
           env:
             - name: SPRING_CLOUD_VAULT_ENABLED
               value: "false"
@@ -24,3 +37,5 @@ spec:
                 secretKeyRef:
                   name: sausage-kv-secret
                   key: SPRING_DATA_MONGODB_URI
+          ports:
+            - containerPort: 8080
