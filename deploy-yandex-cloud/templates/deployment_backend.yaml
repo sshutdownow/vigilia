@@ -40,6 +40,8 @@ spec:
                 secretKeyRef:
                   name: sausage-kv-secret
                   key: SPRING_DATA_MONGODB_URI
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Dspring.cloud.vault.enabled=false -Dspring.config.import="
             - name: SPRING_AUTOCONFIGURE_EXCLUDE
               value: "org.springframework.cloud.vault.config.VaultBootstrapConfiguration,org.springframework.cloud.vault.config.VaultAutoConfiguration"
             - name: SPRING_DATASOURCE_URL
