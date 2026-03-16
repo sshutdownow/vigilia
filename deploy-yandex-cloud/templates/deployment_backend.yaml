@@ -46,12 +46,6 @@ spec:
               value: "optional:vault://kv/sausage-store"
             - name: SPRING_CLOUD_VAULT_ENABLED
               value: "false"
-            - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://postgresql:5432/sausage-store"
-            - name: REPORT_PATH
-              value: "/tmp"
-            - name: LOG_PATH
-              value: "/tmp"
             - name: postgresUri
               value: jdbc:postgresql://postgresql:5432/sausage-store
             - name: reportPath
