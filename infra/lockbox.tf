@@ -26,10 +26,3 @@ resource "yandex_lockbox_secret_version" "v1" {
 resource "yandex_iam_service_account" "sausage_backend_sa" {
   name = "sausage-backend-sa"
 }
-
-# права на чтение содержимого секрета (PayloadViewer)
-resource "yandex_lockbox_secret_iam_binding" "viewer" {
-  secret_id = yandex_lockbox_secret.sausage_store_secrets.id
-  role      = "lockbox.payloadViewer"
-  members   = ["serviceAccount:${yandex_iam_service_account.sausage_backend_sa.id}"]
-}
