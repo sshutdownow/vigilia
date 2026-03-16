@@ -10,12 +10,16 @@ resource "helm_release" "external_secrets" {
 }
 
 # даём права SA бэкенда на чтение секретов Lockbox
-resource "yandex_lockbox_secret_iam_binding" "sausage_backend_viewer" {
-  secret_id = yandex_lockbox_secret.sausage_store_secrets.id
-  role      = "lockbox.payloadViewer"
-  members   = [
-    "serviceAccount:${yandex_iam_service_account.sausage_backend_sa.id}"
-  ]
+resource "yandex_resourcemanager_folder_iam_member" "sausage_backend_roles" {
+  for_each  = toset([
+    "lockbox.payloadViewer", 
+    "kms.viewer"
+  ])
+  
+  folder_id = var.folder_id
+  role      = each.value
+  member    = "serviceAccount:${yandex_iam_service_account.sausage_backend_sa.id}"
+
 }
 
 # даём права SA нодам k8s-кластера использовать SA бэкенда (impersonation)
