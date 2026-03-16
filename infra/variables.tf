@@ -100,6 +100,24 @@ variable "gitlab_image_url" {
   default = "cloud-services-engineer.gitlab.yandexcloud.net:5050/s2633401/vigilia"
 }
 
+variable "spring_datasource_user" {
+  type      = string
+  default   = null
+  sensitive = true
+}
+
+variable "spring_datasource_pass" {
+  type      = string
+  default   = null
+  sensitive = true
+}
+
+variable "spring_mongo_uri" {
+  type      = string
+  default   = null
+  sensitive = true
+}
+
 variable "vm_user" {
   description = "VM user"
   type        = string
