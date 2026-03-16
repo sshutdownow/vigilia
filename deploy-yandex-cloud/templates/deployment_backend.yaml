@@ -21,10 +21,6 @@ spec:
           image: cloud-services-engineer.gitlab.yandexcloud.net:5050/s2633401/vigilia/sausage-backend
           tag: latest
           env:
-            - name: SPRING_CLOUD_VAULT_ENABLED
-              value: "false"
-            - name: SPRING_CONFIG_IMPORT
-              value: "optional:"
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
