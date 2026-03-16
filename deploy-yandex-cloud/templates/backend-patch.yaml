@@ -14,6 +14,8 @@ spec:
               value: "-Dspring.cloud.vault.enabled=false -Dspring.config.import=optional:vault://kv/sausage-store"
             - name: SPRING_CLOUD_VAULT_ENABLED
               value: "false"
+            - name: SPRING_CLOUD_VAULT_HOST
+              value: ""
             - name: SPRING_CONFIG_IMPORT
               value: "optional:vault://kv/sausage-store"
             - name: postgresUri
