@@ -5,12 +5,12 @@ resource "yandex_resourcemanager_folder_iam_member" "k8s_roles" {
     "logging.writer",
     "ydb.editor",
     "storage.editor",
-    "lockbox.payloadViewer",
     "certificate-manager.certificates.downloader",
     "container-registry.images.puller",
     "container-registry.images.pusher",
     "alb.editor",
     "vpc.publicAdmin",
+    "lockbox.payloadViewer",
     "kms.keys.encrypterDecrypter"
   ])
   folder_id = var.folder_id
@@ -22,7 +22,8 @@ resource "yandex_resourcemanager_folder_iam_member" "k8s_node_roles" {
   for_each = toset([ 
     "container-registry.images.puller",
     "lockbox.payloadViewer",
-    "kms.viewer"
+    "kms.viewer",
+    "kms.keys.encrypterDecrypter"
   ])
   folder_id = var.folder_id
   role      = each.key
