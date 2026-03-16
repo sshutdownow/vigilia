@@ -49,6 +49,7 @@ sausage-store:
       reportPath: /logs/reports
       logPath: /logs
     extraEnv: []
+    envFrom: []
     resources:
       requests:
         memory: "256Mi"
