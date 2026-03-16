@@ -41,9 +41,11 @@ spec:
                   name: sausage-kv-secret
                   key: SPRING_DATA_MONGODB_URI
             - name: JAVA_TOOL_OPTIONS
-              value: "-Dspring.cloud.vault.enabled=false -Dspring.config.import="
-            - name: SPRING_AUTOCONFIGURE_EXCLUDE
-              value: "org.springframework.cloud.vault.config.VaultBootstrapConfiguration,org.springframework.cloud.vault.config.VaultAutoConfiguration"
+              value: "-Dspring.cloud.vault.enabled=false -Dspring.config.import=optional:vault://kv/sausage-store"
+            - name: SPRING_CONFIG_IMPORT
+              value: "optional:vault://kv/sausage-store"
+            - name: SPRING_CLOUD_VAULT_ENABLED
+              value: "false"
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:postgresql://postgresql:5432/sausage-store"
             - name: REPORT_PATH
