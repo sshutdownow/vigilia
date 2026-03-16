@@ -18,12 +18,12 @@ spec:
               value: ""
             - name: SPRING_CONFIG_IMPORT
               value: "optional:vault://kv/sausage-store"
-            # - name: postgresUri
-            #   value: jdbc:postgresql://postgresql:5432/sausage-store
-            # - name: reportPath
-            #   value: /logs/reports
-            # - name: logPath
-            #   value: /logs
+            - name: postgresUri
+              value: jdbc:postgresql://postgresql:5432/sausage-store
+            - name: reportPath
+              value: /logs/reports
+            - name: logPath
+              value: /logs
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:postgresql://postgresql:5432/sausage-store"
             - name: REPORT_PATH
