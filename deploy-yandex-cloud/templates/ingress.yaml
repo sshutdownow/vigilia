@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: sausage-store-yandex-ingress
+  name: sausage-store-frontend-ingress
   namespace: sausage-store
   annotations:
     "gwin.yandex.cloud/groupName": "ingress"
