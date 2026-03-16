@@ -40,6 +40,8 @@ spec:
                 secretKeyRef:
                   name: sausage-kv-secret
                   key: SPRING_DATA_MONGODB_URI
+            - name: SPRING_AUTOCONFIGURE_EXCLUDE
+              value: "org.springframework.cloud.vault.config.VaultBootstrapConfiguration,org.springframework.cloud.vault.config.VaultAutoConfiguration"
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:postgresql://postgresql:5432/sausage-store"
             - name: REPORT_PATH
