@@ -40,9 +40,12 @@ spec:
                 secretKeyRef:
                   name: sausage-kv-secret
                   key: SPRING_DATA_MONGODB_URI
-            - postgresUri: jdbc:postgresql://postgresql:5432/sausage-store
-            - reportPath: /logs/reports
-            - logPath: /logs
+            - name: postgresUri
+              value: jdbc:postgresql://postgresql:5432/sausage-store
+            - name: reportPath
+              value: /logs/reports
+            - name: logPath
+              value: /logs
           ports:
             - containerPort: 8080
           revisionHistoryLimit: 15
