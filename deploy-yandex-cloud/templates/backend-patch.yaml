@@ -1,16 +1,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sausage-store-backend 
-  namespace: sausage-store
+  name: {{ .Release.Name }}-{{ .Chart.Name }}
+  namespace: {{ .Release.Namespace }}
 spec:
   template:
     spec:
       serviceAccountName: sausage-backend-sa
       containers:
-        - name: backend
+        - name: {{ .Chart.Name }}
           env:
-            # Отключаем Vault
             - name: JAVA_TOOL_OPTIONS
               value: "-Dspring.cloud.vault.enabled=false -Dspring.config.import=optional:vault://kv/sausage-store"
             - name: SPRING_CLOUD_VAULT_ENABLED
