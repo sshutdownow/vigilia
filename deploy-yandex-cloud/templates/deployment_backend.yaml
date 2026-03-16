@@ -13,6 +13,10 @@ spec:
       labels:
         app: sausage-store-backend
     spec:
+      annotations:
+      path: /actuator/prometheus
+      port: "8080"
+      scrape: "true"
       serviceAccountName: sausage-backend-sa
       imagePullSecrets:
         - name: gitlab-pull-secret
@@ -36,8 +40,18 @@ spec:
                 secretKeyRef:
                   name: sausage-kv-secret
                   key: SPRING_DATA_MONGODB_URI
+            - postgresUri: jdbc:postgresql://postgresql:5432/sausage-store
+            - reportPath: /logs/reports
+            - logPath: /logs
           ports:
             - containerPort: 8080
+          revisionHistoryLimit: 15
+          replicas: 1
+          strategy:
+            type: RollingUpdate
+            rollingUpdate:
+              maxUnavailable: 50%
+              maxSurge: 20%
           resources:
             requests:
               memory: "256Mi"
