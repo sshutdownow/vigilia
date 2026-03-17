@@ -12,6 +12,7 @@ sausage-store:
     secret_id: ""
 
   ingress:
+    host: "sausage-store.vigilia.site"
     gwin_ip: ""
     gwin_sg: ""
     certificate_id: ""
