@@ -85,7 +85,7 @@ backend-report:
     type: Recreate
   env:
     port: 8080
-    db: mongodb://reports:reportspassword@mongodb:27017/sausage-store
+    db: "mongodb://reports:reportspassword@mongodb:27017/sausage-store"
   image: <your-dockerhub>/sausage-backend-report:latest
   resources:
     requests:
