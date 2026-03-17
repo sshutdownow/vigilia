@@ -6,7 +6,8 @@ sausage-store:
       - name: gitlab-pull-secret
     vault:
       enabled: false
-      host: ""
+      name: "sausage-kv-secret"
+      host: "localhost"
 
   lockbox:
     secret_id: ""
