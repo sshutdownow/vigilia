@@ -175,7 +175,6 @@ resource "kubernetes_namespace_v1" "sausage_store" {
   metadata {
     name = "sausage-store"
   }
-    depends_on = [helm_release.argocd]
 }
 
 # login/password for k8s to download images from GitLab 
