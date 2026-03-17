@@ -95,7 +95,6 @@ spec:
         - /bin/sh
         - -c
         - |
-          exit 0
           until mongosh --host mongodb --eval "print(\"waited for connection\")"; do
             sleep 2
           done
