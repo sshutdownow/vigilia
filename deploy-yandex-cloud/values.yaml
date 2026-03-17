@@ -42,4 +42,6 @@ sausage-store:
 
   infra:
     postgresql:
+      containerPort: 5432
     mongodb:
+      containerPort: 27017
