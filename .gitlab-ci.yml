@@ -128,6 +128,8 @@ plan:
     - terraform show -json ${PLAN} > tfplan.json
   rules:
     - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
+      changes:
+        - "infra/**/*"
       when: always
   variables:
     TF_LOG: DEBUG
@@ -157,6 +159,8 @@ apply:
     - terraform apply -auto-approve ${PLAN}
   rules:
     - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
+      changes:
+        - "infra/**/*"
       when: manual
     - when: never
   variables:
@@ -179,6 +183,8 @@ destroy:
     - terraform destroy -auto-approve
   rules:
     - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
+      changes:
+        - "infra/**/*"
       when: manual
     - when: never
   variables:
