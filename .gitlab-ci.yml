@@ -112,6 +112,8 @@ checkov:
       - ${TF_ROOT}/checkov_report/
   rules:
     - if: $OPERATION == "terraform"
+      changes:
+        - "infra/**/*"
       when: always
 
 # Terraform plan для инфраструктуры
