@@ -214,6 +214,8 @@ terratest:
     - apply
   rules:
     - if: $OPERATION == "terraform"
+      changes:
+        - "infra/**/*"
       when: on_success
   allow_failure: false
   variables:
