@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-backend-report
+spec:
+  template:
+    spec:
+      containers:
+        - name: backend-report
+          env:
+            - name: DB
+              valueFrom:
+                secretKeyRef:
+                  name: sausage-kv-secret
+                  key: SPRING_DATA_MONGODB_URI
