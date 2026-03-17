@@ -20,6 +20,6 @@ spec:
             pathType: {{ (index .Values "sausage-store").ingress.pathType | default "Prefix" }}
             backend:
               service:
-                name: sausage-store-frontend-service
+                name: {{ .Release.Name }}-frontend-service
                 port:
                   number: {{ (index .Values "sausage-store").frontend.service.port | default 80 }}
