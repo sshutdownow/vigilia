@@ -165,7 +165,7 @@ variable "cores" {
 
 variable "memory" {
   type    = string
-  default = "4"
+  default = "6"
 }
 
 variable "core_fraction" {
