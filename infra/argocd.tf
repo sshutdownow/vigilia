@@ -166,7 +166,7 @@ resource "helm_release" "argocd_apps" {
   ]
 
   depends_on = [
-    helm_release.argocd,
+    kubernetes_secret_v1.sausage_repo_gitlab,
     yandex_lockbox_secret_version.v1
   ]
 }
