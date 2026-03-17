@@ -6,6 +6,6 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - port: {{ .Values.service.port | default 8080 }}
-      protocol: TCP
-      targetPort: {{ .Values.service.port | default 8080 }}
+    - protocol: TCP
+      port: {{ (index .Values "sausage-store").frontend.service.port | default 80 }}
+      targetPort: {{ (index .Values "sausage-store").frontend.service.port | default 80 }}
