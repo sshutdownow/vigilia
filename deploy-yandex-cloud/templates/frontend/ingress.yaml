@@ -11,16 +11,16 @@ spec:
   ingressClassName: "gwin-default"
   tls:
     - hosts:
-        - {{ .Values.ingress.host }}
+        - {{ (index .Values "sausage-store").ingress.host | quote }}
       secretName: {{ printf "yc-certmgr-cert-id-%s" (index .Values "sausage-store" "ingress" "certificate_id") | quote }}
   rules:
-    - host: {{ .Values.ingress.host }}
+    - host: {{ (index .Values "sausage-store").ingress.host | quote }}
       http:
         paths:
-          - path: {{ .Values.ingress.path }}
-            pathType: {{ .Values.ingress.pathType }}
+          - path: {{ (index .Values "sausage-store").ingress.path | default "/" }}
+            pathType: {{ (index .Values "sausage-store").ingress.pathType | default "Prefix" }}
             backend:
               service:
                 name: sausage-store-frontend-service
                 port:
-                  number: {{ .Values.service.port }}
+                  number: {{ (index .Values "sausage-store").frontend.service.port | default 80 }}
