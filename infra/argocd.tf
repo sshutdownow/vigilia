@@ -98,8 +98,7 @@ resource "helm_release" "argocd" {
     helm_release.external_secrets,
     helm_release.vpa,
     helm_release.gwin,
-    yandex_vpc_security_group.gwin,
-    kubernetes_secret_v1.gitlab_pull_secret
+    yandex_vpc_security_group.gwin
   ]
 }
 
