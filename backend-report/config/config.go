@@ -30,6 +30,7 @@ func NewConfig(files ...string) *Configuration {
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 	}
+	log.Printf("Config: Port=%s, DB_URL=%s\n", cfg.Port, cfg.DataBaseConnectionURL)
 
 	return &cfg
 }
