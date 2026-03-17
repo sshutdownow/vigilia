@@ -1,8 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: sausage-store-frontend-ingress
-  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-frontend-ingress
   annotations:
     "gwin.yandex.cloud/groupName": "ingress"
     "gwin.yandex.cloud/externalIPv4Address": {{ index .Values "sausage-store" "ingress" "gwin_ip" | default "auto" | quote }}
