@@ -2,9 +2,9 @@ apiVersion: v2
 name: deploy-otel-yandex-cloud
 version: 0.1.0
 dependencies:
-  - name: opentelemetry-collector
-    version: 0.107.2
-    repository: https://open-telemetry.github.io/opentelemetry-helm-charts
   - name: opentelemetry-operator
     version: 0.107.2
+    repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+  - name: opentelemetry-collector
+    version: 0.147.1
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts

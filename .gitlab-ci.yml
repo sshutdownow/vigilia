@@ -319,7 +319,7 @@ package-helm-chart:
 
 
 otel-plan:
-  stage: otel
+  stage: plan
   image: hashicorp/terraform:latest
   script:
     - terraform init
@@ -335,11 +335,11 @@ otel-plan:
       - ${TF_ROOT}/otel.tfplan
     expire_in: 1 yrs
   rules:
-    - if: $OPERATION == "setup_otel"
+    - if: $OPERATION == "otel"
       when: manual
 
 otel-apply:
-  stage: otel
+  stage: apply
   needs: ["otel-plan"]
   image: hashicorp/terraform:latest
   script:

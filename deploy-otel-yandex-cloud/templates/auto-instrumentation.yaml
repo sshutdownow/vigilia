@@ -5,7 +5,7 @@ metadata:
   namespace: sausage-store
 spec:
   exporter:
-    endpoint: http://otel-collector-opentelemetry-collector.otel.svc.cluster.local:4317
+    endpoint: http://otel-collector.otel.svc.cluster.local:4317
   propagators:
     - tracecontext
     - baggage

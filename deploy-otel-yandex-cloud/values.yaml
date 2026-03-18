@@ -1,0 +1,35 @@
+opentelemetry-collector:
+  mode: deployment
+  fullnameOverride: "otel-collector"
+  
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: "0.0.0.0:4317"
+          http:
+            endpoint: "0.0.0.0:4318"
+
+    exporters:
+      otlp:
+        endpoint: "ingest.monium.yandex.cloud:443"
+        headers:
+          # Эти переменные прилетят из global values через ArgoCD
+          "x-monium-project": "folder__{{ .Values.global.folder_id }}"
+          "Authorization": "Bearer {{ .Values.global.monium_api_key }}"
+      logging:
+        verbosity: normal
+
+    service:
+      pipelines:
+        metrics:
+          receivers: [otlp]
+          exporters: [otlp, logging]
+        traces:
+          receivers: [otlp]
+          exporters: [otlp, logging]
+
+global:
+  folder_id: ""
+  monium_api_key: ""
