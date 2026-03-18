@@ -1,19 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: otel-operator
+  name: otel-stack
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
   source:
-    chart: opentelemetry-operator
-    repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
-    targetRevision: 0.107.2
+    repoURL: {{ .Values.global.repo_url | quote }}
+    path: "deploy-otel-yandex-cloud"
+    targetRevision: "master"
   destination:
     server: https://kubernetes.default.svc
-    # принцип минимальных привилегий
     namespace: otel
   syncPolicy:
     automated:

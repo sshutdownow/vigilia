@@ -337,6 +337,10 @@ otel-plan:
   rules:
     - if: $OPERATION == "otel"
       when: manual
+  variables:
+    TF_LOG: INFO
+    TF_VAR_cloud_id: ${CLOUD_ID}
+    TF_VAR_folder_id: ${FOLDER_ID}
 
 otel-apply:
   stage: apply
@@ -353,6 +357,10 @@ otel-apply:
   rules:
     - if: $OPERATION == "otel"
       when: manual
+  variables:
+    TF_LOG: INFO
+    TF_VAR_cloud_id: ${CLOUD_ID}
+    TF_VAR_folder_id: ${FOLDER_ID}
 
 otel-activate:
   stage: otel
@@ -360,10 +368,7 @@ otel-activate:
   needs: ["otel-apply"]
   script:
     - argocd login $ARGO_SERVER --username "${ARGO_USER:-admin}" --password "${ARGO_ADM_PASSWD}" --grpc-web
-    - argocd app sync otel-operator
-    - argocd app wait otel-operator
-    - argocd app set otel-collector -p global.monium_api_key=$MONIUM_API_KEY
-    - argocd app sync otel-collector
+    - argocd app sync otel-stack -p global.monium_api_key=$MONIUM_API_KEY
     - argocd app set sausage-store -p sausage-store.backend.otel_enabled=true
     - argocd app sync sausage-store
   rules:
