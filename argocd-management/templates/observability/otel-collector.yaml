@@ -25,5 +25,6 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: sausage-store
-  syncPolicy: {}
- 
+  syncPolicy:
+    automated:
+      enabled: false

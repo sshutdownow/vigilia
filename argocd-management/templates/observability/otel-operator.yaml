@@ -13,4 +13,7 @@ spec:
     server: https://kubernetes.default.svc
     # принцип минимальных привилегий
     namespace: sausage-store
-  syncPolicy: {}
+  syncPolicy:
+    automated:
+      enabled: false
+
