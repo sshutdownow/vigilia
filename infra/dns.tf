@@ -8,8 +8,8 @@ data "yandex_cm_certificate" "le_cert" {
   name = "sausage-store-le"
 }
 
-resource "yandex_dns_recordset" "observability_records" {
-  for_each = toset(["grafana", "jaeger", "pyroscope", "k8s"])
+resource "yandex_dns_recordset" "k8s_dns_record" {
+  for_each = toset(["k8s"])
   zone_id  = data.yandex_dns_zone.sausage_store_public_zone.id
   name     = "${each.value}.${var.domain_name}."
   type     = "A"
@@ -21,6 +21,9 @@ resource "yandex_dns_recordset" "observability_records" {
 # записи, привязанные к Gwin IP
 resource "yandex_dns_recordset" "public_dns_records" {
   for_each = toset([
+    "grafana.${var.domain_name}.",
+    "jaeger.${var.domain_name}.",
+    "pyroscope.${var.domain_name}.",
     "argocd.${var.domain_name}.",
     "sausage-store.${var.domain_name}.",
     "${var.domain_name}."

@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: otel-collector
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: opentelemetry-collector
+    repoURL: https://open-telemetry.github.io
+    targetRevision: 0.107.0
+    helm:
+      values: |
+        mode: deployment
+        config:
+          exporters:
+            otlp:
+              endpoint: "ingest.monium.yandex.cloud:443"
+              headers:
+                "x-monium-project": "folder__{{ .Values.global.folder_id }}"
+                "Authorization": "Bearer {{ .Values.global.monium_api_key }}"
+          service:
+            pipelines:
+              metrics: { receivers: [otlp], exporters: [otlp] }
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: sausage-store
+  syncPolicy: {}
+ 

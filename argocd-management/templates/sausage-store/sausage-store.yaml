@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: "https://cloud-services-engineer.gitlab.yandexcloud.net/s2633401/vigilia.git"
+    repoURL: {{ .Values.global.repo_url | quote }}
     path: "deploy-yandex-cloud"
     targetRevision: "master"
     helm:
@@ -24,6 +24,7 @@ spec:
               - secretRef:
                   name: "sausage-kv-secret"
           lockbox:
+            sa_id: {{ .Values.global.sa_id | quote }}
             secret_id: {{ .Values.global.lockbox_secret_id | quote }}
           ingress:
             gwin_ip: {{ .Values.global.gwin_ip | quote }}

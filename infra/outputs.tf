@@ -11,6 +11,11 @@ output "k8s_cluster_id" {
 }
 
 output "cert-id" {
-  description = "Certificate ID"
+  description = "LE certificate ID"
   value       = data.yandex_cm_certificate.le_cert.id
+}
+
+output "argocd_domain" {
+  description = "ArgoCD Web"
+  value = "argocd.${var.domain_name}"
 }

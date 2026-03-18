@@ -145,6 +145,10 @@ resource "helm_release" "argocd_apps" {
           targetRevision: master
           helm:
             parameters:
+              - name: "global.folder_id"
+                value: "${var.folder_id}"
+              - name: "global.repo_url"
+                value: "${var.gitlab_git_url}"
               - name: "global.sa_id"
                 value: "${yandex_iam_service_account.sausage_backend_sa.id}"
               - name: "global.lockbox_secret_id"

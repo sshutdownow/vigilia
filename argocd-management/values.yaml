@@ -1,0 +1,10 @@
+global:
+  folder_id: ""
+  monium_api_key: ""
+  repo_url: ""
+
+  sa_id: ""
+  lockbox_secret_id: ""
+  gwin_ip: ""
+  gwin_sg: ""
+  certificate_id: ""

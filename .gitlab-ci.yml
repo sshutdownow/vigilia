@@ -7,6 +7,7 @@ stages:
   - ansible_deploy
   - build
   - package
+  - otel 
 
 variables:
   ANSIBLE_ROOT: ${CI_PROJECT_DIR}/ansible
@@ -314,3 +315,34 @@ package-helm-chart:
       when: manual
   tags:
     - docker
+
+
+generate-monium-key:
+  stage: otel
+  image: hashicorp/terraform:latest
+  script:
+    - terraform init
+    - terraform apply -var="enable_monium_key=true" -target=yandex_iam_service_account_api_key.monium_key -auto-approve
+    - echo "MONIUM_API_KEY=$(terraform output -raw monium_api_key)" >> ${CI_PROJECT_DIR}/monium.env
+    - echo "ARGO_SERVER=$(terraform output -raw argocd_domain)" >> ${CI_PROJECT_DIR}/monium.env
+  artifacts:
+    reports:
+      dotenv: monium.env
+  rules:
+    - if: $OPERATION == "otel"
+      when: manual
+
+activate-otel-monitoring:
+  stage: otel
+  image: argoproj/argocd:v2.8.4
+  needs: ["generate-monium-key"]
+  script:
+    - argocd login $ARGO_SERVER --username "${ARGO_USER:-admin}" --password "${ARGO_ADM_PASSWD}" --grpc-web
+    - argocd app set otel-collector -p global.monium_api_key=$MONIUM_API_KEY
+    - argocd app sync otel-collector
+    - argocd app set sausage-store -p sausage-store.backend.otel_enabled=true
+    - argocd app sync sausage-store
+  rules:
+    - if: $OPERATION == "setup_otel"
+      when: on_success
+ 
