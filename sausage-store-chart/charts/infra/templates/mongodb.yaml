@@ -34,7 +34,7 @@ spec:
         - name: mongodb-data
           mountPath: /data/db
         - name: {{ .Release.Name }}-{{ .Chart.Name }}-init
-          mountPath: /docker-entrypoint-initdb.d/mongo-init.js
+          mountPath: /docker-entrypoint-initdb.d/99-mongo-init.js
           subPath: mongo-init.js
           readOnly: true
       volumes:
@@ -132,15 +132,16 @@ data:
 # https://stackoverflow.com/questions/42912755/how-to-create-a-db-for-mongodb-container-on-start-up
 # https://github.com/docker-library/mongo/issues/257
   mongo-init.js: |
-    # db.createUser(
-    #     {
-    #         user: process.env.MONGO_REPORTS_NAME,
-    #         pwd: process.env.MONGO_REPORTS_PASSWORD,
-    #         roles: [
-    #             {
-    #                 role: "readWrite",
-    #                 db: process.env.MONGO_REPORTS_DATABASE
-    #             }
-    #         ]
-    #     }
-    # );
+    db = db.getSiblingDB('process.env.MONGO_REPORTS_DATABASE');
+    db.createUser(
+        {
+            user: 'process.env.MONGO_REPORTS_NAME',
+            pwd: 'process.env.MONGO_REPORTS_PASSWORD',
+            roles: [
+                {
+                    role: "readWrite",
+                    db: 'process.env.MONGO_REPORTS_DATABASE'
+                }
+            ]
+        }
+    );
