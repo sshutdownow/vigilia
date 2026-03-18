@@ -46,6 +46,7 @@ resource "helm_release" "argocd" {
               "gwin.yandex.cloud/externalIPv4Address" = yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address
               "gwin.yandex.cloud/securityGroups"      = yandex_vpc_security_group.gwin.id
               "gwin.yandex.cloud/logs.logGroupId"     = yandex_logging_group.log_group_main.id
+              "gwin.yandex.cloud/rules.backends.http.useHTTP2" = "true"
             }
           }
           spec = {
