@@ -23,6 +23,7 @@ variables:
       - "terraform"
       - "ansible"
       - "k8s"
+      - "setup_otel"
 
 before_script:
   - cd ${TF_ROOT}
