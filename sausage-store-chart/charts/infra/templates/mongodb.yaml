@@ -132,16 +132,16 @@ data:
 # https://stackoverflow.com/questions/42912755/how-to-create-a-db-for-mongodb-container-on-start-up
 # https://github.com/docker-library/mongo/issues/257
   mongo-init.js: |
-    db = db.getSiblingDB('process.env.MONGO_REPORTS_DATABASE');
-    db.createUser(
-        {
-            user: 'process.env.MONGO_REPORTS_NAME',
-            pwd: 'process.env.MONGO_REPORTS_PASSWORD',
-            roles: [
-                {
-                    role: "readWrite",
-                    db: 'process.env.MONGO_REPORTS_DATABASE'
-                }
-            ]
-        }
-    );
+    # db = db.getSiblingDB('process.env.MONGO_REPORTS_DATABASE');
+    # db.createUser(
+    #     {
+    #         user: 'process.env.MONGO_REPORTS_NAME',
+    #         pwd: 'process.env.MONGO_REPORTS_PASSWORD',
+    #         roles: [
+    #             {
+    #                 role: 'readWrite',
+    #                 db: 'process.env.MONGO_REPORTS_DATABASE'
+    #             }
+    #         ]
+    #     }
+    # );
