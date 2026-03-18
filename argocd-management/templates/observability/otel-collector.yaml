@@ -6,25 +6,23 @@ metadata:
 spec:
   project: default
   source:
-    chart: opentelemetry-collector
-    repoURL: https://open-telemetry.github.io
-    targetRevision: 0.107.0
+    repoURL: {{ .Values.global.repo_url | quote }}
+    path: "deploy-otel-yandex-cloud"
+    targetRevision: "master"
     helm:
       values: |
-        mode: deployment
-        config:
-          exporters:
-            otlp:
-              endpoint: "ingest.monium.yandex.cloud:443"
-              headers:
-                "x-monium-project": "folder__{{ .Values.global.folder_id }}"
-                "Authorization": "Bearer {{ .Values.global.monium_api_key }}"
-          service:
-            pipelines:
-              metrics: { receivers: [otlp], exporters: [otlp] }
+        opentelemetry-collector:
+          mode: deployment
+          config:
+            exporters:
+              otlp:
+                endpoint: "ingest.monium.yandex.cloud:443"
+                headers:
+                  "x-monium-project": "folder__{{ .Values.global.folder_id }}"
+                  "Authorization": "Bearer {{ .Values.global.monium_api_key }}"
   destination:
-    server: https://kubernetes.default.svc
-    namespace: sausage-store
+    server: "https://kubernetes.default.svc"
+    namespace: "otel"
   syncPolicy:
     automated:
       enabled: false

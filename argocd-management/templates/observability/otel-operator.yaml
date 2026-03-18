@@ -7,13 +7,14 @@ spec:
   project: default
   source:
     chart: opentelemetry-operator
-    repoURL: https://open-telemetry.github.io
-    targetRevision: 0.107.0
+    repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
+    targetRevision: 0.107.2
   destination:
     server: https://kubernetes.default.svc
     # принцип минимальных привилегий
-    namespace: sausage-store
+    namespace: otel
   syncPolicy:
     automated:
       enabled: false
-
+    syncOptions:
+      - CreateNamespace=true
