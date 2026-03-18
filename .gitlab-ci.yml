@@ -344,6 +344,6 @@ activate-otel-monitoring:
     - argocd app set sausage-store -p sausage-store.backend.otel_enabled=true
     - argocd app sync sausage-store
   rules:
-    - if: $OPERATION == "setup_otel"
+    - if: $OPERATION == "otel"
       when: on_success
  
