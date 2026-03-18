@@ -138,7 +138,7 @@ data:
     mongosh <<EOF
     db = db.getSiblingDB('$MONGO_REPORTS_DATABASE')
     db.createUser({
-      user: '$MONGO_REPORTS_NAME',
+      user: '$MONGO_REPORTS_USERNAME',
       pwd: '$MONGO_REPORTS_PASSWORD',
       roles: [{ role: 'readWrite', db: '$MONGO_REPORTS_DATABASE' }]
     })
