@@ -365,11 +365,20 @@ otel-apply:
 otel-activate:
   stage: otel
   image: argoproj/argocd:v2.8.4
-  needs: ["otel-apply"]
+  needs:
+    - job: "otel-apply"
+      artifacts: true
   script:
     - argocd login $ARGO_SERVER --username "${ARGO_USER:-admin}" --password "${ARGO_ADM_PASSWD}" --grpc-web
-    - argocd app sync otel-stack -p global.monium_api_key=$MONIUM_API_KEY
-    - argocd app set sausage-store -p sausage-store.backend.otel_enabled=true
+    - >
+      argocd app set otel-stack 
+      -p global.monium_api_key=$MONIUM_API_KEY 
+      -p global.folder_id=$FOLDER_ID
+    - argocd app sync otel-stack
+    - >
+      argocd app set sausage-store 
+      -p sausage-store.backend.otel_enabled=true 
+      -p global.folder_id=$FOLDER_ID
     - argocd app sync sausage-store
   rules:
     - if: $OPERATION == "otel"
