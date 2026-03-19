@@ -2,7 +2,7 @@ resource "helm_release" "cert_manager" {
   name             = "cert-manager"
   repository       = "https://charts.jetstack.io"
   chart            = "cert-manager"
-  version          = "v1.14.4"
+  version          = "v1.20.0"
   namespace        = "cert-manager"
   create_namespace = true
 
@@ -10,7 +10,7 @@ resource "helm_release" "cert_manager" {
     name  = "installCRDs"
     value = "true"
   }]
-  
+
   cleanup_on_fail = true
   force_update    = true
   recreate_pods   = true
