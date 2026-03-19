@@ -13,6 +13,8 @@ spec:
     attributes:
       - key: "service.name"
         value: "sausage-store"
+      - key: "deployment.environment"
+        value: "production"
       - key: "project"
         value: "folder__{{ .Values.global.folder_id }}"
   
