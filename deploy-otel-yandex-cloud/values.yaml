@@ -23,13 +23,24 @@ opentelemetry-kube-stack:
             http:
               endpoint: "0.0.0.0:4318"
 
+
+      processors:
+        # Передает кумулятивные монотонные суммы как дельты, которые в Monium дифференцируются и пишутся с типом RATE. Требует дистрибутив otel-collector-contrib
+        # cumulativetodelta:
+
+        # Memory Limiter - защита от Out-of-Memory, рекомендуется в production для стабильности
+        memory_limiter:
+          check_interval: 1s
+          limit_mib: 512        # Жесткий лимит памяти
+          spike_limit_mib: 128  # Запас для всплесков
+
       exporters:
         otlp_grpc/monium:
           endpoint: "ingest.monium.yandex.cloud:443"
           compression: zstd
           headers:
             "x-monium-project": "folder__{{ .Values.global.folder_id }}"
-            "Authorization": "Bearer {{ .Values.global.monium_api_key }}"
+            "Authorization": "Api-Key {{ .Values.global.monium_api_key }}"
           sending_queue:
             enabled: true
         
@@ -47,6 +58,24 @@ opentelemetry-kube-stack:
           logs:
             receivers: [otlp]
             exporters: [otlp_grpc/monium, logging]
+
+        # Телеметрия самого OTel Collector
+        telemetry:
+          logs:
+            level: info  # debug | info | warn | error    
+          metrics:
+            level: detailed  # none | basic | normal | detailed
+            
+            # Отправка телеметрии самого OTel Collector
+            readers:
+              - periodic:
+                  interval: 60000
+                  exporter:
+                    otlp:
+                      protocol: http/protobuf
+                      endpoint: http://${env:MY_POD_IP}:4318
+
+
 
 global:
   folder_id: ""
