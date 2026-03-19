@@ -1,17 +1,18 @@
 opentelemetry-kube-stack:
-  operator:
+  opentelemetry-operator:
     enabled: true
     admissionWebhooks:
       certManager:
         enabled: true
 
-  collector:
+  opentelemetry-collector:
     enabled: true
+    mode: deployment
+#    fullnameOverride: "otel-collector"
+    
     image:
       repository: "otel/opentelemetry-collector-k8s"
 #      tag: "0.110.0"
-
-    mode: deployment
 
     config:
       receivers:
@@ -22,18 +23,19 @@ opentelemetry-kube-stack:
             http:
               endpoint: "0.0.0.0:4318"
 
-
       processors:
-        # Передает кумулятивные монотонные суммы как дельты, которые в Monium дифференцируются и пишутся с типом RATE. Требует дистрибутив otel-collector-contrib
-        # cumulativetodelta:
-
-        # Memory Limiter - защита от Out-of-Memory, рекомендуется в production для стабильности
         memory_limiter:
           check_interval: 1s
-          limit_mib: 512        # Жесткий лимит памяти
-          spike_limit_mib: 128  # Запас для всплесков
+          limit_mib: 512
+          spike_limit_mib: 128
+        batch:
+          send_batch_size: 1000
+          timeout: 10s
 
       exporters:
+        debug:
+          verbosity: detailed
+        
         otlp_grpc/monium:
           endpoint: "ingest.monium.yandex.cloud:443"
           compression: zstd
@@ -43,38 +45,33 @@ opentelemetry-kube-stack:
           sending_queue:
             enabled: true
 
-        logging:
-          verbosity: normal
-
       service:
         pipelines:
           metrics:
             receivers: [otlp]
-            exporters: [otlp_grpc/monium, logging]
+            processors: [memory_limiter, batch]
+            exporters: [otlp_grpc/monium, debug]
           traces:
             receivers: [otlp]
-            exporters: [otlp_grpc/monium, logging]
+            processors: [memory_limiter, batch]
+            exporters: [otlp_grpc/monium, debug]
           logs:
             receivers: [otlp]
-            exporters: [otlp_grpc/monium, logging]
+            processors: [memory_limiter, batch]
+            exporters: [otlp_grpc/monium, debug]
 
-        # Телеметрия самого OTel Collector
         telemetry:
-          logs:
-            level: info  # debug | info | warn | error    
           metrics:
-            level: detailed  # none | basic | normal | detailed
-
-            # Отправка телеметрии самого OTel Collector
+            level: detailed
             readers:
               - periodic:
                   interval: 60000
                   exporter:
                     otlp:
                       protocol: http/protobuf
-                      endpoint: http://${env:MY_POD_IP}:4317
+                      endpoint: http://localhost:4318
 
 global:
   folder_id: ""
   monium_api_key: ""
-  otel_enabled: ""
+  otel_enabled: "false"
