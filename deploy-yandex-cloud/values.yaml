@@ -7,7 +7,7 @@ sausage-store:
     vault:
       enabled: false
       host: ""
-    otel_enabled: "false"
+    otel_enabled: ""
 
   lockbox:
     secret_id: ""
