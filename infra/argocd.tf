@@ -189,6 +189,12 @@ resource "helm_release" "argocd_apps" {
 #   metadata {
 #     name = "sausage-store"
 #   }
+#   lifecycle {
+#     ignore_changes = [
+#       metadata[0].annotations,
+#       metadata[0].labels,
+#     ]
+#   }
 # }
 
 # # login/password for k8s to download images from GitLab 
@@ -202,7 +208,7 @@ resource "helm_release" "argocd_apps" {
 #   data = {
 #     ".dockerconfigjson" = jsonencode({
 #       auths = {
-#         (replace(var.gitlab_image_url, "/^https?:\\/\\/|(\\/.*)$/", "")) = {
+#         (${local.gitlab_registry}) = {
 #           auth = base64encode("${var.gitlab_username}:${var.gitlab_token}")
 #         }
 #       }
