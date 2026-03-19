@@ -1,17 +1,17 @@
 opentelemetry-kube-stack:
-  opentelemetry-operator:
+  operator:
     enabled: true
     admissionWebhooks:
       certManager:
         enabled: true
 
-  opentelemetry-collector:
+  collector:
     enabled: true
     fullnameOverride: "otel-collector" # Короткое DNS имя
     image:
       repository: "otel/opentelemetry-collector-k8s"
 #      tag: "0.110.0"
-    
+
     mode: deployment
 
     config:
@@ -43,7 +43,7 @@ opentelemetry-kube-stack:
             "Authorization": "Api-Key {{ .Values.global.monium_api_key }}"
           sending_queue:
             enabled: true
-        
+
         logging:
           verbosity: normal
 
@@ -65,7 +65,7 @@ opentelemetry-kube-stack:
             level: info  # debug | info | warn | error    
           metrics:
             level: detailed  # none | basic | normal | detailed
-            
+
             # Отправка телеметрии самого OTel Collector
             readers:
               - periodic:
@@ -73,9 +73,7 @@ opentelemetry-kube-stack:
                   exporter:
                     otlp:
                       protocol: http/protobuf
-                      endpoint: http://${env:MY_POD_IP}:4318
-
-
+                      endpoint: http://${env:MY_POD_IP}:4317
 
 global:
   folder_id: ""
