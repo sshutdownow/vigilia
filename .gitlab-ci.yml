@@ -374,12 +374,15 @@ otel-activate:
       argocd app set otel-stack 
       -p global.monium_api_key=$MONIUM_API_KEY 
       -p global.folder_id=$FOLDER_ID 
-    - argocd app sync otel-stack --force --replace --prune
+    - >
+      argocd app sync otel-stack
+      --sync-policy automated
+      --auto-prune
+      --self-heal
     - >
       argocd app set sausage-store 
       -p sausage-store.backend.otel_enabled=true 
       -p global.folder_id=$FOLDER_ID
-    - argocd app sync sausage-store --force --replace --prune
   rules:
     - if: $OPERATION == "otel"
       when: on_success
