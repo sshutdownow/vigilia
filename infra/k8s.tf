@@ -199,7 +199,8 @@ resource "yandex_kubernetes_cluster" "k8s-cluster" {
   
   depends_on = [
     yandex_resourcemanager_folder_iam_member.k8s_roles,
-    yandex_resourcemanager_folder_iam_member.k8s_node_roles
+    yandex_resourcemanager_folder_iam_member.k8s_node_roles,
+    yandex_vpc_security_group.gwin
   ]
 }
 
