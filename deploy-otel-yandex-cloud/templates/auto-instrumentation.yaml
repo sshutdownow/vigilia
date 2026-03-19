@@ -5,7 +5,7 @@ metadata:
   namespace: sausage-store
 spec:
   exporter:
-    endpoint: http://otel-collector.otel.svc.cluster.local:4317
+    endpoint: endpoint: http://otel-stack-daemon-collector.otel.svc.cluster.local:4317
   env:
     - name: OTEL_EXPORTER_OTLP_PROTOCOL
       value: "grpc"

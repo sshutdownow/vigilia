@@ -7,7 +7,6 @@ opentelemetry-kube-stack:
 
   collector:
     enabled: true
-    fullnameOverride: "otel-collector" # Короткое DNS имя
     image:
       repository: "otel/opentelemetry-collector-k8s"
 #      tag: "0.110.0"
