@@ -80,4 +80,4 @@ opentelemetry-kube-stack:
 global:
   folder_id: ""
   monium_api_key: ""
-  otel_enabled: false
+  otel_enabled: ""
