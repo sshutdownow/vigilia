@@ -210,8 +210,10 @@ resource "yandex_kubernetes_node_group" "k8s-node-group" {
   version     = local.k8s_version
 
   scale_policy {
-    fixed_scale {
-      size = 1 # Number of hosts
+    auto_scale {
+      initial = 1
+      min     = 1
+      max     = 3 # Number of hosts
     }
   }
 

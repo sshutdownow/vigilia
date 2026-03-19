@@ -160,12 +160,12 @@ variable "disk_size" {
 
 variable "cores" {
   type    = string
-  default = "2"
+  default = "4"
 }
 
 variable "memory" {
   type    = string
-  default = "6"
+  default = "8"
 }
 
 variable "core_fraction" {
