@@ -27,6 +27,14 @@ sausage-store:
     tag: latest
     service:
       type: NodePort
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "256Mi"
+        cpu: "1"
+
 
   backend:
     imagePullSecrets:
@@ -35,6 +43,13 @@ sausage-store:
     tag: latest
     extraEnv: []
     envFrom: []
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "100m"
+      limits:
+        memory: "1000Mi"
+        cpu: "1"
 
   backend-report:
     imagePullSecrets:
