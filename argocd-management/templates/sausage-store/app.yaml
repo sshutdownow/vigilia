@@ -35,4 +35,4 @@ spec:
     namespace: "sausage-store"
   syncPolicy:
     automated: { prune: true, selfHeal: true }
-    syncOptions: ["CreateNamespace=true"]
+    syncOptions: ["CreateNamespace=false"]
