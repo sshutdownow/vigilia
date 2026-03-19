@@ -2,7 +2,8 @@ global:
   folder_id: ""
   monium_api_key: ""
   repo_url: ""
-
+  gitlab_user: ""
+  gitlab_token: ""
   sa_id: ""
   lockbox_secret_id: ""
   gwin_ip: ""
