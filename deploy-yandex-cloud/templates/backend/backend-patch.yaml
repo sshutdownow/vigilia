@@ -14,6 +14,6 @@ metadata:
   name: sausage-store-backend
   namespace: sausage-store
   annotations:
-    {{- if eq (index .Values.global "otel_enabled" | toString) "true" }}
+{{- if and .Values.global (eq (index .Values.global "otel_enabled" | toString) "true") }}
     instrumentation.opentelemetry.io/inject-java: "true"
-    {{- end }}
+{{- end }}

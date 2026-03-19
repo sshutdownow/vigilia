@@ -1,5 +1,5 @@
 metadata:
   annotations:
-    {{- if eq (index .Values.global "otel_enabled" | toString) "true" }}
+{{- if and .Values.global (eq (index .Values.global "otel_enabled" | toString) "true") }}
     instrumentation.opentelemetry.io/inject-sdk: "true"
-    {{- end }}
+{{- end }}
