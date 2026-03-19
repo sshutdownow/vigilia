@@ -26,11 +26,11 @@ spec:
         prometheus.io/path: {{ .Values.annotations.path }}
         prometheus.io/port: "{{ .Values.annotations.port }}"
         prometheus.io/scrape: "{{ .Values.annotations.scrape }}"
-      labels:
-        app: {{ .Release.Name }}-{{ .Chart.Name }}
 {{- if and .Values.global (eq (index .Values.global "otel_enabled" | toString) "true") }}
         instrumentation.opentelemetry.io/inject-java: "true"
 {{- end }}
+      labels:
+        app: {{ .Release.Name }}-{{ .Chart.Name }}
     spec:
       containers:
         - name: {{ .Chart.Name }}
