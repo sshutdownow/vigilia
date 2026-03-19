@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    argocd.argoproj.io/tracking-id: sausage-store:apps/Deployment:sausage-store/sausage-store-backend
+  labels:
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/instance: sausage-store
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/part-of: sausage-store
+    app.kubernetes.io/version: latest
+    helm.sh/chart: backend-0.1.0
+  name: sausage-store-backend
+  namespace: sausage-store
+  annotations:
+    {{- if eq (index .Values.global "otel_enabled" | toString) "true" }}
+    instrumentation.opentelemetry.io/inject-java: "true"
+    {{- end }}
