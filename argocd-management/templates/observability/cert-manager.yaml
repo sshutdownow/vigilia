@@ -1,19 +1,23 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: otel-stack
+  name: cert-manager
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
   source:
-    repoURL: {{ .Values.global.repo_url | quote }}
-    path: "deploy-otel-yandex-cloud"
-    targetRevision: "master"
+    chart: cert-manager
+    repoURL: https://charts.jetstack.io
+    targetRevision: v1.20.0
+    helm:
+      parameters:
+        - name: installCRDs
+          value: "true"
   destination:
     server: https://kubernetes.default.svc
-    namespace: otel
+    namespace: cert-manager
   syncPolicy:
     automated:
       enabled: false
