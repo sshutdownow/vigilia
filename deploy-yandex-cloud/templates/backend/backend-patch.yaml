@@ -1,8 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    argocd.argoproj.io/tracking-id: sausage-store:apps/Deployment:sausage-store/sausage-store-backend
   labels:
     app.kubernetes.io/component: backend
     app.kubernetes.io/instance: sausage-store

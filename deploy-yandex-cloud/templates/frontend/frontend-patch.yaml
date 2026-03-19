@@ -3,8 +3,6 @@ kind: Deployment
 metadata:
   name: sausage-store-frontend
   namespace: sausage-store
-  labels:
-    app: sausage-store-frontend
   annotations:
 {{- if and .Values.global (eq (index .Values.global "otel_enabled" | toString) "true") }}
     instrumentation.opentelemetry.io/inject-sdk: "true"
