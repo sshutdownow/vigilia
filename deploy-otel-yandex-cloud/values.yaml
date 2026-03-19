@@ -44,24 +44,29 @@ opentelemetry-kube-stack:
             metadata: [k8s.pod.name, k8s.namespace.name, k8s.node.name]
       exporters:
         # Шлюз авторизуется и отправляет данные в Yandex Monium
-        otlp_grpc/monium:
+        otlp/monium:
           endpoint: "ingest.monium.yandex.cloud:443"
-          compression: zstd
+          compression: none
           headers:
             "x-monium-project": "folder__{{ .Values.global.folder_id }}"
             "Authorization": "Api-Key {{ .Values.global.monium_api_key }}"
         debug:
           verbosity: detailed
       service:
+        extensions: [health_check]
         pipelines:
           metrics:
             receivers: [otlp]
             processors: [k8sattributes, batch]
-            exporters: [otlp_grpc/monium, debug]
+            exporters: [otlp, spanmetrics, otlp/monium, debug]
           traces:
             receivers: [otlp]
             processors: [k8sattributes, batch]
-            exporters: [otlp_grpc/monium, debug]
+            exporters: [opensearch, otlp/monium, debug]
+          logs:
+            receivers: [ otlp ]
+            exporters: [ otlphttp/prometheus, otlp/monium ]
+
 
 global:
   folder_id: ""
