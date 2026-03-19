@@ -154,7 +154,7 @@ resource "helm_release" "argocd_apps" {
               - name: "global.repo_url"
                 value: "${var.gitlab_git_url}"
               - name: "global.gitlab_registry"
-                value: "${local.gitlab_registry}
+                value: "${local.gitlab_registry}"
               - name: "global.gitlab_user"
                 value: "${var.gitlab_username}"
               - name: "global.gitlab_token"
