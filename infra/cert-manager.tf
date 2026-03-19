@@ -10,10 +10,11 @@ resource "helm_release" "cert_manager" {
     name  = "installCRDs"
     value = "true"
   }]
-
-  force_update = true
-  recreate_pods = true
-  wait          = true
+  
+  cleanup_on_fail = true
+  force_update    = true
+  recreate_pods   = true
+  wait            = true
 
   depends_on = [yandex_kubernetes_cluster.k8s-cluster]
 }
