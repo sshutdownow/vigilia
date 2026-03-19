@@ -22,6 +22,8 @@ spec:
       app: {{ .Release.Name }}-{{ .Chart.Name }}
   template:
     metadata:
+      labels:
+        app: {{ .Release.Name }}-{{ .Chart.Name }}
       annotations:
         prometheus.io/path: {{ .Values.annotations.path }}
         prometheus.io/port: "{{ .Values.annotations.port }}"
@@ -29,8 +31,6 @@ spec:
 {{- if and .Values.global (eq (index .Values.global "otel_enabled" | toString) "true") }}
         instrumentation.opentelemetry.io/inject-java: "true"
 {{- end }}
-      labels:
-        app: {{ .Release.Name }}-{{ .Chart.Name }}
     spec:
       containers:
         - name: {{ .Chart.Name }}
