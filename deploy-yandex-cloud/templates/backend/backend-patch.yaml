@@ -1,0 +1,17 @@
+{{- if and .Values.global (eq (index .Values.global "otel_enabled" | toString) "true") }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    instrumentation.opentelemetry.io/inject-java: "true"
+  labels:
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/instance: sausage-store
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/part-of: sausage-store
+    app.kubernetes.io/version: latest
+    helm.sh/chart: backend-0.1.0
+  name: sausage-store-backend
+  namespace: sausage-store
+{{- end }}
