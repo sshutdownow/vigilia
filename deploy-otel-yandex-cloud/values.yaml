@@ -75,3 +75,6 @@ global:
   folder_id: ""
   monium_api_key: ""
   otel_enabled: "false"
+  gitlab_user: ""
+  gitlab_token: ""
+  gitlab_registry: ""
