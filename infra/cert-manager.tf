@@ -6,11 +6,14 @@ resource "helm_release" "cert_manager" {
   namespace        = "cert-manager"
   create_namespace = true
 
-  set {
+  set =[{
     name  = "installCRDs"
     value = "true"
-  }
+  }]
 
   force_update = true
   recreate_pods = true
+  wait          = true
+
+  depends_on = [yandex_kubernetes_cluster.k8s-cluster]
 }
