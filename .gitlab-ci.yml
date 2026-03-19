@@ -370,7 +370,6 @@ otel-activate:
       artifacts: true
   script:
     - argocd login $ARGO_SERVER --username admin --password "${ARGO_ADM_PASSWD}" --grpc-web
-    - argocd app sync cert-manager otel-stack --force --replace --prune
     - >
       argocd app set otel-stack 
       -p global.monium_api_key=$MONIUM_API_KEY 
