@@ -1,80 +1,69 @@
 opentelemetry-kube-stack:
-  opentelemetry-operator:
+  # Агент, DaemonSet на каждой ноде
+  daemonset:
     enabled: true
-    admissionWebhooks:
-      certManager:
-        enabled: true
-
-  opentelemetry-collector:
-    enabled: true
-    mode: deployment
-#    fullnameOverride: "otel-collector"
-    
-    image:
-      repository: "otel/opentelemetry-collector-k8s"
-#      tag: "0.110.0"
-
+    fullnameOverride: "otel-agent"
     config:
       receivers:
         otlp:
           protocols:
             grpc:
               endpoint: "0.0.0.0:4317"
-            http:
-              endpoint: "0.0.0.0:4318"
+      exporters:
+        # Агент пересылает данные на шлюз внутри кластера
+        otlp:
+          endpoint: "otel-gateway.otel.svc.cluster.local:4317"
+          tls:
+            insecure: true
+      service:
+        pipelines:
+          metrics:
+            receivers: [otlp]
+            exporters: [otlp]
+          traces:
+            receivers: [otlp]
+            exporters: [otlp]
 
+  # Центральный шлюз Deployment
+  collector:
+    enabled: true
+    mode: deployment
+    fullnameOverride: "otel-gateway"
+    config:
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+              endpoint: "0.0.0.0:4317"
       processors:
-        memory_limiter:
-          check_interval: 1s
-          limit_mib: 512
-          spike_limit_mib: 128
         batch:
           send_batch_size: 1000
           timeout: 10s
-
+        k8sattributes:
+          extract:
+            metadata: [k8s.pod.name, k8s.namespace.name, k8s.node.name]
       exporters:
-        debug:
-          verbosity: detailed
-        
+        # Шлюз авторизуется и отправляет данные в Yandex Monium
         otlp_grpc/monium:
           endpoint: "ingest.monium.yandex.cloud:443"
           compression: zstd
           headers:
             "x-monium-project": "folder__{{ .Values.global.folder_id }}"
             "Authorization": "Api-Key {{ .Values.global.monium_api_key }}"
-          sending_queue:
-            enabled: true
-
+        debug:
+          verbosity: detailed
       service:
         pipelines:
           metrics:
             receivers: [otlp]
-            processors: [memory_limiter, batch]
+            processors: [k8sattributes, batch]
             exporters: [otlp_grpc/monium, debug]
           traces:
             receivers: [otlp]
-            processors: [memory_limiter, batch]
+            processors: [k8sattributes, batch]
             exporters: [otlp_grpc/monium, debug]
-          logs:
-            receivers: [otlp]
-            processors: [memory_limiter, batch]
-            exporters: [otlp_grpc/monium, debug]
-
-        telemetry:
-          metrics:
-            level: detailed
-            readers:
-              - periodic:
-                  interval: 60000
-                  exporter:
-                    otlp:
-                      protocol: http/protobuf
-                      endpoint: http://localhost:4318
 
 global:
   folder_id: ""
   monium_api_key: ""
-  otel_enabled: "false"
-  gitlab_user: ""
-  gitlab_token: ""
-  gitlab_registry: ""
+  otel_enabled: ""
