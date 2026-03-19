@@ -1,14 +1,19 @@
 opentelemetry-kube-stack:
   opentelemetry-operator:
     enabled: true
+    admissionWebhooks:
+      certManager:
+        enabled: true
 
   opentelemetry-collector:
     enabled: true
-    fullnameOverride: "otel-collector"
+    fullnameOverride: "otel-collector" # Короткое DNS имя
     image:
       repository: "otel/opentelemetry-collector-k8s"
-      tag: "0.144.0"
+      tag: "0.110.0"
     
+    mode: deployment
+
     config:
       receivers:
         otlp:
@@ -19,11 +24,15 @@ opentelemetry-kube-stack:
               endpoint: "0.0.0.0:4318"
 
       exporters:
-        otlp:
+        otlp_grpc/monium:
           endpoint: "ingest.monium.yandex.cloud:443"
+          compression: zstd
           headers:
             "x-monium-project": "folder__{{ .Values.global.folder_id }}"
             "Authorization": "Bearer {{ .Values.global.monium_api_key }}"
+          sending_queue:
+            enabled: true
+        
         logging:
           verbosity: normal
 
@@ -31,11 +40,15 @@ opentelemetry-kube-stack:
         pipelines:
           metrics:
             receivers: [otlp]
-            exporters: [otlp, logging]
+            exporters: [otlp_grpc/monium, logging]
           traces:
             receivers: [otlp]
-            exporters: [otlp, logging]
+            exporters: [otlp_grpc/monium, logging]
+          logs:
+            receivers: [otlp]
+            exporters: [otlp_grpc/monium, logging]
 
 global:
   folder_id: ""
   monium_api_key: ""
+  otel_enabled: false

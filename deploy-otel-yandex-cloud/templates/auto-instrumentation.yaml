@@ -9,6 +9,13 @@ spec:
   propagators:
     - tracecontext
     - baggage
+  resource:
+    attributes:
+      - key: "service.name"
+        value: "sausage-store"
+      - key: "project"
+        value: "folder__{{ .Values.global.folder_id }}"
+  
   java:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
   go:
