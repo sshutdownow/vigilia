@@ -97,8 +97,8 @@ resource "helm_release" "argocd" {
     yandex_kubernetes_cluster.k8s-cluster,
     helm_release.external_secrets,
     helm_release.vpa,
-    helm_release.gwin,
-    yandex_vpc_security_group.gwin
+    yandex_vpc_security_group.gwin,
+    helm_release.gwin
   ]
 }
 
@@ -149,6 +149,10 @@ resource "helm_release" "argocd_apps" {
                 value: "${var.folder_id}"
               - name: "global.repo_url"
                 value: "${var.gitlab_git_url}"
+              - name: "global.gitlab_user"
+                value: "${var.gitlab_username}"
+              - name: "global.gitlab_token"
+                value: "${var.gitlab_token}"
               - name: "global.sa_id"
                 value: "${yandex_iam_service_account.sausage_backend_sa.id}"
               - name: "global.lockbox_secret_id"
@@ -171,12 +175,12 @@ resource "helm_release" "argocd_apps" {
 
   depends_on = [
     kubernetes_secret_v1.sausage_repo_gitlab,
-    yandex_lockbox_secret_version.v1,
-    kubernetes_namespace_v1.sausage_store
+    yandex_lockbox_secret_version.v1
   ]
 }
 
 resource "kubernetes_namespace_v1" "sausage_store" {
+  count  = 0
   metadata {
     name = "sausage-store"
   }
@@ -184,6 +188,7 @@ resource "kubernetes_namespace_v1" "sausage_store" {
 
 # login/password for k8s to download images from GitLab 
 resource "kubernetes_secret_v1" "gitlab_pull_secret" {
+  count  = 0
   metadata {
     name      = "gitlab-pull-secret"
     # namespace = "sausage-store"
