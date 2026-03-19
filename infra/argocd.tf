@@ -179,29 +179,27 @@ resource "helm_release" "argocd_apps" {
   ]
 }
 
-resource "kubernetes_namespace_v1" "sausage_store" {
-  count  = 0
-  metadata {
-    name = "sausage-store"
-  }
-}
+# resource "kubernetes_namespace_v1" "sausage_store" {
+#   metadata {
+#     name = "sausage-store"
+#   }
+# }
 
-# login/password for k8s to download images from GitLab 
-resource "kubernetes_secret_v1" "gitlab_pull_secret" {
-  count  = 0
-  metadata {
-    name      = "gitlab-pull-secret"
-    # namespace = "sausage-store"
-    namespace = kubernetes_namespace_v1.sausage_store.metadata[0].name
-  }
-  type = "kubernetes.io/dockerconfigjson"
-  data = {
-    ".dockerconfigjson" = jsonencode({
-      auths = {
-        (replace(var.gitlab_image_url, "/^https?:\\/\\/|(\\/.*)$/", "")) = {
-          auth = base64encode("${var.gitlab_username}:${var.gitlab_token}")
-        }
-      }
-    })
-  }
-}
+# # login/password for k8s to download images from GitLab 
+# resource "kubernetes_secret_v1" "gitlab_pull_secret" {
+#   metadata {
+#     name      = "gitlab-pull-secret"
+#     # namespace = "sausage-store"
+#     namespace = kubernetes_namespace_v1.sausage_store.metadata[0].name
+#   }
+#   type = "kubernetes.io/dockerconfigjson"
+#   data = {
+#     ".dockerconfigjson" = jsonencode({
+#       auths = {
+#         (replace(var.gitlab_image_url, "/^https?:\\/\\/|(\\/.*)$/", "")) = {
+#           auth = base64encode("${var.gitlab_username}:${var.gitlab_token}")
+#         }
+#       }
+#     })
+#   }
+# }
