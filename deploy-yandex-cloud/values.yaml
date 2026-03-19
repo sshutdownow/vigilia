@@ -8,6 +8,9 @@ sausage-store:
       enabled: false
       host: ""
     otel_enabled: ""
+    gitlab_user: ""
+    gitlab_token: ""
+    gitlab_registry: ""
 
   lockbox:
     secret_id: ""
