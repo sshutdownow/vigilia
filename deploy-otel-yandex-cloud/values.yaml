@@ -12,7 +12,7 @@ opentelemetry-kube-stack:
       exporters:
         # Агент пересылает данные на шлюз внутри кластера
         otlp:
-          endpoint: "otel-gateway.otel.svc.cluster.local:4317"
+          endpoint: "otel-stack-daemon-collector.otel.svc.cluster.local:4317"
           tls:
             insecure: true
       service:
