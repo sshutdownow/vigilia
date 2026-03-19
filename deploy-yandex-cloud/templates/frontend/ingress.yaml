@@ -6,6 +6,9 @@ metadata:
     "gwin.yandex.cloud/groupName": "ingress"
     "gwin.yandex.cloud/externalIPv4Address": {{ index .Values "sausage-store" "ingress" "gwin_ip" | default "auto" | quote }}
     "gwin.yandex.cloud/securityGroups": {{ index .Values "sausage-store" "ingress" "gwin_sg" | quote }}
+    {{- if ne (index .Values.global "otel_enabled" | toString) "false" }}
+    instrumentation.opentelemetry.io/inject-sdk: "true"
+    {{- end }}
 spec:
   ingressClassName: "gwin-default"
   tls:
