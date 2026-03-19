@@ -1,3 +1,7 @@
+locals {
+  gitlab_registry = replace(var.gitlab_image_url, "/^https?:\\/\\/|(\\/.*)$/", "")
+}
+
 resource "bcrypt_hash" "argocd_password" {
   cleartext = var.argocd_admin_password
 }
@@ -149,6 +153,8 @@ resource "helm_release" "argocd_apps" {
                 value: "${var.folder_id}"
               - name: "global.repo_url"
                 value: "${var.gitlab_git_url}"
+              - name: "global.gitlab_registry"
+                value: "${local.gitlab_registry}
               - name: "global.gitlab_user"
                 value: "${var.gitlab_username}"
               - name: "global.gitlab_token"
