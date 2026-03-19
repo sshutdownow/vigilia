@@ -12,6 +12,10 @@ metadata:
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     app.kubernetes.io/component: {{ .Chart.Name }}
     app.kubernetes.io/part-of: {{ .Release.Name }}
+  annotations:
+{{- if and .Values.global (eq (index .Values.global "otel_enabled" | toString) "true") }}
+    instrumentation.opentelemetry.io/inject-sdk: "true"
+{{- end }}
 spec:
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   replicas: {{ .Values.replicas }}
