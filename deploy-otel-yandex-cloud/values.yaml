@@ -36,7 +36,7 @@ opentelemetry-kube-stack:
     fullnameOverride: "otel-gateway"
     serviceAccount:
       create: true
-    
+ 
     extraEnvs:
       - name: MY_POD_IP
         valueFrom:
