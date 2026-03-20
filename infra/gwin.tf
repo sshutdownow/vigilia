@@ -35,6 +35,8 @@ resource "helm_release" "gwin" {
   namespace        = "gwin"
   create_namespace = true
 
+  wait             = true
+
   values = [<<-EOF
     controller:
       folderId: ${var.folder_id}
