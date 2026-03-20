@@ -26,7 +26,8 @@ spec:
         app: {{ .Release.Name }}-{{ .Chart.Name }}
       annotations:
 {{- if and .Values.global (eq (index .Values.global "otel_enabled" | toString) "true") }}
-        instrumentation.opentelemetry.io/inject-sdk: "true"
+#        instrumentation.opentelemetry.io/inject-sdk: "true"
+        instrumentation.opentelemetry.io/inject-nginx: "true"
 {{- end }}
     spec:
       containers:
@@ -49,4 +50,4 @@ spec:
             name: {{ .Release.Name }}-{{ .Chart.Name }}-conf
             items:
               - key: {{ .Values.nginxConf }}
-                path: {{ .Values.nginxConf }} 
+                path: {{ .Values.nginxConf }}

@@ -1,17 +1,18 @@
 apiVersion: opentelemetry.io/v1alpha1
 kind: Instrumentation
 metadata:
-  name: sausage-instrumentation
+  name: sausage-store-instrumentation
   namespace: sausage-store
 spec:
   exporter:
     endpoint: http://otel-stack-daemon-collector.otel.svc.cluster.local:4317
   env:
     - name: OTEL_EXPORTER_OTLP_PROTOCOL
-      value: "grpc"
+      value: "otlp"
   propagators:
     - tracecontext
     - baggage
+    - b3
   resource:
     attributes:
       - key: "service.name"
@@ -24,6 +25,20 @@ spec:
   java:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
   go:
+    env:
+      # Required if endpoint is set to 4317.
+      # Go autoinstrumentation uses http/proto by default
+      # so data must be sent to 4318 instead of 4317.
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://otel-stack-daemon-collector.otel.svc.cluster.local:4318
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go:latest
+  nginx:
+    env:
+      - name: OTEL_TRACES_EXPORTER
+        value: otlp
+    attrs:
+    - name: NginxModuleOtelMaxQueueSize
+      value: "4096"
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nginx:latest
   sdk:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-sdk:latest

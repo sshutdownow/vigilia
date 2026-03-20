@@ -48,8 +48,8 @@ opentelemetry-kube-stack:
           endpoint: "ingest.monium.yandex.cloud:443"
           compression: none
           headers:
-            "x-monium-project": "folder__{{ .Values.global.folder_id }}"
-            "Authorization": "Api-Key {{ .Values.global.monium_api_key }}"
+            Authorization: "Api-Key {{ .Values.global.monium_api_key }}"
+            x-monium-project: "folder__{{ .Values.global.folder_id }}"
         debug:
           verbosity: detailed
       service:
