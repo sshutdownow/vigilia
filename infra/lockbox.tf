@@ -31,8 +31,7 @@ resource "yandex_iam_service_account" "sausage_backend_sa" {
 resource "yandex_resourcemanager_folder_iam_member" "sausage_backend_roles" {
   for_each  = toset([
     "lockbox.payloadViewer", # Чтобы видеть "обертку" секрета
-    "kms.viewer",             # Чтобы расшифровать "начинку" ключом
-    "kms.keys.encrypterDecrypter"
+    "kms.viewer"             # Чтобы расшифровать "начинку" ключом
   ])
   
   folder_id = var.folder_id
