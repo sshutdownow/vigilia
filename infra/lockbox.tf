@@ -44,3 +44,10 @@ resource "yandex_iam_service_account_iam_member" "node_sa_impersonate" {
   role               = "iam.serviceAccounts.user"
   member             = "serviceAccount:${yandex_iam_service_account.k8s-node-group-sa.id}"
 }
+
+# Права для нод на СОЗДАНИЕ ТОКЕНОВ (impersonation) аккаунта бэкенда
+resource "yandex_iam_service_account_iam_member" "node_sa_token_creator" {
+  service_account_id = yandex_iam_service_account.sausage_backend_sa.id
+  role               = "iam.serviceAccounts.tokenCreator" 
+  member             = "serviceAccount:${yandex_iam_service_account.k8s-node-group-sa.id}"
+}
