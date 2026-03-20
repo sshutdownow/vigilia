@@ -2,7 +2,7 @@ opentelemetry-kube-stack:
   # Агент, DaemonSet на каждой ноде
   daemonset:
     enabled: true
-    fullnameOverride: "otel-agent"
+#    fullnameOverride: "otel-agent"
     config:
       receivers:
         otlp:
@@ -23,12 +23,15 @@ opentelemetry-kube-stack:
           traces:
             receivers: [otlp]
             exporters: [otlp]
+          logs:
+            receivers: [otlp]
+            exporters: [otlp]
 
   # Центральный шлюз Deployment
   collector:
     enabled: true
     mode: deployment
-    fullnameOverride: "otel-gateway"
+#    fullnameOverride: "otel-gateway"
     config:
       receivers:
         otlp:
@@ -44,28 +47,54 @@ opentelemetry-kube-stack:
             metadata: [k8s.pod.name, k8s.namespace.name, k8s.node.name]
       exporters:
         # Шлюз авторизуется и отправляет данные в Yandex Monium
-        otlp/monium:
+        otlp_grpc/monium:
           endpoint: "ingest.monium.yandex.cloud:443"
-          compression: none
+          compression: zstd
           headers:
             Authorization: "Api-Key {{ .Values.global.monium_api_key }}"
             x-monium-project: "folder__{{ .Values.global.folder_id }}"
+          sending_queue:
+            batch            
+
+          # Настройки повторных попыток при ошибках
+          retry_on_failure:
+            enabled: true
+            initial_interval: 5s     # Первая попытка через 5 сек
+            max_interval: 30s        # Максимальная задержка 30 сек
+            max_elapsed_time: 300s   # Прекратить попытки через 5 мин
+
         debug:
           verbosity: detailed
       service:
         extensions: [health_check]
         pipelines:
           metrics:
-            receivers: [otlp]
-            processors: [k8sattributes, batch]
-            exporters: [otlp, spanmetrics, otlp/monium, debug]
+            receivers: [ otlp ]
+            processors: [ k8sattributes, batch ]
+            exporters: [ otlp_grpc/monium, debug ]
           traces:
-            receivers: [otlp]
-            processors: [k8sattributes, batch]
-            exporters: [opensearch, otlp/monium, debug]
+            receivers: [ otlp ]
+            processors: [ k8sattributes, batch ]
+            exporters: [ otlp_grpc/monium, debug ]
           logs:
             receivers: [ otlp ]
-            exporters: [ otlphttp/prometheus, otlp/monium ]
+            exporters: [ otlp_grpc/monium, otlp/monium ]
+
+        # Телеметрия самого OTel Collector
+        telemetry:
+          logs:
+            level: info  # debug | info | warn | error    
+          metrics:
+            level: detailed  # none | basic | normal | detailed
+            
+            # Отправка телеметрии самого OTel Collector
+            readers:
+              - periodic:
+                  interval: 60000
+                  exporter:
+                    otlp:
+                      protocol: http/protobuf
+                      endpoint: http://${env:MY_POD_IP}:4318
 
 
 global:
