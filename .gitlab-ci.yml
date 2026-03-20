@@ -1,3 +1,13 @@
+spec:
+  inputs:
+    enable_test:
+      type: boolean
+      default: true
+    enable_otel:
+      type: boolean
+      default: false
+---
+
 stages:
   - tests
   - plan
@@ -113,7 +123,7 @@ checkov:
     paths:
       - ${TF_ROOT}/checkov_report/
   rules:
-    - if: $OPERATION == "terraform"
+    - if: $OPERATION == "terraform" && "$[[ inputs.enable_test ]]" == "true"
       changes:
         - "infra/**/*"
       when: always
@@ -217,7 +227,7 @@ terratest:
   dependencies:
     - apply
   rules:
-    - if: $OPERATION == "terraform"
+    - if: $OPERATION == "terraform" && "$[[ inputs.enable_test ]]" == "true"
       changes:
         - "infra/**/*"
       when: on_success

@@ -8,7 +8,9 @@ spec:
     endpoint: http://otel-stack-daemon-collector.otel.svc.cluster.local:4317
   env:
     - name: OTEL_EXPORTER_OTLP_PROTOCOL
-      value: "otlp"
+      value: "grpc"
+    - name: OTEL_EXPORTER_OTLP_METRICS_PROTOCOL
+      value: "grpc"
   propagators:
     - tracecontext
     - baggage
