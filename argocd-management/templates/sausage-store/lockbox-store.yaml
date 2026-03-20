@@ -6,5 +6,7 @@ metadata:
 spec:
   provider:
     yandexlockbox:
-      auth: {}
-#        serviceAccountID: {{ .Values.global.sa_id | quote }}
+      auth:
+        authorizedKeySecretRef:
+          name: yc-auth
+          key: auth
