@@ -10,3 +10,4 @@ spec:
         authorizedKeySecretRef:
           name: yc-auth
           key: auth
+          namespace: external-secrets
