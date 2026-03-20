@@ -1,7 +1,7 @@
 apiVersion: external-secrets.io/v1
 kind: ClusterSecretStore
 metadata:
-  name: secret-store
+  name: sausage-store-kv
   namespace: sausage-store
 spec:
   provider:
