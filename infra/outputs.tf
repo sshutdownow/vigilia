@@ -4,6 +4,7 @@ output "k8s_external_v4_endpoint" {
 
 output "k8s_ca_certificate" {
   value = yandex_kubernetes_cluster.k8s-cluster.master[0].cluster_ca_certificate
+  sensitive = true
 }
 
 output "k8s_cluster_id" {

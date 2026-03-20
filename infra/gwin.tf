@@ -62,7 +62,8 @@ resource "helm_release" "gwin" {
     yandex_resourcemanager_folder_iam_member.gwin_roles,
     yandex_iam_service_account_key.gwin_sa_key,
     yandex_kubernetes_cluster.k8s-cluster,
-    yandex_logging_group.log_group_main
+    yandex_logging_group.log_group_main,
+    yandex_vpc_address.gwin_static_ip
   ]
 }
 
