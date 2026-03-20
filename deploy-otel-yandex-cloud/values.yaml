@@ -54,7 +54,7 @@ opentelemetry-kube-stack:
             Authorization: "Api-Key {{ .Values.global.monium_api_key }}"
             x-monium-project: "folder__{{ .Values.global.folder_id }}"
           sending_queue:
-            batch            
+            enabled: true            
 
           # Настройки повторных попыток при ошибках
           retry_on_failure:
@@ -78,7 +78,7 @@ opentelemetry-kube-stack:
             exporters: [ otlp_grpc/monium, debug ]
           logs:
             receivers: [ otlp ]
-            exporters: [ otlp_grpc/monium, otlp/monium ]
+            exporters: [ otlp_grpc/monium, debug ]
 
         # Телеметрия самого OTel Collector
         telemetry:
