@@ -23,9 +23,9 @@ resource "yandex_resourcemanager_folder_iam_member" "eso_sa_roles" {
 
 resource "helm_release" "external_secrets" {
   name             = "external-secrets"
-  repository       = "oci://cr.yandex/yc-marketplace/yandex-cloud/external-secrets/chart"
-  version          = "0.10.5"
-#  repository       = "https://charts.external-secrets.io"
+  repository       = "https://charts.external-secrets.io"
+#  repository       = "oci://cr.yandex/yc-marketplace/yandex-cloud/external-secrets/chart"
+#  version          = "0.10.5"
   chart            = "external-secrets"
   namespace        = "external-secrets"
   create_namespace = true
@@ -52,21 +52,6 @@ resource "helm_release" "external_secrets" {
       })
     }
   ]
-
-  # values = [<<-EOF
-  #   installCRDs: true
-  #   auth:
-  #     json: |
-  #       ${jsonencode({
-  #         "id"                 : yandex_iam_service_account_key.eso_sa_key.id,
-  #         "service_account_id" : yandex_iam_service_account_key.eso_sa_key.service_account_id,
-  #         "created_at"         : yandex_iam_service_account_key.eso_sa_key.created_at,
-  #         "key_algorithm"      : yandex_iam_service_account_key.eso_sa_key.key_algorithm,
-  #         "public_key"         : yandex_iam_service_account_key.eso_sa_key.public_key,
-  #         "private_key"        : yandex_iam_service_account_key.eso_sa_key.private_key
-  #       })}
-  # EOF
-  # ]
 
   depends_on = [yandex_kubernetes_cluster.k8s-cluster]
 }
