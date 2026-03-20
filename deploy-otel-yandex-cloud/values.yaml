@@ -2,7 +2,7 @@ opentelemetry-kube-stack:
   # Агент, DaemonSet на каждой ноде
   daemonset:
     enabled: true
-#    fullnameOverride: "otel-agent"
+    fullnameOverride: "otel-agent"
     config:
       receivers:
         otlp:
@@ -31,7 +31,7 @@ opentelemetry-kube-stack:
   collector:
     enabled: true
     mode: deployment
-#    fullnameOverride: "otel-gateway"
+    fullnameOverride: "otel-gateway"
     config:
       receivers:
         otlp:
