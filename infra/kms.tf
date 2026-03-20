@@ -6,12 +6,3 @@ resource "yandex_kms_symmetric_key" "kms-key" {
   rotation_period   = "8760h" # 1 год.
   folder_id         = var.folder_id
 }
-
-resource "yandex_resourcemanager_folder_iam_member" "encrypterDecrypter" {
-  symmetric_key_id = yandex_kms_symmetric_key.kms-key.id
-  role             = "kms.keys.encrypterDecrypter"
-
-  members = [
-    "serviceAccount:${yandex_iam_service_account.sausage_backend_sa.id}",
-  ]
-}

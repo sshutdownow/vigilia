@@ -29,9 +29,11 @@ resource "yandex_iam_service_account" "sausage_backend_sa" {
 
 # даём права SA бэкенда на чтение секретов Lockbox
 resource "yandex_resourcemanager_folder_iam_member" "sausage_backend_roles" {
+  symmetric_key_id = yandex_kms_symmetric_key.kms-key.id
   for_each  = toset([
     "lockbox.payloadViewer", # Чтобы видеть "обертку" секрета
-    "kms.viewer"             # Чтобы расшифровать "начинку" ключом
+    "kms.viewer",            # Чтобы расшифровать "начинку" ключом
+    "kms.keys.encrypterDecrypter"
   ])
   
   folder_id = var.folder_id
