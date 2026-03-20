@@ -20,10 +20,7 @@ resource "yandex_resourcemanager_folder_iam_member" "k8s_roles" {
 
 resource "yandex_resourcemanager_folder_iam_member" "k8s_node_roles" {
   for_each = toset([ 
-    "container-registry.images.puller"#,
-    # "lockbox.payloadViewer",
-    # "kms.viewer",
-    # "kms.keys.encrypterDecrypter"
+    "container-registry.images.puller"
   ])
   folder_id = var.folder_id
   role      = each.key

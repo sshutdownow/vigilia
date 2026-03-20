@@ -1,7 +1,7 @@
 # Сервисный аккаунт для Gwin
 resource "yandex_iam_service_account" "gwin_sa" {
   name = "gwin-sa"
-  description = "service account for gwin"
+  description = "Service account for Yandex Cloud Gwin"
 }
 
 # Назначение ролей

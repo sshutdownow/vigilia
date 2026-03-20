@@ -1,6 +1,7 @@
 
 resource "yandex_iam_service_account" "eso_sa" {
   name = "external-secrets-sa"
+  description = "Service account for ESO Yandex Lockbox"
 }
 
 resource "yandex_iam_service_account_key" "eso_sa_key" {
@@ -33,14 +34,12 @@ resource "helm_release" "external_secrets" {
 
   # https://yandex.cloud/ru/docs/managed-kubernetes/operations/applications/external-secrets-operator
   # https://external-secrets.io/latest/provider/yandex-lockbox/
-  # Передаем ключ в формате JSON
-
   set = [
     {
       name  = "installCRDs"
       value = "true"
     },
-    {
+    { # Передаем ключ в формате JSON
       name  = "auth\\.json"
       value = jsonencode({
               "id"                 : yandex_iam_service_account_key.eso_sa_key.id,
