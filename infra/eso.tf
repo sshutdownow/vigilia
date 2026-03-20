@@ -34,22 +34,38 @@ resource "helm_release" "external_secrets" {
   # https://yandex.cloud/ru/docs/managed-kubernetes/operations/applications/external-secrets-operator
   # https://external-secrets.io/latest/provider/yandex-lockbox/
   # Передаем ключ в формате JSON
-  set = [
-    {
-      name  = "installCRDs"
-      value = "true"
-    },
-    {
-      name  = "auth.json"
-      value = jsonencode({
-              "id"                 : yandex_iam_service_account_key.eso_sa_key.id,
-              "service_account_id" : yandex_iam_service_account_key.eso_sa_key.service_account_id,
-              "created_at"         : yandex_iam_service_account_key.eso_sa_key.created_at,
-              "key_algorithm"      : yandex_iam_service_account_key.eso_sa_key.key_algorithm,
-              "public_key"         : yandex_iam_service_account_key.eso_sa_key.public_key,
-              "private_key"        : yandex_iam_service_account_key.eso_sa_key.private_key
-      })
-    }
+
+  # set = [
+  #   {
+  #     name  = "installCRDs"
+  #     value = "true"
+  #   },
+  #   {
+  #     name  = "auth.json"
+  #     value = jsonencode({
+  #             "id"                 : yandex_iam_service_account_key.eso_sa_key.id,
+  #             "service_account_id" : yandex_iam_service_account_key.eso_sa_key.service_account_id,
+  #             "created_at"         : yandex_iam_service_account_key.eso_sa_key.created_at,
+  #             "key_algorithm"      : yandex_iam_service_account_key.eso_sa_key.key_algorithm,
+  #             "public_key"         : yandex_iam_service_account_key.eso_sa_key.public_key,
+  #             "private_key"        : yandex_iam_service_account_key.eso_sa_key.private_key
+  #     })
+  #   }
+  # ]
+
+  values = [<<-EOF
+    installCRDs: true
+    auth:
+      json: |
+        ${jsonencode({
+          "id"                 : yandex_iam_service_account_key.eso_sa_key.id,
+          "service_account_id" : yandex_iam_service_account_key.eso_sa_key.service_account_id,
+          "created_at"         : yandex_iam_service_account_key.eso_sa_key.created_at,
+          "key_algorithm"      : yandex_iam_service_account_key.eso_sa_key.key_algorithm,
+          "public_key"         : yandex_iam_service_account_key.eso_sa_key.public_key,
+          "private_key"        : yandex_iam_service_account_key.eso_sa_key.private_key
+        })}
+  EOF
   ]
 
   depends_on = [yandex_kubernetes_cluster.k8s-cluster]
