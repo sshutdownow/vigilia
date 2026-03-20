@@ -33,7 +33,7 @@ resource "yandex_resourcemanager_folder_iam_member" "sausage_backend_roles" {
     "lockbox.payloadViewer", # Чтобы видеть "обертку" секрета
     "kms.viewer"            # Чтобы расшифровать "начинку" ключом
   ])
-  
+  secret_id = yandex_lockbox_secret.sausage_store_secrets.id
   folder_id = var.folder_id
   role      = each.value
   member    = "serviceAccount:${yandex_iam_service_account.sausage_backend_sa.id}"
