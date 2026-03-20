@@ -7,5 +7,4 @@ spec:
   provider:
     yandexlockbox:
       auth:
-        serviceAccountRef:
-          name: {{ .Values.global.sa_id | quote }}
+        serviceAccountID: {{ .Values.global.sa_id | quote }}
