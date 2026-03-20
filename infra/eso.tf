@@ -63,7 +63,7 @@ resource "kubernetes_secret_v1" "yc_auth" {
   }
 
   data = {
-    "auth\\.json" = jsonencode({
+    "auth" = jsonencode({
               "id"                 : yandex_iam_service_account_key.eso_sa_key.id,
               "service_account_id" : yandex_iam_service_account_key.eso_sa_key.service_account_id,
               "created_at"         : yandex_iam_service_account_key.eso_sa_key.created_at,
