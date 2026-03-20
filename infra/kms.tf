@@ -10,6 +10,5 @@ resource "yandex_kms_symmetric_key" "kms-key" {
 resource "yandex_kms_symmetric_key_iam_member" "encrypterDecrypter" {
   symmetric_key_id = yandex_kms_symmetric_key.kms-key.id
   role             = "kms.keys.encrypterDecrypter"
-  folder_id        = var.folder_id
   member = "serviceAccount:${yandex_iam_service_account.sausage_backend_sa.id}"
   }
