@@ -6,5 +6,5 @@ metadata:
 spec:
   provider:
     yandexlockbox:
-      auth:
-        serviceAccountID: {{ .Values.global.sa_id | quote }}
+      auth: {}
+#        serviceAccountID: {{ .Values.global.sa_id | quote }}

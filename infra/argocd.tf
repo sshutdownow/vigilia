@@ -160,7 +160,7 @@ resource "helm_release" "argocd_apps" {
               - name: "global.gitlab_token"
                 value: "${var.gitlab_token}"
               - name: "global.sa_id"
-                value: "${yandex_iam_service_account.sausage_backend_sa.id}"
+                value: "${yandex_iam_service_account.eso_sa.id}"
               - name: "global.lockbox_secret_id"
                 value: "${yandex_lockbox_secret.sausage_store_secrets.id}"
               - name: "global.gwin_ip"
