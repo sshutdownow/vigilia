@@ -1,4 +1,6 @@
 opentelemetry-kube-stack:
+  rbac: # k8sattributes
+    create: true
   # Агент, DaemonSet на каждой ноде
   daemonset:
     enabled: true
@@ -12,7 +14,7 @@ opentelemetry-kube-stack:
       exporters:
         # Агент пересылает данные на шлюз внутри кластера
         otlp:
-          endpoint: "otel-stack-daemon-collector.otel.svc.cluster.local:4317"
+          endpoint: "otel-gateway.otel.svc.cluster.local:4317"
           tls:
             insecure: true
       service:
@@ -32,6 +34,14 @@ opentelemetry-kube-stack:
     enabled: true
     mode: deployment
     fullnameOverride: "otel-gateway"
+    serviceAccount:
+      create: true
+    
+    extraEnvs:
+      - name: MY_POD_IP
+        valueFrom:
+          fieldRef:
+            fieldPath: status.podIP
     config:
       receivers:
         otlp:
@@ -95,7 +105,6 @@ opentelemetry-kube-stack:
                     otlp:
                       protocol: http/protobuf
                       endpoint: http://${env:MY_POD_IP}:4318
-
 
 global:
   folder_id: ""
