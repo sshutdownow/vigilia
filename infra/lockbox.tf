@@ -21,33 +21,3 @@ resource "yandex_lockbox_secret_version" "v1" {
     text_value = var.spring_mongo_uri
   }
 }
-
-# SA только для app backend
-resource "yandex_iam_service_account" "sausage_backend_sa" {
-  name = "sausage-backend-sa"
-}
-
-# даём права SA бэкенда на чтение секретов Lockbox
-resource "yandex_lockbox_secret_iam_member" "sausage_backend_lockbox" {
-  secret_id = yandex_lockbox_secret.sausage_store_secrets.id
-  role      = "lockbox.payloadViewer" # Чтобы видеть "обертку" секрета
-  member    = "serviceAccount:${yandex_iam_service_account.sausage_backend_sa.id}"
-}
-
-# resource "yandex_resourcemanager_folder_iam_member" "sausage_backend_roles" {
-#   folder_id = var.folder_id
-# }
-
-# даём права SA нодам k8s-кластера использовать SA бэкенда (impersonation)
-resource "yandex_iam_service_account_iam_member" "node_sa_impersonate" {
-  service_account_id = yandex_iam_service_account.sausage_backend_sa.id
-  role               = "iam.serviceAccounts.user"
-  member             = "serviceAccount:${yandex_iam_service_account.k8s-node-group-sa.id}"
-}
-
-# Права для нод на СОЗДАНИЕ ТОКЕНОВ (impersonation) аккаунта бэкенда
-resource "yandex_iam_service_account_iam_member" "node_sa_token_creator" {
-  service_account_id = yandex_iam_service_account.sausage_backend_sa.id
-  role               = "iam.serviceAccounts.tokenCreator" 
-  member             = "serviceAccount:${yandex_iam_service_account.k8s-node-group-sa.id}"
-}
