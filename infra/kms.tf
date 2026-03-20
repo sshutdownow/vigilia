@@ -9,6 +9,11 @@ resource "yandex_kms_symmetric_key" "kms-key" {
 
 resource "yandex_kms_symmetric_key_iam_member" "encrypterDecrypter" {
   symmetric_key_id = yandex_kms_symmetric_key.kms-key.id
-  role             = "kms.keys.encrypterDecrypter"
-  member = "serviceAccount:${yandex_iam_service_account.sausage_backend_sa.id}"
-  }
+
+  for_each  = toset([
+    "kms.viewer",
+    "kms.keys.encrypterDecrypter" # Чтобы расшифровать "начинку" ключом
+  ])
+  role      = each.value
+  member    = "serviceAccount:${yandex_iam_service_account.sausage_backend_sa.id}"
+}
