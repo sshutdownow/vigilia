@@ -21,7 +21,7 @@ resource "yandex_resourcemanager_folder_iam_member" "eso_sa_roles" {
   member    = "serviceAccount:${yandex_iam_service_account.eso_sa.id}"
 }
 
-resource "helm_release" "eso" {
+resource "helm_release" "external_secrets" {
   name             = "external-secrets"
   repository       = "oci://cr.yandex/yc-marketplace/yandex-cloud/external-secrets/chart"
   version          = "0.10.5"
