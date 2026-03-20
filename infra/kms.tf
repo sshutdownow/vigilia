@@ -7,7 +7,7 @@ resource "yandex_kms_symmetric_key" "kms-key" {
   folder_id         = var.folder_id
 }
 
-resource "andex_resourcemanager_folder_iam_member" "encrypterDecrypter" {
+resource "yandex_resourcemanager_folder_iam_member" "encrypterDecrypter" {
   symmetric_key_id = yandex_kms_symmetric_key.kms-key.id
   role             = "kms.keys.encrypterDecrypter"
 
