@@ -116,6 +116,7 @@ checkov:
   allow_failure: true
   image: bridgecrew/checkov:latest
   script:
+    - '[ "$[[ inputs.enable_test ]]" == "false" ] && exit 0'
     - checkov -d . --external-checks-dir ./custom_policies --output junitxml --output-file-path checkov_report
   artifacts:
     reports:
@@ -123,7 +124,7 @@ checkov:
     paths:
       - ${TF_ROOT}/checkov_report/
   rules:
-    - if: $OPERATION == "terraform" && "$[[ inputs.enable_test ]]" == "true"
+    - if: $OPERATION == "terraform"
       changes:
         - "infra/**/*"
       when: always
@@ -216,6 +217,7 @@ terratest:
   stage: terratest
   image: golang:1.21
   script:
+    - '[ "$[[ inputs.enable_test ]]" == "false" ] && exit 0'
     - cd test
     - go mod init terratest
     - go mod edit -go=1.21
@@ -227,7 +229,7 @@ terratest:
   dependencies:
     - apply
   rules:
-    - if: $OPERATION == "terraform" && "$[[ inputs.enable_test ]]" == "true"
+    - if: $OPERATION == "terraform"
       changes:
         - "infra/**/*"
       when: on_success
