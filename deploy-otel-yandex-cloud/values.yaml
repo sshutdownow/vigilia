@@ -1,119 +1,118 @@
 opentelemetry-kube-stack:
+  clusterName: sausage-store-cluster
+
   opentelemetry-operator:
     enabled: true
     manager:
       extraArgs:
         - --enable-nginx-instrumentation=true
-  rbac: # k8sattributes
+
+  rbac:
     create: true
-  # Агент, DaemonSet на каждой ноде
-  daemonset:
-    enabled: true
-    service:
+
+  collectors:
+    # Агент (DaemonSet) на каждой ноде кластера
+    daemon:
       enabled: true
-    fullnameOverride: "otel-agent"
-    ports:
-      - containerPort: 4317
-        hostPort: 4317
-        name: otlp-grpc
-        protocol: TCP
-      - containerPort: 4318
-        hostPort: 4318 # HTTP/Protobuf
-        name: otlp-http
-        protocol: TCP
-    config:
-      receivers:
-        otlp:
-          protocols:
-            grpc:
-              endpoint: "0.0.0.0:4317"
-      exporters:
-        # Агент пересылает данные на шлюз внутри кластера
-        otlp:
-          endpoint: "otel-gateway.otel.svc.cluster.local:4317"
-          tls:
-            insecure: true
+      fullnameOverride: "otel-agent"
       service:
-        pipelines:
-          metrics:
-            receivers: [otlp]
-            exporters: [otlp]
-          traces:
-            receivers: [otlp]
-            exporters: [otlp]
-          logs:
-            receivers: [otlp]
-            exporters: [otlp]
+        enabled: true
+      # Пробрасываем порты на IP ноды
+      ports:
+        - containerPort: 4317
+          hostPort: 4317
+          name: otlp-grpc
+          protocol: TCP
+        - containerPort: 4318
+          hostPort: 4318
+          name: otlp-http
+          protocol: TCP
+      config:
+        receivers:
+          otlp:
+            protocols:
+              grpc:
+                endpoint: "0.0.0.0:4317"
+              http:
+                endpoint: "0.0.0.0:4318"
+        exporters:
+          # Агент пересылает данные на шлюз (gateway) внутри кластера
+          otlp:
+            endpoint: "otel-gateway.otel.svc.cluster.local:4317"
+            tls:
+              insecure: true
+        service:
+          pipelines:
+            metrics:
+              receivers: [otlp]
+              exporters: [otlp]
+            traces:
+              receivers: [otlp]
+              exporters: [otlp]
+            logs:
+              receivers: [otlp]
+              exporters: [otlp]
 
-  # Центральный шлюз Deployment
-  collector:
-    enabled: true
-    mode: deployment
-    fullnameOverride: "otel-gateway"
-    serviceAccount:
-      create: true
- 
-    extraEnvs:
-      - name: MY_POD_IP
-        valueFrom:
-          fieldRef:
-            fieldPath: status.podIP
-    config:
-      receivers:
-        otlp:
-          protocols:
-            grpc:
-              endpoint: "0.0.0.0:4317"
-      processors:
-        batch:
-          send_batch_size: 1000
-          timeout: 10s
-        k8sattributes:
-          extract:
-            metadata: [k8s.pod.name, k8s.namespace.name, k8s.node.name]
-      exporters:
-        # Шлюз авторизуется и отправляет данные в Yandex Monium
-        otlp_grpc/monium:
-          endpoint: "ingest.monium.yandex.cloud:443"
-          compression: zstd
-          headers:
-            Authorization: "Api-Key {{ .Values.global.monium_api_key }}"
-            x-monium-project: "folder__{{ .Values.global.folder_id }}"
-          sending_queue:
-            enabled: true
-
-          # Настройки повторных попыток при ошибках
-          retry_on_failure:
-            enabled: true
-            initial_interval: 5s     # Первая попытка через 5 сек
-            max_interval: 30s        # Максимальная задержка 30 сек
-            max_elapsed_time: 300s   # Прекратить попытки через 5 мин
-
-        debug:
-          verbosity: detailed
-      service:
-        extensions: [health_check]
-        pipelines:
-          metrics:
-            receivers: [ otlp ]
-            processors: [ k8sattributes, batch ]
-            exporters: [ otlp_grpc/monium, debug ]
-          traces:
-            receivers: [ otlp ]
-            processors: [ k8sattributes, batch ]
-            exporters: [ otlp_grpc/monium, debug ]
-          logs:
-            receivers: [ otlp ]
-            exporters: [ otlp_grpc/monium, debug ]
-
-        # Телеметрия самого OTel Collector
+    # 2. Центральный шлюз (Deployment) для отправки в облако
+    deployment:
+      enabled: true
+      fullnameOverride: "otel-gateway"
+      serviceAccount:
+        create: true
+      extraEnvs:
+        - name: MY_POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+      config:
+        receivers:
+          otlp:
+            protocols:
+              grpc:
+                endpoint: "0.0.0.0:4317"
+        processors:
+          batch:
+            send_batch_size: 1000
+            timeout: 10s
+          k8sattributes:
+            extract:
+              metadata: [k8s.pod.name, k8s.namespace.name, k8s.node.name]
+        exporters:
+          # Шлюз отправляет данные в Yandex Monitoring (Monium)
+          otlp_grpc/monium:
+            endpoint: "ingest.monium.yandex.cloud:443"
+            compression: zstd
+            headers:
+              Authorization: "Api-Key {{ .Values.global.monium_api_key }}"
+              x-monium-project: "folder__{{ .Values.global.folder_id }}"
+            sending_queue:
+              enabled: true
+            retry_on_failure:
+              enabled: true
+              initial_interval: 5s
+              max_interval: 30s
+              max_elapsed_time: 300s
+          debug:
+            verbosity: detailed
+        service:
+          extensions: [health_check]
+          pipelines:
+            metrics:
+              receivers: [ otlp ]
+              processors: [ k8sattributes, batch ]
+              exporters: [ otlp_grpc/monium, debug ]
+            traces:
+              receivers: [ otlp ]
+              processors: [ k8sattributes, batch ]
+              exporters: [ otlp_grpc/monium, debug ]
+            logs:
+              receivers: [ otlp ]
+              exporters: [ otlp_grpc/monium, debug ]
         telemetry:
           logs:
-            level: info  # debug | info | warn | error    
+            level: info
           metrics:
-            level: detailed  # none | basic | normal | detailed
-
-            # Отправка телеметрии самого OTel Collector
+            level: detailed
             readers:
               - periodic:
                   interval: 60000
@@ -122,7 +121,8 @@ opentelemetry-kube-stack:
                       protocol: http/protobuf
                       endpoint: http://${env:MY_POD_IP}:4318
 
+# Глобальные переменные
 global:
   folder_id: ""
   monium_api_key: ""
-  otel_enabled: ""
+  otel_enabled: "true"
