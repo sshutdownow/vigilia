@@ -20,15 +20,13 @@ opentelemetry-kube-stack:
         enabled: true
       # Пробрасываем порты на IP ноды
       ports:
-        otlp-grpc:
-          enabled: true
-          containerPort: 4317
+        - name: otlp-grpc
+          port: 4317
           hostPort: 4317
           appProtocol: grpc
           protocol: TCP
-        otlp-http:
-          enabled: true
-          containerPort: 4318
+        - name: otlp-http
+          port: 4318
           hostPort: 4318
           appProtocol: http
           protocol: TCP
@@ -61,8 +59,7 @@ opentelemetry-kube-stack:
       enabled: true
       mode: deployment
       fullnameOverride: "otel-gateway"
-      serviceAccount:
-        create: true
+      serviceAccount: "otel-gateway"
       extraEnvs:
         - name: MONIUM_API_KEY
           value: "{{ .Values.global.monium_api_key }}"
