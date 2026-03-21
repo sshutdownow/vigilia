@@ -3,7 +3,7 @@ opentelemetry-kube-stack:
     enabled: true
     manager:
       extraArgs:
-        - --feature-gates=operator.autoinstrumentation.all
+        - --enable-nginx-instrumentation=true
   rbac: # k8sattributes
     create: true
   # Агент, DaemonSet на каждой ноде
