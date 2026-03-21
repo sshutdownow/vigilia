@@ -5,7 +5,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-FROM nginx:latest
+FROM nginx:stable-trixie-otel
 
 COPY --from=builder /usr/src/app/dist/frontend/* /usr/share/nginx/html/
 EXPOSE 80
