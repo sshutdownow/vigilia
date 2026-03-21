@@ -45,7 +45,7 @@ opentelemetry-kube-stack:
         exporters:
           # Агент пересылает данные на шлюз (gateway) внутри кластера
           otlp:
-            endpoint: "otel-gateway-collector.otel.svc.cluster.local:4317"
+            endpoint: "otel-gateway-collector:4317"
             tls:
               insecure: true
         service:
@@ -72,9 +72,9 @@ opentelemetry-kube-stack:
           app.kubernetes.io/instance: "otel-stack"
       extraEnvs:
         - name: MONIUM_API_KEY
-          value: {{ .Values.global.monium_api_key | quote }}
+          value: "{{ .Values.global.monium_api_key }}"
         - name: MONIUM_FOLDER_ID
-          value: {{ .Values.global.folder_id | quote }}
+          value: "{{ .Values.global.folder_id }}"
         - name: MY_POD_IP
           valueFrom:
             fieldRef:
