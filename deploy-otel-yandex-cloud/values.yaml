@@ -1,7 +1,7 @@
 opentelemetry-kube-stack:
   opentelemetry-operator:
     enabled: true
-    manager:
+#    manager:
 #      extraArgs:
 #        - --feature-gates=operator.autoinstrumentation.nginx
   rbac: # k8sattributes
