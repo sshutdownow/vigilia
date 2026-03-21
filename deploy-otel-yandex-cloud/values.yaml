@@ -60,6 +60,10 @@ opentelemetry-kube-stack:
       # Схема требует имя аккаунта, а не объект
       serviceAccount: "otel-gateway"
       extraEnvs:
+        - name: MONIUM_API_KEY
+          value: "{{ .Values.global.monium_api_key }}"
+        - name: MONIUM_FOLDER_ID
+          value: "{{ .Values.global.folder_id }}"
         - name: MY_POD_IP
           valueFrom:
             fieldRef:
@@ -83,8 +87,8 @@ opentelemetry-kube-stack:
             endpoint: "ingest.monium.yandex.cloud:443"
             compression: zstd
             headers:
-              Authorization: "Api-Key {{ .Values.global.monium_api_key }}"
-              x-monium-project: "folder__{{ .Values.global.folder_id }}"
+              Authorization: "Api-Key ${env:MONIUM_API_KEY}"
+              x-monium-project: "folder__${env:MONIUM_FOLDER_ID}"
             sending_queue:
               enabled: true
             retry_on_failure:
