@@ -60,6 +60,9 @@ opentelemetry-kube-stack:
       mode: deployment
       fullnameOverride: "otel-gateway"
       serviceAccount: "otel-gateway"
+      serviceAccountCustom: 
+        create: true
+        name: "otel-gateway"
       extraEnvs:
         - name: MONIUM_API_KEY
           value: "{{ .Values.global.monium_api_key }}"
