@@ -61,9 +61,9 @@ opentelemetry-kube-stack:
       fullnameOverride: "otel-gateway"
       env:
         - name: MONIUM_API_KEY
-          value: "{{ .Values.global.monium_api_key }}"
+          value: {{ (index .Values "global").monium_api_key | quote }}
         - name: MONIUM_FOLDER_ID
-          value: "{{ .Values.global.folder_id }}"
+          value: {{ (index .Values "global").folder_id | quote }}
         # - name: MY_POD_IP
         #   valueFrom:
         #     fieldRef:
