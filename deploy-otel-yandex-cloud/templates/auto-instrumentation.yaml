@@ -4,13 +4,15 @@ metadata:
   name: sausage-store-instrumentation
   namespace: sausage-store
 spec:
-  exporter:
-    endpoint: http://${env:NODE_IP}:4317
+  # exporter:
+  #   endpoint: http://${env:NODE_IP}:4317
   env:
     - name: NODE_IP
       valueFrom:
         fieldRef:
           fieldPath: status.hostIP
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: http://$(NODE_IP):4317 # синтаксис Kubernetes
     - name: OTEL_EXPORTER_OTLP_PROTOCOL
       value: "grpc"
     - name: OTEL_EXPORTER_OTLP_METRICS_PROTOCOL
