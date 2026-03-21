@@ -5,6 +5,12 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-FROM nginx:1.22.0
+FROM nginx:latest
+
+# Install OpenTelemetry module
+RUN apt-get update && \
+    apt-get install -y nginx-module-otel && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY --from=builder /usr/src/app/dist/frontend/* /usr/share/nginx/html/
 EXPOSE 80
