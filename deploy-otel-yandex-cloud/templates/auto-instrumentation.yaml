@@ -38,7 +38,8 @@ spec:
       # Go autoinstrumentation uses http/proto by default
       # so data must be sent to 4318 instead of 4317.
       - name: OTEL_EXPORTER_OTLP_ENDPOINT
-        value: http://otel-stack-daemon-collector.otel.svc.cluster.local:4318
+        value: http://$(NODE_IP):4318
+#        value: http://otel-stack-daemon-collector.otel.svc.cluster.local:4318
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go:latest
   nginx:
     env:

@@ -12,6 +12,15 @@ opentelemetry-kube-stack:
     service:
       enabled: true
     fullnameOverride: "otel-agent"
+    ports:
+      - containerPort: 4317
+        hostPort: 4317
+        name: otlp-grpc
+        protocol: TCP
+      - containerPort: 4318
+        hostPort: 4318 # HTTP/Protobuf
+        name: otlp-http
+        protocol: TCP
     config:
       receivers:
         otlp:
