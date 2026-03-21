@@ -41,6 +41,6 @@ spec:
     attrs:
     - name: NginxModuleOtelMaxQueueSize
       value: "4096"
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nginx:latest
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:latest
   sdk:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-sdk:latest
