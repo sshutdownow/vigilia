@@ -1,4 +1,9 @@
 opentelemetry-kube-stack:
+  opentelemetry-operator:
+    enabled: true
+    manager:
+      extraArgs:
+        - --feature-gates=operator.autoinstrumentation.nginx
   rbac: # k8sattributes
     create: true
   # Агент, DaemonSet на каждой ноде
