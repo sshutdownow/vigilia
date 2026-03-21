@@ -10,6 +10,12 @@ opentelemetry-kube-stack:
   rbac: # k8sattributes
     create: true
 
+  commonEnv:
+    - name: MONIUM_API_KEY
+      value: "{{ .Values.global.monium_api_key }}"
+    - name: MONIUM_FOLDER_ID
+      value: "{{ .Values.global.folder_id }}"
+
   collectors:
     # Агент (DaemonSet) на каждой ноде кластера
     agent:
@@ -60,10 +66,6 @@ opentelemetry-kube-stack:
       mode: deployment
       fullnameOverride: "otel-gateway"
       env:
-        - name: MONIUM_API_KEY
-          value: '{{ "{{ .Values.global.monium_api_key }}" }}'
-        - name: MONIUM_FOLDER_ID
-          value: '{{ "{{ .Values.global.folder_id }}" }}'
         - name: MY_POD_IP
           valueFrom:
             fieldRef:
