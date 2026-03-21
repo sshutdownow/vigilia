@@ -3,7 +3,7 @@ opentelemetry-kube-stack:
     enabled: true
     manager:
       extraArgs:
-        - --feature-gates=operator.autoinstrumentation.nginx
+#        - --feature-gates=operator.autoinstrumentation.nginx
   rbac: # k8sattributes
     create: true
   # Агент, DaemonSet на каждой ноде
@@ -69,7 +69,7 @@ opentelemetry-kube-stack:
             Authorization: "Api-Key {{ .Values.global.monium_api_key }}"
             x-monium-project: "folder__{{ .Values.global.folder_id }}"
           sending_queue:
-            enabled: true            
+            enabled: true
 
           # Настройки повторных попыток при ошибках
           retry_on_failure:
@@ -101,7 +101,7 @@ opentelemetry-kube-stack:
             level: info  # debug | info | warn | error    
           metrics:
             level: detailed  # none | basic | normal | detailed
-            
+
             # Отправка телеметрии самого OTel Collector
             readers:
               - periodic:

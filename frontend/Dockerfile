@@ -5,6 +5,6 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-FROM nginx:latest
+FROM nginx:1.22.0
 COPY --from=builder /usr/src/app/dist/frontend/* /usr/share/nginx/html/
 EXPOSE 80
