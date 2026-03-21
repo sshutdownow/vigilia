@@ -64,10 +64,10 @@ opentelemetry-kube-stack:
           value: "{{ .Values.global.monium_api_key }}"
         - name: MONIUM_FOLDER_ID
           value: "{{ .Values.global.folder_id }}"
-        - name: MY_POD_IP
-          valueFrom:
-            fieldRef:
-              fieldPath: status.podIP
+        # - name: MY_POD_IP
+        #   valueFrom:
+        #     fieldRef:
+        #       fieldPath: status.podIP
       config:
         extensions:
           health_check:
