@@ -1,6 +1,7 @@
 opentelemetry-kube-stack:
   clusterName: sausage-store-cluster
 
+  # Настройки оператора (управляет внедрением агентов в поды)
   opentelemetry-operator:
     enabled: true
     manager:
@@ -11,21 +12,20 @@ opentelemetry-kube-stack:
     create: true
 
   collectors:
-    # Агент (DaemonSet) на каждой ноде кластера
+    # Агент (DaemonSet) — собирает данные с нод
     daemon:
       enabled: true
       fullnameOverride: "otel-agent"
-      service:
-        enabled: true
-      # Пробрасываем порты на IP ноды
       ports:
-        - containerPort: 4317
+        - name: otlp-grpc
+          port: 4317
           hostPort: 4317
-          name: otlp-grpc
+          appProtocol: grpc
           protocol: TCP
-        - containerPort: 4318
+        - name: otlp-http
+          port: 4318
           hostPort: 4318
-          name: otlp-http
+          appProtocol: http
           protocol: TCP
       config:
         receivers:
@@ -36,7 +36,7 @@ opentelemetry-kube-stack:
               http:
                 endpoint: "0.0.0.0:4318"
         exporters:
-          # Агент пересылает данные на шлюз (gateway) внутри кластера
+          # Пересылка на центральный шлюз (gateway)
           otlp:
             endpoint: "otel-gateway.otel.svc.cluster.local:4317"
             tls:
@@ -53,12 +53,12 @@ opentelemetry-kube-stack:
               receivers: [otlp]
               exporters: [otlp]
 
-    # 2. Центральный шлюз (Deployment) для отправки в облако
+    # Шлюз (Deployment) — отправляет данные в Yandex Cloud
     deployment:
       enabled: true
       fullnameOverride: "otel-gateway"
-      serviceAccount:
-        create: true
+      # Схема требует имя аккаунта, а не объект
+      serviceAccount: "otel-gateway"
       extraEnvs:
         - name: MY_POD_IP
           valueFrom:
@@ -78,7 +78,7 @@ opentelemetry-kube-stack:
             extract:
               metadata: [k8s.pod.name, k8s.namespace.name, k8s.node.name]
         exporters:
-          # Шлюз отправляет данные в Yandex Monitoring (Monium)
+          # Экспорт в Yandex Monitoring (Monium)
           otlp_grpc/monium:
             endpoint: "ingest.monium.yandex.cloud:443"
             compression: zstd
@@ -89,13 +89,9 @@ opentelemetry-kube-stack:
               enabled: true
             retry_on_failure:
               enabled: true
-              initial_interval: 5s
-              max_interval: 30s
-              max_elapsed_time: 300s
           debug:
             verbosity: detailed
         service:
-          extensions: [health_check]
           pipelines:
             metrics:
               receivers: [ otlp ]
@@ -121,7 +117,7 @@ opentelemetry-kube-stack:
                       protocol: http/protobuf
                       endpoint: http://${env:MY_POD_IP}:4318
 
-# Глобальные переменные
+# Глобальные параметры чарта
 global:
   folder_id: ""
   monium_api_key: ""
