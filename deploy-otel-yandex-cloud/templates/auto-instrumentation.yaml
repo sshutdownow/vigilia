@@ -25,6 +25,10 @@ spec:
       - key: "project"
         value: "folder__{{ .Values.global.folder_id }}"
 
+  logs:
+    exporter:
+      endpoint: "http://otel-agent-collector.otel.svc.cluster.local:4317"
+
   java:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
   go: # https://github.com/open-telemetry/opentelemetry-go-instrumentation/blob/main/docs/configuration.md
