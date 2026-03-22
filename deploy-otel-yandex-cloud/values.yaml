@@ -61,13 +61,13 @@ opentelemetry-kube-stack:
         service:
           pipelines:
             metrics:
-              receivers: [otlp,http]
+              receivers: [otlp]
               exporters: [otlp]
             traces:
-              receivers: [otlp,http]
+              receivers: [otlp]
               exporters: [otlp]
             logs:
-              receivers: [otlp,http]
+              receivers: [otlp]
               exporters: [otlp]
 
     # Центральный шлюз (Deployment) для отправки в облако
