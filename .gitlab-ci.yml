@@ -337,7 +337,10 @@ otel-plan:
     - terraform init
     - >
       terraform plan 
-      -var="enable_monium_key=true" 
+      -var="enable_monium_key=true"
+      -target=yandex_iam_service_account.monium_sa 
+      -target=yandex_resourcemanager_folder_iam_member.monium_sa_role 
+      -target=yandex_iam_service_account_api_key.monium_key        
       -out=otel.tfplan
   artifacts:
     paths:
