@@ -24,8 +24,11 @@ spec:
     metadata:
       labels:
         app: {{ .Release.Name }}-{{ .Chart.Name }}
-{{- if .Values.global.otel_enabled }}
       annotations:
+        prometheus.io/path: {{ .Values.annotations.path }}
+        prometheus.io/port: "{{ .Values.annotations.port }}"
+        prometheus.io/scrape: "{{ .Values.annotations.scrape }}"
+{{- if .Values.global.otel_enabled }}
         instrumentation.opentelemetry.io/inject-go: "{{ .Release.Namespace }}/sausage-store-instrumentation"
         instrumentation.opentelemetry.io/otel-go-auto-target-exe: "/root/main"
         instrumentation.opentelemetry.io/container-names: "{{ .Chart.Name }}"
@@ -58,6 +61,8 @@ spec:
           ports:
             - name: {{ .Chart.Name }}
               containerPort: {{ .Values.containerPort }}
+          livenessProbe:
+{{ toYaml .Values.livenessProbe | indent 12 }}
       volumes:
       - name: {{ .Release.Name }}-{{ .Chart.Name }}-conf
         configMap:
