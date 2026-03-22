@@ -6,17 +6,17 @@ variable "enable_monium_key" {
 
 resource "yandex_iam_service_account" "monium_sa" {
   count = var.enable_monium_key ? 1 : 0
-  name  = "sausage-monium-sa"
+  description = "Service account to send telemetry data to monium"
+  name  = "monium-sa"
 }
 
 resource "yandex_resourcemanager_folder_iam_member" "monium_sa_role" {
   count     = var.enable_monium_key ? 1 : 0
-
+  # https://yandex.cloud/ru/docs/monium/security/#monium-telemetry-writer
   for_each  = toset([
-    "monium.telemetry.writer",
-    "monium.traces.writer"
+    "monium.telemetry.writer"
   ])
-    folder_id = var.folder_id
+  folder_id = var.folder_id
   role      = each.key
   member    = "serviceAccount:${yandex_iam_service_account.monium_sa[0].id}"    
 }
