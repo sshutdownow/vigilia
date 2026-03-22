@@ -11,9 +11,14 @@ resource "yandex_iam_service_account" "monium_sa" {
 
 resource "yandex_resourcemanager_folder_iam_member" "monium_sa_role" {
   count     = var.enable_monium_key ? 1 : 0
-  folder_id = var.folder_id
-  role      = "monium.telemetry.writer"
-  member    = "serviceAccount:${yandex_iam_service_account.monium_sa[0].id}"
+
+  for_each  = toset([
+    "monium.telemetry.writer",
+    "monium.traces.writer"
+  ])
+    folder_id = var.folder_id
+  role      = each.key
+  member    = "serviceAccount:${yandex_iam_service_account.monium_sa[0].id}"    
 }
 
 resource "yandex_iam_service_account_api_key" "monium_key" {
