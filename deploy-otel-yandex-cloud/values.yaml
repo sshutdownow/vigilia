@@ -50,6 +50,8 @@ opentelemetry-kube-stack:
             protocols:
               grpc:
                 endpoint: "0.0.0.0:4317"
+              http: # для Go
+                endpoint: "0.0.0.0:4318"
         exporters:
           # Агент пересылает данные на шлюз (gateway) внутри кластера
           otlp:
