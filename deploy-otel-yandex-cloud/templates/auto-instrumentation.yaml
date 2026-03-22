@@ -27,14 +27,16 @@ spec:
 
   java:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
-  go:
+  go: # https://github.com/open-telemetry/opentelemetry-go-instrumentation/blob/main/docs/configuration.md
     env:
+      - name: OTEL_LOG_LEVEL
+        value: "info"    
       - name: OTEL_EXPORTER_OTLP_ENDPOINT
-        value: "http://otel-agent-collector.otel.svc.cluster.local:4318"
+        value: "http://otel-agent-collector.otel.svc.cluster.local:4317"
       - name: OTEL_EXPORTER_OTLP_PROTOCOL
-        value: "http/protobuf"
+        value: "grpc"
       - name: OTEL_EXPORTER_OTLP_METRICS_PROTOCOL
-        value: "http/protobuf"
+        value: "grpc"
       - name: OTEL_GO_AUTO_INCLUDE_DB_STATEMENT
         value: "true"
       - name: OTEL_GO_AUTO_PARSE_DB_STATEMENT
