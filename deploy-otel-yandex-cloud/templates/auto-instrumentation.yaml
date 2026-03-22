@@ -5,14 +5,14 @@ metadata:
   namespace: sausage-store
 spec:
   exporter:
-    endpoint: "http://otel-agent.otel.svc.cluster.local:4317"
+    endpoint: "http://otel-agent-collector.otel.svc.cluster.local:4317"
   env:
     - name: OTEL_NODE_IP
       valueFrom:
         fieldRef:
           fieldPath: status.hostIP
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: "http://otel-agent.otel.svc.cluster.local:4317"
+      value: "http://otel-agent-collector.otel.svc.cluster.local:4317"
     - name: OTEL_EXPORTER_OTLP_PROTOCOL
       value: "grpc"
     - name: OTEL_EXPORTER_OTLP_METRICS_PROTOCOL
