@@ -28,7 +28,7 @@ spec:
       annotations:
         instrumentation.opentelemetry.io/inject-go: "{{ .Release.Namespace }}/sausage-store-instrumentation"
         instrumentation.opentelemetry.io/otel-go-auto-target-exe: "/root/main"
-        instrumentation.opentelemetry.io/container-names: "{{ .Release.Name }}-{{ .Chart.Name }}"
+        instrumentation.opentelemetry.io/container-names: "{{ .Chart.Name }}"
 {{- end }}
     spec:
       containers:
