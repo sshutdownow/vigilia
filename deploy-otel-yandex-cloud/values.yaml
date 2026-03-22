@@ -5,6 +5,7 @@ opentelemetry-kube-stack:
     enabled: true
     manager:
       extraArgs:
+        - --enable-go-instrumentation=true
         - --enable-nginx-instrumentation=true
 
   rbac: # k8sattributes

@@ -37,6 +37,8 @@ spec:
           securityContext:
             runAsUser: 0
             privileged: true
+            add:
+              - SYS_PTRACE
 {{- end }}
           image: {{ .Values.image }}
           imagePullPolicy: {{ .Values.global.imagePullPolicy }}
