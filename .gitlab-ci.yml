@@ -338,9 +338,6 @@ otel-plan:
     - >
       terraform plan 
       -var="enable_monium_key=true" 
-      -target=yandex_iam_service_account.monium_sa 
-      -target=yandex_resourcemanager_folder_iam_member.monitoring_editor 
-      -target=yandex_iam_service_account_api_key.monium_key 
       -out=otel.tfplan
   artifacts:
     paths:

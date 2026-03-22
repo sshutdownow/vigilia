@@ -18,7 +18,7 @@ resource "yandex_resourcemanager_folder_iam_member" "monium_sa_role" {
   ]) : []
   folder_id = var.folder_id
   role      = each.key
-  member    = "serviceAccount:${yandex_iam_service_account.monium_sa[*].id}"    
+  member    = "serviceAccount:${yandex_iam_service_account.monium_sa[0].id}"    
 }
 
 resource "yandex_iam_service_account_api_key" "monium_key" {
