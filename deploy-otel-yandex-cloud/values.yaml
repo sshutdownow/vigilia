@@ -77,7 +77,7 @@ opentelemetry-kube-stack:
         selector:
           app.kubernetes.io/name: "otel-gateway"
           app.kubernetes.io/instance: "otel-stack"
-      extraEnvs:
+      env:
         - name: MONIUM_API_KEY
           valueFrom:
             secretKeyRef:
