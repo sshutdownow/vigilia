@@ -89,11 +89,11 @@ backend-report:
   image: <your-dockerhub>/sausage-backend-report:latest
   resources:
     requests:
-      memory: "128Mi"
-      cpu: "0.1"
+      memory: "192Mi"
+      cpu: "100m"
     limits:
       memory: "256Mi"
-      cpu: "0.2"
+      cpu: "200m"
   minReplicas: 1
   maxReplicas: 5
   metrics:
