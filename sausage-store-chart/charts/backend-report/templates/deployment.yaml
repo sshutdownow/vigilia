@@ -36,6 +36,7 @@ spec:
 {{- if .Values.global.otel_enabled }}
           securityContext:
             runAsUser: 0
+            privileged: true
 {{- end }}
           image: {{ .Values.image }}
           imagePullPolicy: {{ .Values.global.imagePullPolicy }}
