@@ -5,14 +5,14 @@ metadata:
   namespace: sausage-store
 spec:
   exporter:
-    endpoint: http://127.0.0.1:4317
+    endpoint: "http://otel-agent.otel.svc.cluster.local:4317"
   env:
-    - name: NODE_IP
+    - name: OTEL_NODE_IP
       valueFrom:
         fieldRef:
           fieldPath: status.hostIP
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: http://127.0.0.1:4317 # синтаксис Kubernetes
+      value: "http://otel-agent.otel.svc.cluster.local:4317"
     - name: OTEL_EXPORTER_OTLP_PROTOCOL
       value: "grpc"
     - name: OTEL_EXPORTER_OTLP_METRICS_PROTOCOL
@@ -34,8 +34,6 @@ spec:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
   go:
     env:
-      - name: OTEL_EXPORTER_OTLP_ENDPOINT
-        value: "http://127.0.0.1:4318" 
       - name: OTEL_GO_AUTO_INCLUDE_DB_STATEMENT
         value: "true"
     image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:latest
