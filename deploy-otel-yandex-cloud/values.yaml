@@ -12,9 +12,15 @@ opentelemetry-kube-stack:
 
   commonEnv:
     - name: MONIUM_API_KEY
-      value: "{{ .Values.global.monium_api_key }}"
+      valueFrom:
+        secretKeyRef:
+          name: monium-secret
+          key: api-key
     - name: MONIUM_FOLDER_ID
-      value: "{{ .Values.global.folder_id }}"
+      valueFrom:
+        secretKeyRef:
+          name: monium-secret
+          key: folder-id
 
   collectors:
     # Агент (DaemonSet) на каждой ноде кластера
@@ -25,6 +31,7 @@ opentelemetry-kube-stack:
       service:
         enabled: true
       # Пробрасываем порты на IP ноды
+      hostNetwork: true
       ports:
         - name: otlp-grpc
           port: 4317
@@ -72,9 +79,15 @@ opentelemetry-kube-stack:
           app.kubernetes.io/instance: "otel-stack"
       extraEnvs:
         - name: MONIUM_API_KEY
-          value: "{{ .Values.global.monium_api_key }}"
+          valueFrom:
+            secretKeyRef:
+              name: monium-secret
+              key: api-key
         - name: MONIUM_FOLDER_ID
-          value: "{{ .Values.global.folder_id }}"
+          valueFrom:
+            secretKeyRef:
+              name: monium-secret
+              key: folder-id
         - name: MY_POD_IP
           valueFrom:
             fieldRef:
