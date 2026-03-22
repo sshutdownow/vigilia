@@ -40,7 +40,8 @@ spec:
       - name: OTEL_EXPORTER_OTLP_ENDPOINT
         value: http://$(NODE_IP):4318
 #        value: http://otel-stack-daemon-collector.otel.svc.cluster.local:4318
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go:latest
+#   image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-go:latest
+    image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:latest
   nginx:
     env:
       - name: OTEL_TRACES_EXPORTER
