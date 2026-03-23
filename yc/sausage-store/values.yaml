@@ -4,16 +4,15 @@ global:
   gitlab_token: ""
   gitlab_registry: ""
 
-sausage-store:
-  global:
-    imagePullPolicy: Always
-    # секрет для скачивания образов
-    imagePullSecrets:
-      - name: gitlab-pull-secret
-    vault:
-      enabled: false
-      host: ""
+  imagePullPolicy: Always
 
+  imagePullSecrets: # секрет для скачивания образов
+    - name: gitlab-pull-secret
+  vault:
+    enabled: false
+    host: ""
+
+sausage-store:
   lockbox:
     secret_id: ""
 
