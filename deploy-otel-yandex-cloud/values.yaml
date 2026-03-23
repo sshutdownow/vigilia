@@ -182,12 +182,9 @@ opentelemetry-kube-stack:
       - baggage
     resource:
       resourceAttributes:
-        - key: "service.name"
-          value: "sausage-store"
-        - key: "deployment.environment"
-          value: "production"
-        - key: "project"
-          value: "folder__{{ .Values.global.folder_id }}"
+        service.name: "sausage-store"
+        deployment.environment: "production"
+        project: "folder__{{ .Values.global.folder_id }}"
     java:
       image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
     go: # https://github.com/open-telemetry/opentelemetry-go-instrumentation/blob/main/docs/configuration.md
