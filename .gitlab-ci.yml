@@ -147,7 +147,7 @@ tflint:
   allow_failure: true
   image: 
     name: ghcr.io/terraform-linters/tflint:latest
-    entrypoint: [""]
+    entrypoint: ["/bin/sh"]
   needs: ["tflint-prepare"]
   variables:
     GIT_DEPTH: "1"
