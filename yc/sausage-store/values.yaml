@@ -1,4 +1,14 @@
 default:
+  imagePullPolicy: Always
+  vault:
+    enabled: false
+    host: ""
+    name: vault
+    vaultToken: someToken
+  otel_enabled: ""
+  gitlab_user: ""
+  gitlab_token: ""
+  gitlab_registry: ""
 
 sausage-store:
   lockbox:
