@@ -29,7 +29,7 @@ spec:
         prometheus.io/port: "{{ .Values.annotations.port }}"
         prometheus.io/scrape: "{{ .Values.annotations.scrape }}"
 {{- if and .Values.global (eq (index .Values.global "otel_enabled" | toString) "true") }}
-        instrumentation.opentelemetry.io/inject-java: "true"
+        instrumentation.opentelemetry.io/inject-java: "otel/sausage-store-instrumentation"
 {{- end }}
     spec:
       containers:
