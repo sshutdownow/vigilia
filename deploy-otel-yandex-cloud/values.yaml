@@ -171,6 +171,12 @@ opentelemetry-kube-stack:
         value: "grpc"
       - name: OTEL_EXPORTER_OTLP_METRICS_PROTOCOL
         value: "grpc"
+      - name: OTEL_TRACES_EXPORTER
+        value: "otlp"
+      - name: OTEL_METRICS_EXPORTER
+        value: "otlp"
+      - name: OTEL_LOGS_EXPORTER
+        value: "otlp"
     propagators:
       - tracecontext
       - baggage
@@ -182,10 +188,6 @@ opentelemetry-kube-stack:
           value: "production"
         - key: "project"
           value: "folder__{{ .Values.global.folder_id }}"
-    logs:
-      exporter:
-        endpoint: "http://otel-agent-collector.otel.svc.cluster.local:4317"
-
     java:
       image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
     go: # https://github.com/open-telemetry/opentelemetry-go-instrumentation/blob/main/docs/configuration.md
@@ -211,8 +213,8 @@ opentelemetry-kube-stack:
       - name: NginxModuleOtelMaxQueueSize
         value: "4096"
       image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:latest
-    sdk:
-      image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-sdk:latest
+    # sdk:
+    #   image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-sdk:latest
 
   opAMPBridge:
     enabled: true
