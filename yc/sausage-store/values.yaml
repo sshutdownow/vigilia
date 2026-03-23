@@ -1,16 +1,16 @@
+global:
+  otel_enabled: ""
+  gitlab_user: ""
+  gitlab_token: ""
+  gitlab_registry: ""
+
+  imagePullPolicy: Always
+
+  vault:
+    enabled: false
+    host: ""
+
 sausage-store:
-  global:
-    otel_enabled: ""
-    gitlab_user: ""
-    gitlab_token: ""
-    gitlab_registry: ""
-
-    imagePullPolicy: Always
-
-    vault:
-      enabled: false
-      host: ""
-
   lockbox:
     secret_id: ""
 
