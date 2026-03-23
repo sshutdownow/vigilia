@@ -134,13 +134,12 @@ tflint:
     GIT_DEPTH: "1"
   script:
     - '[ "$[[ inputs.enable_test ]]" == "false" ] && exit 0'
-    - cd ${TF_ROOT}
     - curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | TFLINT_INSTALL_PATH="${TF_ROOT}" bash
     - terraform init -backend=false
     - ./tflint --init || true
     - mkdir -p ${CI_PROJECT_DIR}/tflint_report
     - ./tflint --recursive --format=junit > ${CI_PROJECT_DIR}/tflint_report/results_junit.xml || EXIT_CODE=$?
-    - ./bin/tflint --recursive --format=compact
+    - ./tflint --recursive --format=compact
     - exit ${EXIT_CODE:-0}
   artifacts:
     when: always
