@@ -126,38 +126,21 @@ checkov:
       when: always
 
 # Выполнение cтатического анализа TFLint
-.tflint-prepare:
-  stage: tests
-  extends: .terraform_setup
-  variables:
-    GIT_DEPTH: "1"
-  script:
-    - terraform init -backend=false
-  artifacts:
-    paths:
-      - ${TF_ROOT}/.terraform/
-    expire_in: 1h
-  rules:
-    - if: $OPERATION == "terraform"
-      changes:
-        - "infra/**/*"
-
 tflint:
-  extends: .tflint-prepare
+  extends: .terraform_setup
   stage: tests
   allow_failure: true
-  image: 
-    name: ghcr.io/terraform-linters/tflint:latest
-    entrypoint: [""]
   variables:
     GIT_DEPTH: "1"
   script:
     - '[ "$[[ inputs.enable_test ]]" == "false" ] && exit 0'
     - cd ${TF_ROOT}
-    - /usr/local/bin/tflint --init || true
+    - curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | TFLINT_INSTALL_PATH="${TF_ROOT}" bash
+    - terraform init -backend=false
+    - ./tflint --init || true
     - mkdir -p ${CI_PROJECT_DIR}/tflint_report
-    - /usr/local/bin/tflint --recursive --format=junit > ${CI_PROJECT_DIR}/tflint_report/results_junit.xml || EXIT_CODE=$?
-    - /usr/local/bin/tflint --recursive --format=compact
+    - ./tflint --recursive --format=junit > ${CI_PROJECT_DIR}/tflint_report/results_junit.xml || EXIT_CODE=$?
+    - ./bin/tflint --recursive --format=compact
     - exit ${EXIT_CODE:-0}
   artifacts:
     when: always
@@ -165,7 +148,7 @@ tflint:
       junit: tflint_report/results_junit.xml
     paths:
       - tflint_report/
-    expire_in: 1h
+    expire_in: 8h
   rules:
     - if: $OPERATION == "terraform"
       changes:
