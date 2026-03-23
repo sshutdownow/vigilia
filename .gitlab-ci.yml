@@ -108,6 +108,8 @@ checkov:
   stage: tests
   allow_failure: true
   image: bridgecrew/checkov:latest
+  variables:
+    GIT_DEPTH: "1"
   script:
     - '[ "$[[ inputs.enable_test ]]" == "false" ] && exit 0'
     - checkov -d ${TF_ROOT} --external-checks-dir ${TF_ROOT}/custom_policies --output junitxml --output-file-path checkov_report
@@ -123,14 +125,33 @@ checkov:
       when: always
 
 # Выполнение cтатического анализа TFLint
-tflint:
-  extends: .terraform_setup
+tflint-prepare:
   stage: tests
-  allow_failure: true  
+  extends: .terraform_setup
+  variables:
+    GIT_DEPTH: "1"
   script:
-    - curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash -s -- ${CI_PROJECT_DIR}/bin
-    - export PATH="${CI_PROJECT_DIR}/bin:$PATH"
     - terraform init -backend=false
+  artifacts:
+    paths:
+      - ${TF_ROOT}/.terraform/
+    expire_in: 1h
+  rules:
+    - if: $OPERATION == "terraform"
+      changes:
+        - "infra/**/*"
+
+tflint:
+  stage: tests
+  allow_failure: true
+  image: 
+    name: ghcr.io/terraform-linters/tflint:latest
+    entrypoint: [""]
+  needs: ["tflint-prepare"]
+  variables:
+    GIT_DEPTH: "1"
+  script:
+    - cd ${TF_ROOT}
     - tflint --init || true
     - mkdir -p ${CI_PROJECT_DIR}/tflint_report
     - tflint --recursive --format=junit > ${CI_PROJECT_DIR}/tflint_report/results_junit.xml || EXIT_CODE=$?
@@ -142,11 +163,11 @@ tflint:
       junit: tflint_report/results_junit.xml
     paths:
       - tflint_report/
+    expire_in: 1h
   rules:
     - if: $OPERATION == "terraform"
       changes:
         - "infra/**/*"
-      when: always
 
 # Terraform plan для инфраструктуры
 plan:
@@ -156,6 +177,7 @@ plan:
   needs:
     - checkov
     - tflint
+  dependencies: [] # не скачивать артифакты из tests
   script:
     - terraform init
     - terraform fmt -check -recursive -diff || true
