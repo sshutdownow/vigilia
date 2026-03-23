@@ -1,17 +1,19 @@
 global:
-  imagePullPolicy: Always
-  # секрет для скачивания образов
-  imagePullSecrets:
-    - name: gitlab-pull-secret
-  vault:
-    enabled: false
-    host: ""
   otel_enabled: ""
   gitlab_user: ""
   gitlab_token: ""
   gitlab_registry: ""
 
 sausage-store:
+  global:
+    imagePullPolicy: Always
+    # секрет для скачивания образов
+    imagePullSecrets:
+      - name: gitlab-pull-secret
+    vault:
+      enabled: false
+      host: ""
+
   lockbox:
     secret_id: ""
 
