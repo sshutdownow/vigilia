@@ -119,6 +119,7 @@ checkov:
       junit: checkov_report/results_junitxml.xml
     paths:
       - checkov_report/
+    expire_in: 8h
   rules:
     - if: $OPERATION == "terraform"
       changes:
@@ -157,7 +158,6 @@ tflint:
 plan:
   extends: .terraform_setup
   stage: plan
-  image: hashicorp/terraform:latest
   needs:
     - checkov
     - tflint
@@ -196,7 +196,6 @@ plan:
 apply:
   extends: .terraform_setup
   stage: apply
-  image: hashicorp/terraform:latest
   script:
     - terraform init
     - terraform apply -auto-approve ${PLAN}
@@ -221,7 +220,6 @@ apply:
 destroy:
   extends: .terraform_setup
   stage: destroy
-  image: hashicorp/terraform:latest
   script:
     - terraform init
     - terraform destroy -auto-approve
@@ -328,7 +326,6 @@ package-helm-chart:
 otel-plan:
   extends: .terraform_setup
   stage: plan
-  image: hashicorp/terraform:latest
   script:
     - terraform init
     - >
@@ -354,7 +351,6 @@ otel-apply:
   extends: .terraform_setup
   stage: apply
   needs: ["otel-plan"]
-  image: hashicorp/terraform:latest
   script:
     - terraform init
     - terraform apply "otel.tfplan"
