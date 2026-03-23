@@ -16,6 +16,10 @@ spec:
       valueFiles:
         - "values.yaml"
       values: |
+        global:
+          gitlab_registry: {{ .Values.global.gitlab_registry | quote }}
+          gitlab_user: {{ .Values.global.gitlab_user | quote }}
+          gitlab_token: {{ .Values.global.gitlab_token | quote }}
         sausage-store:
           backend:
             extraEnv:
