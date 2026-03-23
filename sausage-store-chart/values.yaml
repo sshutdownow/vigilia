@@ -1,9 +1,14 @@
 global:
   imagePullPolicy: Always
   vault:
-    host: <your-vault-host-ip>
+    enabled: false
+    host: ""
     name: vault
     vaultToken: someToken
+  otel_enabled: ""
+  gitlab_user: ""
+  gitlab_token: ""
+  gitlab_registry: ""
 
 frontend:
   replicas: 1
