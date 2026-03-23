@@ -126,7 +126,7 @@ checkov:
       when: always
 
 # Выполнение cтатического анализа TFLint
-tflint-prepare:
+.tflint-prepare:
   stage: tests
   extends: .terraform_setup
   variables:
@@ -143,22 +143,21 @@ tflint-prepare:
         - "infra/**/*"
 
 tflint:
+  extends: .tflint-prepare
   stage: tests
   allow_failure: true
   image: 
     name: ghcr.io/terraform-linters/tflint:latest
-    entrypoint: ["/bin/sh"]
-  needs: ["tflint-prepare"]
+    entrypoint: [""]
   variables:
     GIT_DEPTH: "1"
   script:
     - '[ "$[[ inputs.enable_test ]]" == "false" ] && exit 0'
     - cd ${TF_ROOT}
-    - export PATH="${PATH}:/usr/local/bin"
-    - tflint --init || true
+    - /usr/local/bin/tflint --init || true
     - mkdir -p ${CI_PROJECT_DIR}/tflint_report
-    - tflint --recursive --format=junit > ${CI_PROJECT_DIR}/tflint_report/results_junit.xml || EXIT_CODE=$?
-    - tflint --recursive --format=compact
+    - /usr/local/bin/tflint --recursive --format=junit > ${CI_PROJECT_DIR}/tflint_report/results_junit.xml || EXIT_CODE=$?
+    - /usr/local/bin/tflint --recursive --format=compact
     - exit ${EXIT_CODE:-0}
   artifacts:
     when: always
