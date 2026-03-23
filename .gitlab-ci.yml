@@ -214,7 +214,7 @@ terratest:
   before_script:
     - cd ${TF_ROOT}
     - touch ./authorized_key.json && chmod 0600 ./authorized_key.json && echo ${AUTHORIZED_KEY} | base64 -d > ./authorized_key.json
-#   - sed -i -e "s/\${CI_PROJECT_ID}/${CI_PROJECT_ID}/g" -e "s/\${GITLAB_USER_NAME}/${GITLAB_USER_NAME}/g" -e "s/\${TF_HTTP_PASSWORD}/${TF_HTTP_PASSWORD}/g" provider.tf
+    - sed -i -e "s/\${CI_PROJECT_ID}/${CI_PROJECT_ID}/g" -e "s/\${GITLAB_USER_NAME}/${GITLAB_USER_NAME}/g" -e "s/\${TF_HTTP_PASSWORD}/${TF_HTTP_PASSWORD}/g" provider.tf
   script:
     - '[ "$[[ inputs.enable_test ]]" == "false" ] && exit 0'
     - cd test

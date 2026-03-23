@@ -204,6 +204,8 @@ opentelemetry-kube-stack:
       image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:latest
     nginx:
       env:
+        - name: OTEL_LOG_LEVEL
+          value: "info"
       attrs:
       - name: NginxModuleOtelMaxQueueSize
         value: "4096"
