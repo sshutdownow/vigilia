@@ -5,6 +5,12 @@ metadata:
   name: {{ .Release.Name }}-{{ .Chart.Name }}-conf
 data:
   {{ .Values.nginxConf }}: |
+
+    {{- if .Values.global.otel_enabled }}
+    # Загружаем модуль, он есть в nginx:1.28-trixie-otel
+    load_module modules/ngx_otel_module.so;
+    {{- end }}
+
     user  nginx;
     worker_processes  auto;
     error_log  /var/log/nginx/error.log notice;
@@ -14,28 +20,44 @@ data:
     }
 
     http {
+        {{- if .Values.global.otel_enabled }}
+         otel_exporter {
+            endpoint otel-agent-collector.otel.svc.cluster.local:4317;
+        }
+        otel_trace on;
+        otel_service_name {{ .Chart.Name | quote }};
+        {{- end }}
+
+
         include       /etc/nginx/mime.types;
         default_type  application/octet-stream;
 
         log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
                           '$status $body_bytes_sent "$http_referer" '
-                          '"$http_user_agent" "$http_x_forwarded_for"';
+                          '"$http_user_agent" "$http_x_forwarded_for"'
+                          {{- if .Values.global.otel_enabled }}
+                          'trace_id=$otel_trace_id span_id=$otel_span_id'; 
+                          {{- else }}
+                          ;
+                          {{- end }}
 
         access_log  /var/log/nginx/access.log  main;
 
         sendfile        on;
-        keepalive_timeout  65;
+        keepalive_timeout  5;
         server {
 
           listen       80;
-
+          {{- if .Values.global.otel_enabled }}
+          otel_trace_context propagate;
+          {{- end }
           location / {
               root   /usr/share/nginx/html;
               index  index.html;
               try_files $uri $uri/ /index.html;
           }
 
-            location /api {
+          location /api {
               proxy_pass http://{{ .Release.Name }}-backend-service:8080;
           }
 
