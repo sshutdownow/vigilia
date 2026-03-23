@@ -6,5 +6,5 @@ version: 1.0.0
 dependencies:
   - name: sausage-store
     # основной чарт
-    repository: "file://../sausage-store-chart" 
+    repository: "file://../../sausage-store-chart"
     version: "1.0.2"

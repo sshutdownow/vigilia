@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: {{ .Values.global.repo_url | quote }}
-    path: "deploy-yandex-cloud"
+    path: "yc/sausage-store"
     targetRevision: "master"
     helm:
       releaseName: sausage-store
@@ -16,7 +16,6 @@ spec:
       values: |
         sausage-store:
           backend:
-            serviceAccountName: "sausage-backend-sa"
             extraEnv:
               - name: JAVA_TOOL_OPTIONS
                 value: "-Dspring.cloud.vault.enabled=false -Dspring.config.import=optional:vault://kv/sausage-store"

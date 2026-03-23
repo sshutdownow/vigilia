@@ -38,7 +38,6 @@ sausage-store:
         memory: "256Mi"
         cpu: "1"
 
-
   backend:
     imagePullSecrets:
       - name: gitlab-pull-secret

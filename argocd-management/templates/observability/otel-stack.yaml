@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: {{ .Values.global.repo_url | quote }}
-    path: "deploy-otel-yandex-cloud"
+    path: "yc/otel"
     targetRevision: "master"
   destination:
     server: https://kubernetes.default.svc
