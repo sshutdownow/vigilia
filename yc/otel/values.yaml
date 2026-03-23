@@ -214,7 +214,7 @@ opentelemetry-kube-stack:
     #   image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-sdk:latest
 
   opAMPBridge:
-    enabled: true
+    enabled: false
     addReportingLabel: true
 
 # Глобальные переменные чарта
