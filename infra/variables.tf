@@ -56,9 +56,9 @@ variable "net_cidr" {
   }))
 
   default = [
-    { name = "infra-subnet-a", zone = "ru-central1-a", prefix = "10.129.1.0/24" },
-    { name = "infra-subnet-b", zone = "ru-central1-b", prefix = "10.130.1.0/24" },
-    { name = "infra-subnet-d", zone = "ru-central1-d", prefix = "10.131.1.0/24" },
+    { name = "infra-subnet-a", zone = "ru-central1-a", prefix = "10.10.0.0/16" },
+    { name = "infra-subnet-b", zone = "ru-central1-b", prefix = "10.11.0.0/16" },
+    { name = "infra-subnet-d", zone = "ru-central1-d", prefix = "10.13.0.0/16" },
   ]
 }
 

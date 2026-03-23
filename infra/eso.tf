@@ -30,7 +30,6 @@ resource "helm_release" "external_secrets" {
   chart            = "external-secrets"
   namespace        = "external-secrets"
   create_namespace = true
-  wait             = true
 
   # https://yandex.cloud/ru/docs/managed-kubernetes/operations/applications/external-secrets-operator
   # https://external-secrets.io/latest/provider/yandex-lockbox/
@@ -51,6 +50,11 @@ resource "helm_release" "external_secrets" {
       })
     }
   ]
+
+  cleanup_on_fail = true
+  force_update    = true
+  recreate_pods   = true
+  wait            = true
 
   depends_on = [yandex_kubernetes_cluster.k8s-cluster]
 }

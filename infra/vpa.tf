@@ -22,5 +22,10 @@ resource "helm_release" "vpa" {
     })
   ]
 
+  cleanup_on_fail = true
+  force_update    = true
+  recreate_pods   = true
+  wait            = true
+
   depends_on = [yandex_kubernetes_cluster.k8s-cluster]
 }

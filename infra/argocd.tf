@@ -97,6 +97,11 @@ resource "helm_release" "argocd" {
     })
   ]
 
+  cleanup_on_fail = true
+  force_update    = true
+  recreate_pods   = true
+  wait            = true
+
   depends_on = [
     yandex_kubernetes_cluster.k8s-cluster,
     helm_release.external_secrets,
@@ -179,39 +184,13 @@ resource "helm_release" "argocd_apps" {
     EOT
   ]
 
+  cleanup_on_fail = true
+  force_update    = true
+  recreate_pods   = true
+  wait            = true
+
   depends_on = [
     kubernetes_secret_v1.sausage_repo_gitlab,
     yandex_lockbox_secret_version.v1
   ]
 }
-
-# resource "kubernetes_namespace_v1" "sausage_store" {
-#   metadata {
-#     name = "sausage-store"
-#   }
-#   lifecycle {
-#     ignore_changes = [
-#       metadata[0].annotations,
-#       metadata[0].labels,
-#     ]
-#   }
-# }
-
-# # login/password for k8s to download images from GitLab 
-# resource "kubernetes_secret_v1" "gitlab_pull_secret" {
-#   metadata {
-#     name      = "gitlab-pull-secret"
-#     # namespace = "sausage-store"
-#     namespace = kubernetes_namespace_v1.sausage_store.metadata[0].name
-#   }
-#   type = "kubernetes.io/dockerconfigjson"
-#   data = {
-#     ".dockerconfigjson" = jsonencode({
-#       auths = {
-#         (${local.gitlab_registry}) = {
-#           auth = base64encode("${var.gitlab_username}:${var.gitlab_token}")
-#         }
-#       }
-#     })
-#   }
-# }

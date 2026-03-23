@@ -35,8 +35,6 @@ resource "helm_release" "gwin" {
   namespace        = "gwin"
   create_namespace = true
 
-  wait             = true
-
   values = [<<-EOF
     controller:
       folderId: ${var.folder_id}
@@ -60,6 +58,11 @@ resource "helm_release" "gwin" {
   EOF
   ]
  
+  cleanup_on_fail = true
+  force_update    = true
+  recreate_pods   = true
+  wait            = true
+
   depends_on = [
     yandex_resourcemanager_folder_iam_member.gwin_roles,
     yandex_iam_service_account_key.gwin_sa_key,
