@@ -14,7 +14,6 @@ stages:
   - apply
   - terratest
   - destroy
-  - ansible_deploy
   - build
   - package
   - otel 
@@ -34,11 +33,6 @@ variables:
       - "ansible"
       - "k8s"
       - "otel"
-
-before_script:
-  - cd ${TF_ROOT}
-  - touch ./authorized_key.json && chmod 0600 ./authorized_key.json && echo ${AUTHORIZED_KEY} | base64 -d > ./authorized_key.json
-  - sed -i -e "s/\${CI_PROJECT_ID}/${CI_PROJECT_ID}/g" -e "s/\${GITLAB_USER_NAME}/${GITLAB_USER_NAME}/g" -e "s/\${TF_HTTP_PASSWORD}/${TF_HTTP_PASSWORD}/g" provider.tf
 
 # TEMPLATE FOR TERRAFORM JOBS ONLY
 .terraform_setup:
@@ -117,12 +111,12 @@ checkov:
   image: bridgecrew/checkov:latest
   script:
     - '[ "$[[ inputs.enable_test ]]" == "false" ] && exit 0'
-    - checkov -d . --external-checks-dir ./custom_policies --output junitxml --output-file-path checkov_report
+    - checkov -d ${TF_ROOT} --external-checks-dir ${TF_ROOT}/custom_policies --output junitxml --output-file-path checkov_report
   artifacts:
     reports:
-      junit: ${TF_ROOT}/checkov_report/results_junitxml.xml
+      junit: checkov_report/results_junitxml.xml
     paths:
-      - ${TF_ROOT}/checkov_report/
+      - checkov_report/
   rules:
     - if: $OPERATION == "terraform"
       changes:
@@ -131,6 +125,7 @@ checkov:
 
 # Terraform plan для инфраструктуры
 plan:
+  extends: .terraform_setup
   stage: plan
   image: hashicorp/terraform:latest
   needs:
@@ -167,6 +162,7 @@ plan:
 
 # Создание инфраструктуры Terraform
 apply:
+  extends: .terraform_setup
   stage: apply
   image: hashicorp/terraform:latest
   script:
@@ -191,6 +187,7 @@ apply:
 
 # Удаление инфраструктуры Terraform за исключением LE-сертификата
 destroy:
+  extends: .terraform_setup
   stage: destroy
   image: hashicorp/terraform:latest
   script:
@@ -209,13 +206,15 @@ destroy:
     TF_VAR_gitlab_username: ${ARGO_USER}
     TF_VAR_gitlab_token: ${ARGO_PASSWD}
     TF_VAR_argocd_admin_password: ${ARGO_ADM_PASSWD}    
-    TF_VAR_vm_user: "${SERVER_USER}"
-    TF_VAR_ssh_key: "${SERVER_SSH_PUBKEY}"
 
 # Выполнение тестов terratest
 terratest:
   stage: terratest
   image: golang:1.21
+  before_script:
+    - cd ${TF_ROOT}
+    - touch ./authorized_key.json && chmod 0600 ./authorized_key.json && echo ${AUTHORIZED_KEY} | base64 -d > ./authorized_key.json
+#   - sed -i -e "s/\${CI_PROJECT_ID}/${CI_PROJECT_ID}/g" -e "s/\${GITLAB_USER_NAME}/${GITLAB_USER_NAME}/g" -e "s/\${TF_HTTP_PASSWORD}/${TF_HTTP_PASSWORD}/g" provider.tf
   script:
     - '[ "$[[ inputs.enable_test ]]" == "false" ] && exit 0'
     - cd test
@@ -244,42 +243,6 @@ terratest:
     TF_VAR_spring_datasource_user: "${POSTGRES_USER}"
     TF_VAR_spring_datasource_pass: "${POSTGRES_PASSWORD}"
     TF_VAR_spring_mongo_uri: "${MONGODB_URI}"
-
-# Деплой ansible-playbook
-ansible-vmdevip:
-  stage: ansible_deploy
-  image: hashicorp/terraform:latest
-  script:
-    - terraform init
-    - echo "VM_DEV_ADDRESS=$(terraform output -raw vm_dev_address)" >> ${CI_PROJECT_DIR}/vmdevip.env
-  rules:
-    - if: $OPERATION == "ansible"
-      when: always
-  variables:
-    TF_VAR_cloud_id: ${CLOUD_ID}
-    TF_VAR_folder_id: ${FOLDER_ID}
-    TF_VAR_vm_user: "${SERVER_USER}"
-    TF_VAR_ssh_key: "${SERVER_SSH_PUBKEY}"
-  artifacts:
-    reports:
-      dotenv: vmdevip.env
-
-ansible-deploy:
-  stage: ansible_deploy
-  before_script:
-    - cd ${ANSIBLE_ROOT}
-    - mkdir -p .ssh && chmod 0700 .ssh
-    - echo "$SSH_PRIVATE_KEY" | base64 -d > .ssh/id_rsa && chmod 0400 .ssh/id_rsa
-  script:
-    - ansible-playbook -i inventory/vm.yml vault-playbook.yml -e "ansible_host=${VM_DEV_ADDRESS} ansible_user=${SERVER_USER} ansible_ssh_private_key_file=.ssh/id_rsa"
-  rules:
-    - if: $OPERATION == "ansible"
-      when: manual
-  needs:
-    - job: ansible-vmdevip
-      artifacts: true
-  dependencies:
-    - ansible-vmdevip
 
 # Сборка и пуш Docker-образов в GitLAB
 build-and-push-images:
@@ -331,6 +294,7 @@ package-helm-chart:
 
 
 otel-plan:
+  extends: .terraform_setup
   stage: plan
   image: hashicorp/terraform:latest
   script:
@@ -355,6 +319,7 @@ otel-plan:
     TF_VAR_folder_id: ${FOLDER_ID}
 
 otel-apply:
+  extends: .terraform_setup
   stage: apply
   needs: ["otel-plan"]
   image: hashicorp/terraform:latest
@@ -375,6 +340,7 @@ otel-apply:
     TF_VAR_folder_id: ${FOLDER_ID}
 
 otel-activate:
+  extends: .terraform_setup
   stage: otel
   image: argoproj/argocd:v2.8.4
   needs:
