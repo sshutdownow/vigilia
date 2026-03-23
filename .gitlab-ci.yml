@@ -30,7 +30,6 @@ variables:
     options:
       - "terraform_bootstrap"
       - "terraform"
-      - "ansible"
       - "k8s"
       - "otel"
 
@@ -129,7 +128,8 @@ tflint:
   stage: tests
   allow_failure: true  
   script:
-    - curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+    - curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash -s -- ${CI_PROJECT_DIR}/bin
+    - export PATH="${CI_PROJECT_DIR}/bin:$PATH"
     - terraform init -backend=false
     - tflint --init || true
     - mkdir -p ${CI_PROJECT_DIR}/tflint_report
