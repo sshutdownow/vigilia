@@ -1,3 +1,5 @@
+default:
+
 sausage-store:
   lockbox:
     secret_id: ""
