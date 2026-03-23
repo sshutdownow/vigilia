@@ -6,8 +6,6 @@ global:
 
   imagePullPolicy: Always
 
-  imagePullSecrets: # секрет для скачивания образов
-    - name: gitlab-pull-secret
   vault:
     enabled: false
     host: ""
