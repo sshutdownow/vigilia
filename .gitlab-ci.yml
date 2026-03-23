@@ -158,10 +158,11 @@ tflint:
 plan:
   extends: .terraform_setup
   stage: plan
-  needs:
-    - checkov
-    - tflint
-  dependencies: [] # не скачивать артифакты из tests
+  needs: # не скачивать артифакты из tests
+    - job: checkov
+      artifacts: false
+    - job: tflint
+      artifacts: false 
   script:
     - terraform init
     - terraform fmt -check -recursive -diff || true
