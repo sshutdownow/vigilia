@@ -129,7 +129,7 @@ tflint:
   stage: tests
   allow_failure: true  
   script:
-    - curl -s https://raw.githubusercontent.com | bash
+    - curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
     - terraform init -backend=false
     - tflint --init || true
     - mkdir -p ${CI_PROJECT_DIR}/tflint_report
