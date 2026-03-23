@@ -50,7 +50,7 @@ data:
           listen       80;
           {{- if .Values.global.otel_enabled }}
           otel_trace_context propagate;
-          {{- end }
+          {{- end }}
           location / {
               root   /usr/share/nginx/html;
               index  index.html;
