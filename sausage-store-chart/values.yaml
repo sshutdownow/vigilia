@@ -22,6 +22,8 @@ frontend:
     path: /
     pathType: Prefix
   containerPort: 80
+  imagePullSecrets:
+    - name: gitlab-pull-secret
   image: <your-dockerhub>/sausage-frontend:latest
   resources:
     requests:
@@ -50,6 +52,8 @@ backend:
     rollingUpdate:
       maxUnavailable: 50%
       maxSurge: 20%
+  imagePullSecrets:
+    - name: gitlab-pull-secret
   image: <your-dockerhub>/sausage-backend:latest
   imagePullPolicy: Always
   resources:
@@ -91,6 +95,8 @@ backend-report:
   env:
     port: 8080
     db: "mongodb://reports:reportspassword@mongodb:27017/sausage-store"
+  imagePullSecrets:
+    - name: gitlab-pull-secret
   image: <your-dockerhub>/sausage-backend-report:latest
   resources:
     requests:

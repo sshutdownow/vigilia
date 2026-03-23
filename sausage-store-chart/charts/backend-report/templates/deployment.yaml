@@ -31,7 +31,7 @@ spec:
         instrumentation.opentelemetry.io/container-names: "{{ .Chart.Name }}"
 {{- end }}
     spec:
-      {{- with .Values.global.imagePullSecrets }}
+      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- range . }}
         - name: {{ .name }}

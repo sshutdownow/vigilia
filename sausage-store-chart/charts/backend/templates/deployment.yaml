@@ -32,7 +32,7 @@ spec:
         instrumentation.opentelemetry.io/inject-java: "otel/sausage-store-instrumentation"
 {{- end }}
     spec:
-      {{- with .Values.global.imagePullSecrets }}
+      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- range . }}
         - name: {{ .name }}
