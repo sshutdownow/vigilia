@@ -181,7 +181,7 @@ opentelemetry-kube-stack:
       - tracecontext
       - baggage
     resource:
-      attributes:
+      resourceAttributes:
         - key: "service.name"
           value: "sausage-store"
         - key: "deployment.environment"
