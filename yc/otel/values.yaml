@@ -31,7 +31,7 @@ opentelemetry-kube-stack:
       fullnameOverride: "otel-agent"
       image:
         repository: otel/opentelemetry-collector-contrib
-        tag: v0.148.0 
+        tag: latest 
       service:
         enabled: true
       # Пробрасываем порты на IP ноды
