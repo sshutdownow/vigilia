@@ -60,9 +60,9 @@ opentelemetry-kube-stack:
               http: # для Go
                 endpoint: "0.0.0.0:4318"
           syslog:
-            endpoint: "0.0.0.0:54527"
+            udp:
+              endpoint: "0.0.0.0:54527"
             protocol: rfc3164 # Стандартный Syslog
-            udp: {}
         exporters:
           # Агент пересылает данные на шлюз (gateway) внутри кластера
           otlp:
