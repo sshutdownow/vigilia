@@ -79,7 +79,7 @@ opentelemetry-kube-stack:
               exporters: [otlp]
             logs:
               receivers: [otlp, syslog]
-              exporters: [otlp]
+              exporters: [otlp, debug]
 
     # Центральный шлюз (Deployment) для отправки в облако
     gateway:
