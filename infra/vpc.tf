@@ -3,6 +3,11 @@
 	# VPC Resources
 	# ===============
 
+locals {
+    main_security_group_name = "${var.k8s_cluster_name}-${var.vpc_name}-main-sg"
+    public_services_sg_name  = "${var.k8s_cluster_name}-${var.vpc_name}-services-sg"
+}
+
 resource "yandex_vpc_network" "k8s-network" {
   description = "Network for the Managed Service for Kubernetes cluster"
   name        = var.vpc_name
@@ -45,7 +50,7 @@ resource "yandex_vpc_address" "gwin_static_ip" {
 
 resource "yandex_vpc_security_group" "k8s-main-sg" {
   description = "Security group ensure the basic performance of the cluster. Apply it to the cluster and node groups."
-  name        = var.main_security_group_name
+  name        = local.main_security_group_name
   network_id  = yandex_vpc_network.k8s-network.id
 
   ingress {
@@ -125,7 +130,7 @@ resource "yandex_vpc_security_group" "k8s-main-sg" {
 
 resource "yandex_vpc_security_group" "k8s-public-services" {
   description = "Security group allows connections to services from the internet. Apply the rules only for node groups."
-  name        = var.public_services_sg_name
+  name        = local.public_services_sg_name
   network_id  = yandex_vpc_network.k8s-network.id
 
   ingress {
