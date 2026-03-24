@@ -27,13 +27,11 @@ opentelemetry-kube-stack:
     # Агент (DaemonSet) на каждой ноде кластера
     agent:
       enabled: true
+      image: "otel/opentelemetry-collector-contrib:0.114.0" # для syslog
       mode: daemonset
       fullnameOverride: "otel-agent"
       service:
         enabled: true
-      image: # для syslog
-        repository: otel/opentelemetry-collector-contrib
-      tag: 0.114.0
       # Пробрасываем порты на IP ноды
       hostNetwork: true
       ports:
