@@ -56,7 +56,7 @@ resource "helm_release" "external_secrets" {
   recreate_pods   = true
   wait            = true
 
-  depends_on = [yandex_kubernetes_cluster.k8s-cluster]
+  depends_on = [yandex_kubernetes_node_group.k8s-node-group]
 }
 
 resource "kubernetes_secret_v1" "yc_auth" {

@@ -103,7 +103,7 @@ resource "helm_release" "argocd" {
   wait            = true
 
   depends_on = [
-    yandex_kubernetes_cluster.k8s-cluster,
+    yandex_kubernetes_node_group.k8s-node-group,
     helm_release.external_secrets,
     helm_release.vpa,
     yandex_vpc_security_group.gwin,

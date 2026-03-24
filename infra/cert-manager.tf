@@ -16,5 +16,5 @@ resource "helm_release" "cert_manager" {
   recreate_pods   = true
   wait            = true
 
-  depends_on = [yandex_kubernetes_cluster.k8s-cluster]
+  depends_on = [yandex_kubernetes_node_group.k8s-node-group]
 }
