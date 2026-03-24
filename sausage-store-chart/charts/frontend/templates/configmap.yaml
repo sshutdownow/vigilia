@@ -20,23 +20,24 @@ data:
     }
 
     http {
+        include       /etc/nginx/mime.types;
+        default_type  application/octet-stream;
+
         {{- if .Values.global.otel_enabled }}
          otel_exporter {
             endpoint otel-agent-collector.otel.svc.cluster.local:4317;
         }
         otel_trace on;
         otel_service_name {{ .Chart.Name | quote }};
-        access_log syslog:server=otel-agent-collector.otel.svc.cluster.local:54527,tag=nginx,severity=info main;
         {{- end }}
-
-        include       /etc/nginx/mime.types;
-        default_type  application/octet-stream;
 
         log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
                           '$status $body_bytes_sent "$http_referer" '
                           '"$http_user_agent" "$http_x_forwarded_for"'
                           {{- if .Values.global.otel_enabled }}
                           ' trace_id="$otel_trace_id" span_id="$otel_span_id"';
+        error_log syslog:server=otel-agent-collector.otel.svc.cluster.local:54527,tag=nginx_error,severity=error;
+        access_log syslog:server=otel-agent-collector.otel.svc.cluster.local:54527,tag=nginx,severity=info main;
                           {{- else }}
                           ;
                           {{- end }}
