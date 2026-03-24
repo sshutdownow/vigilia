@@ -281,9 +281,18 @@ terratest:
       when: on_success
   allow_failure: false
   variables:
-    TF_LOG: INFO
+    TF_LOG: DEBUG
     TF_VAR_cloud_id: ${CLOUD_ID}
     TF_VAR_folder_id: ${FOLDER_ID}
+    TF_VAR_vm_user: "${SSH_USER}"
+    TF_VAR_ssh_key: "${SSH_PUBLIC_KEY}"
+    TF_VAR_ssh_private_key: "${SSH_PRIVATE_KEY}"
+    TF_VAR_gitlab_username: ${ARGO_USER}
+    TF_VAR_gitlab_token: ${ARGO_PASSWD}
+    TF_VAR_argocd_admin_password: ${ARGO_ADM_PASSWD}    
+    TF_VAR_spring_datasource_user: "${POSTGRES_USER}"
+    TF_VAR_spring_datasource_pass: "${POSTGRES_PASSWORD}"
+    TF_VAR_spring_mongo_uri: "${MONGODB_URI}"
 
 # Сборка и пуш Docker-образов в GitLAB
 build-and-push-images:
