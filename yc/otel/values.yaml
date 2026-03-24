@@ -61,7 +61,7 @@ opentelemetry-kube-stack:
                 endpoint: "0.0.0.0:4318"
           syslog:
             udp:
-              endpoint: "0.0.0.0:54527"
+              listen_address: "0.0.0.0:54527"
             protocol: rfc3164 # Стандартный Syslog
         exporters:
           # Агент пересылает данные на шлюз (gateway) внутри кластера
