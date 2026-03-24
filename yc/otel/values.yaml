@@ -155,6 +155,7 @@ opentelemetry-kube-stack:
               exporters: [ otlp_grpc/monium, debug ]
             logs:
               receivers: [ otlp ]
+              processors: [ k8sattributes, batch ]
               exporters: [ otlp_grpc/monium, debug ]
         # Телеметрия самого OTel Collector
         telemetry:
