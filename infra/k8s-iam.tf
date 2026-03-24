@@ -1,9 +1,20 @@
+resource "yandex_iam_service_account" "k8s-sa" {
+  description = "Service account to manage the Kubernetes cluster and node group"
+  name        = var.sa_k8s
+  folder_id   = var.folder_id
+}
+
+resource "yandex_iam_service_account" "k8s-node-group-sa" {
+	description = "Service account to manage the Kubernetes node group"
+  name        = var.sa_k8s_node_group
+  folder_id   = var.folder_id
+}
+
 resource "yandex_resourcemanager_folder_iam_member" "k8s_roles" {
   for_each = toset([
     "k8s.clusters.agent",
     "monitoring.editor",
     "logging.writer",
-    "ydb.editor",
     "storage.editor",
     "certificate-manager.certificates.downloader",
     "container-registry.images.puller",
@@ -19,7 +30,8 @@ resource "yandex_resourcemanager_folder_iam_member" "k8s_roles" {
 }
 
 resource "yandex_resourcemanager_folder_iam_member" "k8s_node_roles" {
-  for_each = toset([ 
+  for_each = toset([
+    "k8s.clusters.agent", 
     "container-registry.images.puller"
   ])
   folder_id = var.folder_id

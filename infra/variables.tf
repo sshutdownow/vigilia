@@ -17,6 +17,18 @@ variable "zone" {
   default = "ru-central1-a"
 }
 
+variable "k8s_cluster_name" {
+  type        = string
+  default     = "k8s-cluster-argo"
+  description = "Name of the Kubernetes cluster"
+}
+
+variable "k8s_node_group_name" {
+  type        = string
+  default     = "k8s-node-group"
+  description = "Name of the Kubernetes node group"
+}
+
 variable "k8s_version" {
   type        = string
   default     = "1.33"
@@ -44,7 +56,7 @@ variable "container_registry_name" {
 variable "vpc_name" {
   description = "VPC Name"
   type        = string
-  default     = "infra-network"
+  default     = "k8s-network"
 }
 
 variable "net_cidr" {
@@ -56,9 +68,9 @@ variable "net_cidr" {
   }))
 
   default = [
-    { name = "infra-subnet-a", zone = "ru-central1-a", prefix = "10.10.0.0/16" },
-    { name = "infra-subnet-b", zone = "ru-central1-b", prefix = "10.11.0.0/16" },
-    { name = "infra-subnet-d", zone = "ru-central1-d", prefix = "10.13.0.0/16" },
+    { name = "subnet-a", zone = "ru-central1-a", prefix = "10.10.0.0/16" },
+    { name = "subnet-b", zone = "ru-central1-b", prefix = "10.11.0.0/16" },
+    { name = "subnet-d", zone = "ru-central1-d", prefix = "10.13.0.0/16" },
   ]
 }
 

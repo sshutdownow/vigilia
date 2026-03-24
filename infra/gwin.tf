@@ -38,7 +38,7 @@ resource "helm_release" "gwin" {
   values = [<<-EOF
     controller:
       folderId: ${var.folder_id}
-      defaultBalancerSubnets: ["${yandex_vpc_subnet.subnet-a.id}"]
+      defaultBalancerSubnets: ${jsonencode(local.k8s_node_subnet_ids)}
       ycServiceAccount:
         secret:
           value: |
@@ -111,7 +111,7 @@ resource "yandex_vpc_security_group" "gwin" {
   egress {
     protocol       = "TCP"
     description    = "Enable traffic from GWIN to K8s services"
-    v4_cidr_blocks = [local.zone_a_v4_cidr_blocks]
+    v4_cidr_blocks = local.k8s_zone_v4_cidr_blocks
     from_port      = 30000
     to_port        = 32767
   }
@@ -119,7 +119,7 @@ resource "yandex_vpc_security_group" "gwin" {
   egress {
     protocol       = "TCP"
     description    = "Enable probes from GWIN to K8s"
-    v4_cidr_blocks = [local.zone_a_v4_cidr_blocks]
+    v4_cidr_blocks = local.k8s_zone_v4_cidr_blocks
     port           = 10501
   }
 }
