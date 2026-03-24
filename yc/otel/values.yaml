@@ -69,6 +69,8 @@ opentelemetry-kube-stack:
             endpoint: "otel-gateway-collector:4317"
             tls:
               insecure: true
+          debug:
+            verbosity: detailed
         service:
           pipelines:
             metrics:
