@@ -65,17 +65,24 @@ resource "yandex_kubernetes_cluster" "k8s-cluster" {
 # ==========================================
 
 resource "yandex_kubernetes_node_group" "k8s-node-group" {
-  description = "Node group for Managed Service for Kubernetes cluster"
-  name        = var.k8s_node_group_name
+  for_each = { for s in var.net_cidr : s.zone => s }
+
+  description = "Node group for Managed Service for Kubernetes cluster for zone ${each.value.zone}"
+  name        = "{var.k8s_node_group_name}-${each.value.zone}"
   cluster_id  = yandex_kubernetes_cluster.k8s-cluster.id
   version     = var.k8s_version
 
   allocation_policy {
-    dynamic "location" {
-      for_each = var.net_cidr
-      content {
-        zone = location.value.zone
-      }
+    location {
+      zone = each.value.zone
+    }
+  }
+
+  scale_policy {
+    auto_scale {
+      initial = 1
+      min     = 1
+      max     = 2
     }
   }
 
@@ -85,10 +92,10 @@ resource "yandex_kubernetes_node_group" "k8s-node-group" {
 
     network_interface {
       nat                = var.nat
-      subnet_ids         = local.k8s_node_subnet_ids
+      subnet_ids         = [yandex_vpc_subnet.k8s-subnets[each.value.zone].id]
       security_group_ids = [
         yandex_vpc_security_group.k8s-main-sg.id, 
-        yandex_vpc_security_group.k8s-public-services.id
+        yandex_vpc_security_group.gwin.id
       ]
     }
 
@@ -106,17 +113,9 @@ resource "yandex_kubernetes_node_group" "k8s-node-group" {
     scheduling_policy {
       preemptible = var.vm_preemptible
     }
-    
+
     metadata = {
       ssh-keys = "${var.vm_user}:${var.ssh_key}"
-    }
-  }
-
-  scale_policy {
-    auto_scale {
-      initial = local.cluster_size
-      min     = local.cluster_size
-      max     = local.cluster_size * 2
     }
   }
 }
