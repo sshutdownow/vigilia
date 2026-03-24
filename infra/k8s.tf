@@ -68,7 +68,7 @@ resource "yandex_kubernetes_node_group" "k8s-node-group" {
   for_each = { for s in var.net_cidr : s.zone => s }
 
   description = "Node group for Managed Service for Kubernetes cluster for zone ${each.value.zone}"
-  name        = "{var.k8s_node_group_name}-${each.value.zone}"
+  name        = "${var.k8s_node_group_name}-${each.value.zone}"
   cluster_id  = yandex_kubernetes_cluster.k8s-cluster.id
   version     = var.k8s_version
 
