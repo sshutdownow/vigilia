@@ -26,8 +26,8 @@ data:
         }
         otel_trace on;
         otel_service_name {{ .Chart.Name | quote }};
+        access_log syslog:server=otel-agent-collector.otel.svc.cluster.local:54527,tag=nginx,severity=info main;
         {{- end }}
-
 
         include       /etc/nginx/mime.types;
         default_type  application/octet-stream;
@@ -36,7 +36,7 @@ data:
                           '$status $body_bytes_sent "$http_referer" '
                           '"$http_user_agent" "$http_x_forwarded_for"'
                           {{- if .Values.global.otel_enabled }}
-                          'trace_id=$otel_trace_id span_id=$otel_span_id'; 
+                          ' trace_id="$otel_trace_id" span_id="$otel_span_id"';
                           {{- else }}
                           ;
                           {{- end }}

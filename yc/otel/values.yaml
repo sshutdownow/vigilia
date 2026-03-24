@@ -44,6 +44,10 @@ opentelemetry-kube-stack:
           hostPort: 4318
           appProtocol: http
           protocol: TCP
+        - name: syslog-udp
+          port: 54527
+          hostPort: 54527
+          protocol: UDP
       config:
         receivers:
           otlp:
@@ -52,6 +56,10 @@ opentelemetry-kube-stack:
                 endpoint: "0.0.0.0:4317"
               http: # для Go
                 endpoint: "0.0.0.0:4318"
+          syslog:
+            udp:
+              endpoint: "0.0.0.0:54527"
+            protocol: rfc3164 # Стандартный Syslog
         exporters:
           # Агент пересылает данные на шлюз (gateway) внутри кластера
           otlp:
@@ -67,7 +75,7 @@ opentelemetry-kube-stack:
               receivers: [otlp]
               exporters: [otlp]
             logs:
-              receivers: [otlp]
+              receivers: [otlp, syslog]
               exporters: [otlp]
 
     # Центральный шлюз (Deployment) для отправки в облако
