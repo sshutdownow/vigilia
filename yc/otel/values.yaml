@@ -77,7 +77,7 @@ opentelemetry-kube-stack:
             log_statements:
               - context: log
                 conditions:
-                  - attributes["appname"] == "frontend"
+                  - attributes["appname"] == "nginx"
                 statements:
                   - merge_maps(attributes, ParseJSON(attributes["message"]), "upsert") where IsString(attributes["message"])
                   - set(trace_id, TraceID(attributes["trace_id"])) where attributes["trace_id"] != nil
