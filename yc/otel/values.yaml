@@ -73,19 +73,17 @@ opentelemetry-kube-stack:
           k8sattributes:
             extract:
               metadata: [k8s.pod.name, k8s.namespace.name, k8s.node.name]
-          filter/nginx:
-            error_mode: ignore
-            logs:
-              condition: 'attributes["appname"] == "frontend"'
           transform/nginx:
             log_statements:
               - context: log
+                conditions:
+                  - attributes["appname"] == "frontend"
                 statements:
                   - set(trace_id, TraceID(attributes["trace_id"])) where attributes["trace_id"] != nil
                   - set(span_id, SpanID(attributes["span_id"])) where attributes["span_id"] != nil
                   - set(resource.attributes["service.name"], attributes["appname"])
                   - set(body, attributes["request"]) where attributes["request"] != nil
-                  - delete_matching_keys(attributes, "^(trace_id|span_id|request|appname)$")
+                  - delete_matching_keys(attributes, "^(trace_id|span_id|parent_id|request|appname)$")
         exporters:
           # Агент пересылает данные на шлюз (gateway) внутри кластера
           otlp:
@@ -104,7 +102,7 @@ opentelemetry-kube-stack:
               exporters: [otlp_grpc]
             logs:
               receivers: [otlp_grpc, syslog]
-              processors: [k8sattributes, filter/nginx, transform/nginx, batch]
+              processors: [k8sattributes, transform/nginx, batch]
               exporters: [otlp_grpc, debug]
 
     # Центральный шлюз (Deployment) для отправки в облако
