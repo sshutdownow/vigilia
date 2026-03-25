@@ -146,6 +146,9 @@ opentelemetry-kube-stack:
           batch:
             send_batch_size: 1000
             timeout: 10s
+          k8s_attributes:
+            extract:
+              metadata: [k8s.pod.name, k8s.namespace.name, k8s.node.name]
         exporters:
           # Шлюз авторизуется и отправляет данные в Yandex Monitoring (Monium)
           otlp_grpc/monium:
@@ -169,15 +172,15 @@ opentelemetry-kube-stack:
           pipelines:
             metrics:
               receivers: [ otlp ]
-              processors: [ batch ]
+              processors: [ k8s_attributes, batch ]
               exporters: [ otlp_grpc/monium, debug ]
             traces:
               receivers: [ otlp ]
-              processors: [ batch ]
+              processors: [ k8s_attributes,batch ]
               exporters: [ otlp_grpc/monium, debug ]
             logs:
               receivers: [ otlp ]
-              processors: [ batch ]
+              processors: [ k8s_attributes, batch ]
               exporters: [ otlp_grpc/monium, debug ]
         # Телеметрия самого OTel Collector
         telemetry:
