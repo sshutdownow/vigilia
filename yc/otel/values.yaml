@@ -72,6 +72,7 @@ opentelemetry-kube-stack:
           transform:
             log_statements:
               - context: log
+                condition: log.attributes["appname"] == "nginx"
                 statements:
                   - set(log.trace_id, TraceID(log.attributes["trace_id"])) where log.attributes["trace_id"] != nil
                   - set(log.span_id, SpanID(log.attributes["span_id"])) where log.attributes["span_id"] != nil
