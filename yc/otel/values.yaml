@@ -67,25 +67,18 @@ opentelemetry-kube-stack:
               - type: json_parser
                 parse_from: body
                 parse_to: attributes
-
-              - type: move
-                from: attributes.trace_id
-                to: trace_id
-              
-              - type: move
-                from: attributes.span_id
-                to: span_id
-
               - type: severity_parser
                 parse_from: attributes.priority
 
-              - type: move
-                from: attributes.appname
-                to: resource["service.name"]
-
-              - type: copy
-                from: attributes.request
-                to: body
+        processors:
+          transform:
+            log_statements:
+              - context: log
+                statements:
+                  - set(trace_id, TraceID(attributes["trace_id"]))
+                  - set(span_id, SpanID(attributes["span_id"]))
+                  - set(resource.attributes["service.name"], attributes["appname"])
+                  - set(body, attributes["request"])
 
         exporters:
           # Агент пересылает данные на шлюз (gateway) внутри кластера
@@ -105,6 +98,7 @@ opentelemetry-kube-stack:
               exporters: [otlp]
             logs:
               receivers: [otlp, syslog]
+              processors: [transform]
               exporters: [otlp, debug]
 
     # Центральный шлюз (Deployment) для отправки в облако
