@@ -62,7 +62,31 @@ opentelemetry-kube-stack:
           syslog:
             udp:
               listen_address: "0.0.0.0:54527"
-            protocol: rfc3164 # Стандартный Syslog
+            protocol: rfc5424 # rfc3164 стандартный Syslog
+            operators: # nginx шлёт JSON 
+              - type: json_parser
+                parse_from: body
+                parse_to: attributes
+
+              - type: move
+                from: attributes.trace_id
+                to: trace_id
+              
+              - type: move
+                from: attributes.span_id
+                to: span_id
+
+              - type: severity_parser
+                parse_from: attributes.priority
+
+              - type: move
+                from: attributes.appname
+                to: resource["service.name"]
+
+              - type: copy
+                from: attributes.request
+                to: body
+
         exporters:
           # Агент пересылает данные на шлюз (gateway) внутри кластера
           otlp:
