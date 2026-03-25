@@ -69,19 +69,25 @@ opentelemetry-kube-stack:
                 parse_to: attributes
                 onError: drop
         processors:
-          transform:
+          batch: {}
+          k8sattributes:
+            extract:
+              metadata: [k8s.pod.name, k8s.namespace.name, k8s.node.name]
+          filter/nginx:
+            error_mode: ignore
+            logs:
+              include:
+                match_type: strict
+                attributes: [{key: appname, value: frontend}]
+          transform/nginx:
             log_statements:
               - context: log
-                condition: log.attributes["appname"] == "nginx"
                 statements:
-                  - set(log.trace_id, TraceID(log.attributes["trace_id"])) where log.attributes["trace_id"] != nil
-                  - set(log.span_id, SpanID(log.attributes["span_id"])) where log.attributes["span_id"] != nil
-                  - set(resource.attributes["service.name"], log.attributes["appname"]) where log.attributes["appname"] != nil
-                  - set(log.body, log.attributes["request"]) where log.attributes["request"] != nil
-                  - delete_key(log.attributes, "trace_id")
-                  - delete_key(log.attributes, "span_id")
-                  - delete_key(log.attributes, "appname")
-                  - delete_key(log.attributes, "request")
+                  - set(trace_id, TraceID(attributes["trace_id"])) where attributes["trace_id"] != nil
+                  - set(span_id, SpanID(attributes["span_id"])) where attributes["span_id"] != nil
+                  - set(resource.attributes["service.name"], attributes["appname"])
+                  - set(body, attributes["request"]) where attributes["request"] != nil
+                  - delete_matching_keys(attributes, "^(trace_id|span_id|request|appname)$")
         exporters:
           # Агент пересылает данные на шлюз (gateway) внутри кластера
           otlp:
@@ -100,7 +106,7 @@ opentelemetry-kube-stack:
               exporters: [otlp_grpc]
             logs:
               receivers: [otlp_grpc, syslog]
-              processors: [transform]
+              processors: [k8sattributes, filter/nginx, transform/nginx, batch]
               exporters: [otlp_grpc, debug]
 
     # Центральный шлюз (Deployment) для отправки в облако
