@@ -53,7 +53,7 @@ opentelemetry-kube-stack:
           protocol: UDP
       config:
         receivers:
-          otlp_grpc:
+          otlp:
             protocols:
               grpc:
                 endpoint: "0.0.0.0:4317"
@@ -95,13 +95,13 @@ opentelemetry-kube-stack:
         service:
           pipelines:
             metrics:
-              receivers: [otlp_grpc]
+              receivers: [otlp]
               exporters: [otlp_grpc]
             traces:
-              receivers: [otlp_grpc]
+              receivers: [otlp]
               exporters: [otlp_grpc]
             logs:
-              receivers: [otlp_grpc, syslog]
+              receivers: [otlp, syslog]
               processors: [k8sattributes, transform/nginx, batch]
               exporters: [otlp_grpc, debug]
 
