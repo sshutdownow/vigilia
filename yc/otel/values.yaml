@@ -78,7 +78,9 @@ opentelemetry-kube-stack:
             logs:
               include:
                 match_type: ottl
-                ottl: 'attributes["appname"] == "frontend"'
+                ottl_config:
+                  expressions:
+                    - 'attributes["appname"] == "frontend"'
           transform/nginx:
             log_statements:
               - context: log
