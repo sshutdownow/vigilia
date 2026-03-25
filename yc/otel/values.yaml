@@ -62,7 +62,7 @@ opentelemetry-kube-stack:
           syslog:
             udp:
               listen_address: "0.0.0.0:54527"
-            protocol: rfc5424 # rfc3164 стандартный Syslog
+            protocol: rfc3164 # rfc3164 стандартный Syslog. rfc5424
             operators: # nginx шлёт JSON 
               - type: json_parser
                 parse_from: body
