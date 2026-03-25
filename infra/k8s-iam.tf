@@ -31,7 +31,6 @@ resource "yandex_resourcemanager_folder_iam_member" "k8s_roles" {
 
 resource "yandex_resourcemanager_folder_iam_member" "k8s_node_roles" {
   for_each = toset([
-    "k8s.clusters.agent", 
     "container-registry.images.puller"
   ])
   folder_id = var.folder_id

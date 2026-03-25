@@ -62,6 +62,7 @@ resource "helm_release" "gwin" {
   force_update    = true
   recreate_pods   = true
   wait            = true
+  timeout         = 900
 
   depends_on = [
     yandex_resourcemanager_folder_iam_member.gwin_roles,

@@ -1,5 +1,5 @@
 variable "enable_monium_key" {
-  description = "Флаг для активации генерации API-ключа Monium"  
+  description = "Флаг для активации конфигурации Monium"  
   type    = bool
   default = false
 }

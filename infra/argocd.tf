@@ -101,6 +101,7 @@ resource "helm_release" "argocd" {
   force_update    = true
   recreate_pods   = true
   wait            = true
+  timeout         = 900
 
   depends_on = [
     yandex_kubernetes_node_group.k8s-node-group,
