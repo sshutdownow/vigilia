@@ -86,7 +86,7 @@ opentelemetry-kube-stack:
                   - delete_matching_keys(attributes, "^(trace_id|span_id|parent_id|request|appname)$")
         exporters:
           # Агент пересылает данные на шлюз (gateway) внутри кластера
-          otlp:
+          otlp_grpc:
             endpoint: "otel-gateway-collector:4317"
             tls:
               insecure: true
