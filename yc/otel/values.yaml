@@ -76,11 +76,7 @@ opentelemetry-kube-stack:
           filter/nginx:
             error_mode: ignore
             logs:
-              include:
-                match_type: ottl
-                ottl_config:
-                  expressions:
-                    - 'attributes["appname"] == "frontend"'
+              condition: 'attributes["appname"] == "frontend"'
           transform/nginx:
             log_statements:
               - context: log
