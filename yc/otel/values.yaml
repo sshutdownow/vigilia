@@ -103,7 +103,7 @@ opentelemetry-kube-stack:
               exporters: [otlp_grpc]
             logs:
               receivers: [otlp, syslog]
-              processors: [k8s_attributes, transform/nginx, batch]
+              processors: [k8sattributes, transform/nginx, batch]
               exporters: [otlp_grpc, debug]
 
     # Центральный шлюз (Deployment) для отправки в облако
@@ -172,15 +172,15 @@ opentelemetry-kube-stack:
           pipelines:
             metrics:
               receivers: [ otlp ]
-              processors: [ k8s_attributes, batch ]
+              processors: [ k8sattributes, batch ]
               exporters: [ otlp_grpc/monium, debug ]
             traces:
               receivers: [ otlp ]
-              processors: [ k8s_attributes,batch ]
+              processors: [ k8sattributes,batch ]
               exporters: [ otlp_grpc/monium, debug ]
             logs:
               receivers: [ otlp ]
-              processors: [ k8s_attributes, batch ]
+              processors: [ k8sattributes, batch ]
               exporters: [ otlp_grpc/monium, debug ]
         # Телеметрия самого OTel Collector
         telemetry:
