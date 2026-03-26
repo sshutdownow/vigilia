@@ -34,10 +34,13 @@ spec:
                   secretName: {{ printf "yc-certmgr-cert-id-%s" .Values.global.certificate_id | quote }}
 
         opentelemetry-collector:
+          enabled: true
           config:
             exporters:
               otlp:
                 endpoint: "otel-agent-collector.otel.svc.cluster.local:4317"
+                tls:
+                  insecure: true
 
         prometheus:
           enabled: false
