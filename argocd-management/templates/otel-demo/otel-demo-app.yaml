@@ -15,7 +15,7 @@ spec:
       values: |
         components: # https://opentelemetry.io/docs/demo/kubernetes-deployment/
           frontend-proxy:
-            service:
+            service: # https://opentelemetry.io/docs/demo/kubernetes-deployment/#configure-service-types
               type: NodePort
             ingress:
               enabled: true
@@ -35,6 +35,12 @@ spec:
                     - "otel-demo.vigilia.site"
                   secretName: {{ printf "yc-certmgr-cert-id-%s" .Values.global.certificate_id | quote }}
 
+          frontend: # https://opentelemetry.io/docs/demo/kubernetes-deployment/#configure-browser-telemetry
+            envOverrides:
+              - name: PUBLIC_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+                value: "https://otel-demo.vigilia.site/otlp-http/v1/traces"
+
+        # https://opentelemetry.io/docs/demo/kubernetes-deployment/#bring-your-own-backend
         opentelemetry-collector:
           enabled: true
           config:
