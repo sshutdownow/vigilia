@@ -13,37 +13,38 @@ spec:
     targetRevision: 0.40.6
     helm:
       values: |
-        ingress:
-          enabled: true
-          ingressClassName: "gwin-default"
-          annotations:
-            "gwin.yandex.cloud/groupName": "ingress"
-            "gwin.yandex.cloud/externalIPv4Address": {{ .Values.global.gwin_ip | quote }}
-            "gwin.yandex.cloud/securityGroups": {{ .Values.global.gwin_sg | quote }}
-          hosts:
-            - host: "otel-demo.vigilia.site"
-              paths:
-                - path: /
-                  pathType: Prefix
-                  port: 8080 # frontendproxy
-          tls:
-            - hosts:
-                - "otel-demo.vigilia.site"
-              secretName: {{ printf "yc-certmgr-cert-id-%s" .Values.global.certificate_id | quote }}
+        opentelemetry-demo:
+          ingress:
+            enabled: true
+            ingressClassName: "gwin-default"
+            annotations:
+              "gwin.yandex.cloud/groupName": "ingress"
+              "gwin.yandex.cloud/externalIPv4Address": {{ .Values.global.gwin_ip | quote }}
+              "gwin.yandex.cloud/securityGroups": {{ .Values.global.gwin_sg | quote }}
+            hosts:
+              - host: "otel-demo.vigilia.site"
+                paths:
+                  - path: /
+                    pathType: Prefix
+                    port: 8080
+            tls:
+              - hosts:
+                  - "otel-demo.vigilia.site"
+                secretName: {{ printf "yc-certmgr-cert-id-%s" .Values.global.certificate_id | quote }}
 
-        default:
-          otelcol:
-            config:
-              exporters:
-                otlp:
-                  endpoint: "otel-agent-collector.otel.svc.cluster.local:4317"
-        
-        prometheus:
-          enabled: false
-        grafana:
-          enabled: false
-        jaeger:
-          enabled: false
+          default:
+            otelcol:
+              config:
+                exporters:
+                  otlp:
+                    endpoint: "otel-agent-collector.otel.svc.cluster.local:4317"
+          
+          prometheus:
+            enabled: false
+          grafana:
+            enabled: false
+          jaeger:
+            enabled: false
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: otel-demo
