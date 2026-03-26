@@ -34,6 +34,7 @@ opentelemetry-kube-stack:
         tag: latest 
       service:
         enabled: true
+        type: ClusterIP
       # Пробрасываем порты на IP ноды
       hostNetwork: false
       ports:
