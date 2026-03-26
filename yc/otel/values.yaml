@@ -35,21 +35,21 @@ opentelemetry-kube-stack:
       service:
         enabled: true
       # Пробрасываем порты на IP ноды
-      hostNetwork: true
+      hostNetwork: false
       ports:
         - name: otlp-grpc
           port: 4317
-          hostPort: 4317
+          #hostPort: 4317
           appProtocol: grpc
           protocol: TCP
         - name: otlp-http
           port: 4318
-          hostPort: 4318
+          #hostPort: 4318
           appProtocol: http
           protocol: TCP
         - name: syslog-udp
           port: 54527
-          hostPort: 54527
+          #hostPort: 54527
           protocol: UDP
       config:
         receivers:
