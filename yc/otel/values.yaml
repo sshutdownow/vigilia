@@ -99,9 +99,11 @@ opentelemetry-kube-stack:
           pipelines:
             metrics:
               receivers: [otlp]
+              processors: [k8sattributes, batch]
               exporters: [otlp_grpc]
             traces:
               receivers: [otlp]
+              processors: [k8sattributes, batch]
               exporters: [otlp_grpc]
             logs:
               receivers: [otlp, syslog]
