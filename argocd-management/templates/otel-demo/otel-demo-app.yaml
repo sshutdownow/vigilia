@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: otel-demo
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "25"
+spec:
+  project: default
+  source:
+    repoURL: 'https://open-telemetry.github.io/opentelemetry-helm-charts'
+    chart: 'open-telemetry/opentelemetry-demo'
+    targetRevision: 0.40.6
+    helm:
+      values: |
+        ingress:
+          enabled: true
+          ingressClassName: "gwin-default"
+          annotations:
+            "gwin.yandex.cloud/groupName": "ingress"
+            "gwin.yandex.cloud/externalIPv4Address": {{ .Values.global.gwin_ip | quote }}
+            "gwin.yandex.cloud/securityGroups": {{ .Values.global.gwin_sg | quote }}
+          hosts:
+            - host: "otel-demo.vigilia.site"
+              paths:
+                - path: /
+                  pathType: Prefix
+                  port: 8080 # frontendproxy
+          tls:
+            - hosts:
+                - "otel-demo.vigilia.site"
+              secretName: {{ printf "yc-certmgr-cert-id-%s" .Values.global.certificate_id | quote }}
+
+        default:
+          otelcol:
+            config:
+              exporters:
+                otlp:
+                  endpoint: "otel-agent-collector.otel.svc.cluster.local:4317"
+        
+        prometheus:
+          enabled: false
+        grafana:
+          enabled: false
+        jaeger:
+          enabled: false
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: otel-demo
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+

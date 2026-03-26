@@ -26,6 +26,7 @@ resource "yandex_dns_recordset" "public_dns_records" {
     "pyroscope.${var.domain_name}.",
     "argocd.${var.domain_name}.",
     "sausage-store.${var.domain_name}.",
+    "otel-demo.${var.domain_name}.",
     "${var.domain_name}."
   ])
 
