@@ -13,8 +13,8 @@ spec:
     targetRevision: 0.40.6
     helm:
       values: |
-        components:
-          frontendProxy:
+        components: # https://opentelemetry.io/docs/demo/kubernetes-deployment/
+          frontend-proxy:
             ingress:
               enabled: true
               ingressClassName: "gwin-default"
