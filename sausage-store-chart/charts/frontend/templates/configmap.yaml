@@ -49,7 +49,7 @@ data:
             '"realip_remote_addr": "$realip_remote_addr", '
             '"trace_id": "$otel_trace_id", '
             '"span_id": "$otel_span_id", '
-            '"namespace": {{ .Release.Namespace | qoute }}, '
+            '"namespace": {{ .Release.Namespace | quote }}, '
             '"parent_id": "$otel_parent_id", '
             '"request_id": "$http_x_request_id"'
         '}';

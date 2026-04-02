@@ -90,7 +90,7 @@ opentelemetry-kube-stack:
                   - set(attributes["k8s.namespace.name"], attributes["namespace"]) where attributes["namespace"] != nil
                   - set(resource.attributes["service.name"], Concat(["frontend", attributes["namespace"]], ".")) where attributes["namespace"] != nil
                   - set(body, attributes["request"]) where attributes["request"] != nil
-                  - delete_matching_keys(attributes, "^(trace_id|span_id|parent_id|request|appname|message|facility.*|priority|hostname)$")
+                  - delete_matching_keys(attributes, "^(trace_id|span_id|parent_id|request|appname|message|namespace|facility.*|priority|hostname)$")
         exporters:
           # Агент пересылает данные на шлюз (gateway) внутри кластера
           otlp_grpc:
