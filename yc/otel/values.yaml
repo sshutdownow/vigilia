@@ -51,7 +51,7 @@ opentelemetry-kube-stack:
           protocol: TCP
         - name: syslog-udp
           port: 54527
-          hostPort: 54527
+          #hostPort: 54527
           protocol: UDP
       config:
         receivers:
