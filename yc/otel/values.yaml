@@ -87,7 +87,6 @@ opentelemetry-kube-stack:
                   - merge_maps(attributes, ParseJSON(attributes["message"]), "upsert") where IsString(attributes["message"])
                   - set(trace_id, TraceID(attributes["trace_id"])) where attributes["trace_id"] != nil
                   - set(span_id, SpanID(attributes["span_id"])) where attributes["span_id"] != nil
-                  - set(attributes["k8s.namespace.name"], attributes["namespace"]) where attributes["namespace"] != nil
                   - set(resource.attributes["service.name"], Concat(["frontend", attributes["namespace"]], ".")) where attributes["namespace"] != nil
                   - set(body, attributes["request"]) where attributes["request"] != nil
                   - delete_matching_keys(attributes, "^(trace_id|span_id|parent_id|request|appname|message|namespace|facility.*|priority|hostname)$")
