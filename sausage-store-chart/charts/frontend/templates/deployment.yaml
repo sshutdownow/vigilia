@@ -33,11 +33,6 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          env:
-            - name: NODE_IP
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.hostIP
           image: {{ .Values.image }}
           imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           resources:
