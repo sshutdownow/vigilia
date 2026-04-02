@@ -35,6 +35,7 @@ data:
         otel_trace on;
         otel_service_name {{ .Chart.Name | quote }};
         otel_trace_context propagate;
+        otel_span_attr "request_id" $http_x_request_id; # from ALB
         log_format otel_json escape=json '{'
             '"time_local": "$time_local", '
             '"remote_addr": "$remote_addr", '
@@ -48,7 +49,8 @@ data:
             '"realip_remote_addr": "$realip_remote_addr", '
             '"trace_id": "$otel_trace_id", '
             '"span_id": "$otel_span_id", '
-            '"parent_id": "$otel_parent_id"'
+            '"parent_id": "$otel_parent_id", '
+            '"request_id": "$http_x_request_id"'
         '}';
 
         access_log syslog:server=otel-agent-collector.otel.svc.cluster.local:54527,tag=nginx,severity=info otel_json;
@@ -71,6 +73,7 @@ data:
           }
 
           location /api {
+              proxy_set_header X-Request-Id $http_x_request_id;
               proxy_pass http://{{ .Release.Name }}-backend-service:8080;
           }
 
