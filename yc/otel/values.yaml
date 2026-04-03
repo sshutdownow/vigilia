@@ -130,7 +130,7 @@ opentelemetry-kube-stack:
               processors: [k8sattributes, batch]
               exporters: [otlp_grpc]
             logs:
-              receivers: [otlp, syslog]
+              receivers: [otlp, syslog, filelog]
               processors: [k8sattributes, transform/common, batch]
               exporters: [otlp_grpc, debug]
 
