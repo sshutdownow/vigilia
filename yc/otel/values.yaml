@@ -78,18 +78,15 @@ opentelemetry-kube-stack:
               - type: container
                 id: container-parser
               - type: regex_parser
-                id: nginx-id-parser
+                id: nginx-parser
                 regex: 'trace_id=(?P<trace_id>[a-f0-9]+) span_id=(?P<span_id>[a-f0-9]+) request_id=(?P<request_id>[a-f0-9-]+)'
                 parse_from: body
                 if: 'body contains "trace_id="'
-              - type: json_parser
-                id: app-json-parser
-                if: 'body matches "^{.*}$"'
-                parse_from: body
-                parse_to: attributes
+                onError: drop
         processors:
           batch: {}
           k8sattributes:
+            auth_type: serviceAccount
             extract:
               metadata:
                 - k8s.node.name
@@ -112,6 +109,7 @@ opentelemetry-kube-stack:
                   - set(log.span_id, SpanID(log.attributes["span_id"])) where log.attributes["span_id"] != nil
                   - set(resource.attributes["service.name"], Concat([log.attributes["k8s.deployment.name"], log.attributes["k8s.namespace.name"]], ".")) 
                     where log.attributes["k8s.deployment.name"] != nil and log.attributes["k8s.namespace.name"] != nil
+                  - set(resource.attributes["host.name"], log.attributes["k8s.pod.name"]) where log.attributes["k8s.pod.name"] != nil
                   - delete_matching_keys(log.attributes, "^(trace_id|span_id)$")
         exporters:
           # Агент пересылает данные на шлюз (gateway) внутри кластера
