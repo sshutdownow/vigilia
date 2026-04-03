@@ -13,6 +13,8 @@ spec:
     targetRevision: 0.40.6
     helm:
       values: |
+        default: # Отключаем демо
+          enabled: false
         components: # https://opentelemetry.io/docs/demo/kubernetes-deployment/
           frontend-proxy:
             service: # https://opentelemetry.io/docs/demo/kubernetes-deployment/#configure-service-types
