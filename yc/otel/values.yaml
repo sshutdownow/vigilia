@@ -81,7 +81,7 @@ opentelemetry-kube-stack:
                 id: nginx-parser
                 regex: 'trace_id=(?P<trace_id>[a-f0-9]+) span_id=(?P<span_id>[a-f0-9]+) request_id=(?P<request_id>[a-f0-9-]+)'
                 parse_from: attributes.log
-                if: 'body contains "trace_id="'
+                if: 'attributes.log contains "trace_id="'
                 onError: drop
         processors:
           batch: {}
