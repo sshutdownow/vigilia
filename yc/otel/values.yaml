@@ -70,29 +70,47 @@ opentelemetry-kube-stack:
                 parse_from: body
                 parse_to: attributes
                 onError: drop
+          filelog:
+            include: [/var/log/pods/*/*/*.log]
+            exclude: [/var/log/pods/otel_*/*/*.log]
+            start_at: end
+            operators:
+              - type: container
+                id: container-parser
+              - type: regex_parser
+                id: nginx-id-parser
+                regex: 'trace_id=(?P<trace_id>[a-f0-9]+) span_id=(?P<span_id>[a-f0-9]+) request_id=(?P<request_id>[a-f0-9-]+)'
+                parse_from: body
+                if: 'body contains "trace_id="'
+              - type: json_parser
+                id: app-json-parser
+                if: 'body matches "^{.*}$"'
+                parse_from: body
+                parse_to: attributes
         processors:
           batch: {}
           k8sattributes:
             extract:
-              metadata: [k8s.pod.name, k8s.namespace.name, k8s.node.name, k8s.pod.ip]
+              metadata:
+                - k8s.node.name
+                - k8s.namespace.name
+                - k8s.pod.name
+                - k8s.pod.ip
+                - k8s.deployment.name
+                - k8s.container.name
             pod_association:
-              - sources: # чтобы syslog смог определить NS отправителя
+              - sources: # чтобы UDP-syslog смог определить NS отправителя
+                - from: connection
+              - sources:
                   - from: resource_attribute
                     name: k8s.pod.ip
-              - sources:
-                - from: connection
-          transform/nginx:
+          transform/common:
             log_statements:
               - context: log
-                conditions:
-                  - attributes["appname"] == "nginx"
                 statements:
-                  - merge_maps(attributes, ParseJSON(attributes["message"]), "upsert") where IsString(attributes["message"])
                   - set(trace_id, TraceID(attributes["trace_id"])) where attributes["trace_id"] != nil
                   - set(span_id, SpanID(attributes["span_id"])) where attributes["span_id"] != nil
-                  - set(resource.attributes["service.name"], Concat(["frontend", attributes["namespace"]], ".")) where attributes["namespace"] != nil
-                  - set(body, attributes["request"]) where attributes["request"] != nil
-                  - delete_matching_keys(attributes, "^(trace_id|span_id|parent_id|request|appname|message|namespace|facility.*|priority|hostname)$")
+                  - delete_matching_keys(attributes, "^(trace|span)_id$")
         exporters:
           # Агент пересылает данные на шлюз (gateway) внутри кластера
           otlp_grpc:
@@ -113,7 +131,7 @@ opentelemetry-kube-stack:
               exporters: [otlp_grpc]
             logs:
               receivers: [otlp, syslog]
-              processors: [k8sattributes, transform/nginx, batch]
+              processors: [k8sattributes, transform/common, batch]
               exporters: [otlp_grpc, debug]
 
     # Центральный шлюз (Deployment) для отправки в облако
