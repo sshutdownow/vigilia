@@ -108,11 +108,11 @@ opentelemetry-kube-stack:
             log_statements:
               - context: log
                 statements:
-                  - set(trace_id, TraceID(attributes["trace_id"])) where attributes["trace_id"] != nil
-                  - set(resource.attributes["service.name"], Concat([attributes["k8s.deployment.name"], attributes["k8s.namespace.name"]], "."))
-                    where attributes["k8s.deployment.name"] != nil and attributes["k8s.namespace.name"] != nil
-                  - set(span_id, SpanID(attributes["span_id"])) where attributes["span_id"] != nil
-                  - delete_matching_keys(attributes, "^(trace_id|span_id)$")
+                  - set(log.trace_id, TraceID(log.attributes["trace_id"])) where log.attributes["trace_id"] != nil
+                  - set(log.span_id, SpanID(log.attributes["span_id"])) where log.attributes["span_id"] != nil
+                  - set(resource.attributes["service.name"], Concat([log.attributes["k8s.deployment.name"], log.attributes["k8s.namespace.name"]], ".")) 
+                    where log.attributes["k8s.deployment.name"] != nil and log.attributes["k8s.namespace.name"] != nil
+                  - delete_matching_keys(log.attributes, "^(trace_id|span_id)$")
         exporters:
           # Агент пересылает данные на шлюз (gateway) внутри кластера
           otlp_grpc:
