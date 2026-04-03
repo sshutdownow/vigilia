@@ -80,7 +80,7 @@ opentelemetry-kube-stack:
               - type: regex_parser
                 id: nginx-parser
                 regex: 'trace_id=(?P<trace_id>[a-f0-9]+) span_id=(?P<span_id>[a-f0-9]+) request_id=(?P<request_id>[a-f0-9-]+)'
-                parse_from: body
+                parse_from: attributes.log
                 if: 'body contains "trace_id="'
                 onError: drop
         processors:
@@ -133,7 +133,6 @@ opentelemetry-kube-stack:
               receivers: [otlp, syslog, filelog]
               processors: [k8sattributes, transform/common, batch]
               exporters: [otlp_grpc, debug]
-
     # Центральный шлюз (Deployment) для отправки в облако
     gateway:
       enabled: true
