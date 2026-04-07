@@ -29,6 +29,8 @@ opentelemetry-kube-stack:
       enabled: true
       mode: daemonset
       fullnameOverride: "otel-agent"
+      serviceAccount:
+        create
       image:
         repository: otel/opentelemetry-collector-contrib
         tag: latest 
@@ -72,8 +74,11 @@ opentelemetry-kube-stack:
                 onError: drop
           filelog:
             include: [/var/log/pods/*/*/*.log]
-            exclude: [/var/log/pods/otel_*/*/*.log]
+            exclude:
+              - /var/log/pods/otel_*/*/*.log
+              - /var/log/pods/kube-system_*/*/*.log
             start_at: end
+            include_file_path: true
             operators:
               - type: container
                 id: container-parser
