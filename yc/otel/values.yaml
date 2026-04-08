@@ -30,7 +30,7 @@ opentelemetry-kube-stack:
       mode: daemonset
       fullnameOverride: "otel-agent"
       serviceAccount:
-        create
+        create: true
       image:
         repository: otel/opentelemetry-collector-contrib
         tag: latest 
