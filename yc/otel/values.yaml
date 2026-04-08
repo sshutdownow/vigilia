@@ -27,9 +27,9 @@ opentelemetry-kube-stack:
     # Агент (DaemonSet) на каждой ноде кластера
     agent:
       enabled: true
-      securityContext: # для доступа к лог-файлам
-        runAsUser: 0
-        runAsGroup: 0
+      # securityContext: # для доступа к лог-файлам
+      #   runAsUser: 0
+      #   runAsGroup: 0
       presets:
         logsCollection:
           enabled: true
