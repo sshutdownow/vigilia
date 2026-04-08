@@ -29,7 +29,6 @@ opentelemetry-kube-stack:
       enabled: true
       mode: daemonset
       fullnameOverride: "otel-agent"
-      serviceAccount: "otel-agent"
       image:
         repository: otel/opentelemetry-collector-contrib
         tag: latest 
