@@ -31,19 +31,12 @@ opentelemetry-kube-stack:
         logsCollection: # доступ к лог-файлам [/var/log/pods/*/*/*.log]
           enabled: true
           includeCollectorLogs: false # не собирать логи OTel
-          extraFilelogOperators:
-            - type: container
-              id: container-parser
-            - type: regex_parser
-              id: nginx-parser
-              regex: 'trace_id=(?P<trace_id>[a-f0-9]+)\s+span_id=(?P<span_id>[a-f0-9]+)\s+request_id=(?P<request_id>[a-f0-9-]+)'
-              parse_from: body
-              if: 'body contains "trace_id="'
-              on_error: drop
         hostMetrics:
           enabled: true # метрики CPU/RAM нод 
         kubernetesAttributes:
           enabled: true # k8s_attributes
+          extractAllPodLabels: true
+          extractAllPodAnnotations: true
       mode: daemonset
       fullnameOverride: "otel-agent"
       image:
@@ -87,6 +80,18 @@ opentelemetry-kube-stack:
                 parse_from: body
                 parse_to: attributes
                 onError: drop
+          filelog/nginx:
+            include: [/var/log/pods/*/*/*.log]
+            exclude: [/var/log/pods/otel_*/*/*.log]
+            start_at: end
+            operators:
+              - type: container
+              - type: regex_parser
+                id: nginx-parser
+                regex: 'trace_id=(?P<trace_id>[a-f0-9]+)\s+span_id=(?P<span_id>[a-f0-9]+)\s+request_id=(?P<request_id>[a-f0-9-]+)'
+                parse_from: body
+                if: 'body contains "trace_id="'
+                on_error: drop
         processors:
           batch: {}
           k8sattributes:
@@ -133,7 +138,7 @@ opentelemetry-kube-stack:
               processors: [k8sattributes, batch]
               exporters: [otlp_grpc]
             logs:
-              receivers: [otlp, syslog, filelog]
+              receivers: [otlp, syslog, filelog/nginx]
               processors: [k8sattributes, transform/common, batch]
               exporters: [otlp_grpc, debug]
     # Центральный шлюз (Deployment) для отправки в облако
