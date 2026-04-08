@@ -30,6 +30,14 @@ opentelemetry-kube-stack:
       securityContext: # для доступа к лог-файлам
         runAsUser: 0
         runAsGroup: 0
+      presets:
+        logsCollection:
+          enabled: true
+          includeCollectorLogs: false # не собирать логи OTel
+        hostMetrics:
+          enabled: true # метрики CPU/RAM нод 
+        kubernetesAttributes:
+          enabled: true # k8s_attributes
       mode: daemonset
       fullnameOverride: "otel-agent"
       image:
