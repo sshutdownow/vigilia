@@ -31,16 +31,15 @@ opentelemetry-kube-stack:
         logsCollection: # доступ к лог-файлам [/var/log/pods/*/*/*.log]
           enabled: true
           includeCollectorLogs: false # не собирать логи OTel
-          filelogConfig:
-            operators:
-              - type: container
-                id: container-parser
-              - type: regex_parser
-                id: nginx-parser
-                regex: 'trace_id=(?P<trace_id>[a-f0-9]+)\s+span_id=(?P<span_id>[a-f0-9]+)\s+request_id=(?P<request_id>[a-f0-9-]+)'
-                parse_from: body
-                if: 'body contains "trace_id="'
-                on_error: drop
+          extraFilelogOperators:
+            - type: container
+              id: container-parser
+            - type: regex_parser
+              id: nginx-parser
+              regex: 'trace_id=(?P<trace_id>[a-f0-9]+)\s+span_id=(?P<span_id>[a-f0-9]+)\s+request_id=(?P<request_id>[a-f0-9-]+)'
+              parse_from: body
+              if: 'body contains "trace_id="'
+              on_error: drop
         hostMetrics:
           enabled: true # метрики CPU/RAM нод 
         kubernetesAttributes:
