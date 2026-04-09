@@ -106,7 +106,10 @@ opentelemetry-kube-stack:
                 - k8s.deployment.name
                 - k8s.container.name
             pod_association:
-              - sources: # чтобы UDP-syslog смог определить NS отправителя
+              - sources: # Позволяет сопоставить pod c log-файлом на основе пути
+                  - from: resource_attribute
+                    name: log.file.path
+              - sources: # Позволяет UDP-syslog определить namespace отправителя
                 - from: connection
               - sources:
                   - from: resource_attribute
