@@ -30,7 +30,7 @@ resource "yandex_iam_service_account_key" "gwin_sa_key" {
 resource "helm_release" "gwin" {
   name             = "gwin"
   repository       = "oci://cr.yandex/yc-marketplace/yandex-cloud/gwin"
-  version          = "v1.0.10"
+  version          = "v1.1.0"
   chart            = "gwin-chart"
   namespace        = "gwin"
   create_namespace = true
