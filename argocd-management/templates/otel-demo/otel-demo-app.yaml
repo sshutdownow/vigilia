@@ -13,8 +13,6 @@ spec:
     targetRevision: 0.40.6
     helm:
       values: |
-        default: # Отключаем демо
-          enabled: false
         components: # https://opentelemetry.io/docs/demo/kubernetes-deployment/
           frontend-proxy:
             service: # https://opentelemetry.io/docs/demo/kubernetes-deployment/#configure-service-types
@@ -59,7 +57,7 @@ spec:
                   exporters: [otlp/agent]
                 logs:
                   exporters: [otlp/agent]
-
+        # https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-demo#jaeger
         prometheus:
           enabled: false
         grafana:
@@ -71,8 +69,8 @@ spec:
     namespace: otel-demo
   syncPolicy:
     automated:
+      enabled: false # Отключаем демо
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-
