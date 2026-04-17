@@ -25,28 +25,23 @@ export default function () {
     const url = `${baseUrl}/api/orders`;
     
     const payload = JSON.stringify({
-      "orderProducts": [
+      "productOrders": [
         {
           "quantity": 1,
           "product": {
             "id": 1,
             "name": "Сливочная",
-            "price": 320.0,
+            "price": 320,
             "pictureUrl": "https://res.cloudinary.com/sugrobov/image/upload/v1623323635/repos/sausages/6.jpg"
-          },
-          "totalPrice": 320.0
+          }
         }
-      ],
-      "id": 3,
-      "dateCreated": "17/04/2026",
-      "status": "PAID",
-      "totalOrderPrice": 320.0,
-      "numberOfProducts": 1
+      ]
     });
 
     const params = {
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
     };
 
