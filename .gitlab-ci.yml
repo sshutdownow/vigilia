@@ -60,12 +60,20 @@ variables:
     - touch ./authorized_key.json && chmod 0600 ./authorized_key.json && echo ${AUTHORIZED_KEY} | base64 -d > ./authorized_key.json
 
 .k6_setup:
-  image: 
-    name: grafana/k6:master
-    entrypoint: [""]
   script:
     - '[ "$[[ inputs.enable_test ]]" == "false" ] && exit 0'
-    - k6 run --env BASE_URL="${K6_BASE_URL}" --vus $[[ inputs.k6_vus ]] --duration $[[ inputs.k6_duration ]] $K6_TEST_FILE --summary-export=load-performance.json
+    - |
+      docker run --rm \
+        --user $(id -u):$(id -g) \
+        -v "$(pwd)":/k6 \
+        -w /k6 \
+        grafana/k6:latest \
+        run \
+        --env BASE_URL="${K6_BASE_URL}" \
+        --vus $[[ inputs.k6_vus ]] \
+        --duration $[[ inputs.k6_duration ]] \
+        load-testing/load_test.js \
+        --summary-export=load-performance.json
   artifacts:
     reports:
       load_performance: load-performance.json
