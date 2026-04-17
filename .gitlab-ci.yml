@@ -26,15 +26,6 @@ stages:
   - performance
 
 variables:
-  TF_STATE_NAME: "tfstate"
-  TF_HTTP_ADDRESS: "https://cloud-services-engineer.gitlab.yandexcloud.net/api/v4/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}"
-  TF_HTTP_LOCK_ADDRESS: "https://cloud-services-engineer.gitlab.yandexcloud.net/api/v4/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}/lock"
-  TF_HTTP_UNLOCK_ADDRESS: "https://cloud-services-engineer.gitlab.yandexcloud.net/api/v4/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}/lock"
-  TF_HTTP_USERNAME: "${GITLAB_USER_NAME}"
-  TF_HTTP_PASSWORD: "${TF_HTTP_PASSWORD}"
-  TF_HTTP_LOCK_METHOD: "POST"
-  TF_HTTP_UNLOCK_METHOD: "DELETE"
-  TF_HTTP_RETRY_WAIT_MIN: "5"
   TF_ROOT: ${CI_PROJECT_DIR}/infra
   PLAN: infra_plan.cache
   BTPLAN: bootstrap.tfplan
@@ -58,7 +49,16 @@ variables:
     - touch ./authorized_key.json && chmod 0600 ./authorized_key.json && echo ${AUTHORIZED_KEY} | base64 -d > ./authorized_key.json
 #    - sed -i -e "s/\${CI_PROJECT_ID}/${CI_PROJECT_ID}/g" -e "s/\${GITLAB_USER_NAME}/${GITLAB_USER_NAME}/g" -e "s/\${TF_HTTP_PASSWORD}/${TF_HTTP_PASSWORD}/g" provider.tf
   variables:
-    TF_LOG: INFO
+    TF_STATE_NAME: "tfstate"
+    TF_HTTP_ADDRESS: "https://cloud-services-engineer.gitlab.yandexcloud.net/api/v4/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}"
+    TF_HTTP_LOCK_ADDRESS: "https://cloud-services-engineer.gitlab.yandexcloud.net/api/v4/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}/lock"
+    TF_HTTP_UNLOCK_ADDRESS: "https://cloud-services-engineer.gitlab.yandexcloud.net/api/v4/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}/lock"
+    TF_HTTP_USERNAME: "${GITLAB_USER_NAME}"
+    TF_HTTP_PASSWORD: "${TF_HTTP_PASSWORD}"
+    TF_HTTP_LOCK_METHOD: "POST"
+    TF_HTTP_UNLOCK_METHOD: "DELETE"
+    TF_HTTP_RETRY_WAIT_MIN: "5"
+    TF_LOG: DEBUG
     TF_VAR_cloud_id: ${CLOUD_ID}
     TF_VAR_folder_id: ${FOLDER_ID}
 
