@@ -17,6 +17,10 @@ spec:
 include:
   - template: Jobs/Load-Performance-Testing.gitlab-ci.yml
 
+load_performance:
+  rules:
+    - when: never
+
 stages:
   - tests
   - plan
@@ -34,7 +38,7 @@ variables:
   BTPLAN: bootstrap.tfplan
   GITLAB_ACCESS_TOKEN: ${TF_HTTP_PASSWORD}
   K6_TEST_FILE: load-testing/load_test.js
-  K6_BASE_URL: "sausage-store.${DOMAIN_NAME}"
+  K6_OPTIONS: "--vus $[[ inputs.k6_vus ]] --duration $[[ inputs.k6_duration ]] --env BASE_URL=sausage-store.${DOMAIN_NAME}"
   OPERATION:
     description: "Select CI/CD-operation"
     value: "terraform"
