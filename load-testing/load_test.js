@@ -1,6 +1,5 @@
-import http from 'k6/http';
-import { check, sleep, group } from 'k6';
-import { textSummary } from 'https://k6.io';
+import http from "k6/http";
+import { check } from "k6";
 
 export const options = {
   thresholds: {
