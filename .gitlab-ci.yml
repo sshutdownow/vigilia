@@ -82,7 +82,7 @@ bootstrap_plan:
   variables:
     TF_ROOT: ${CI_PROJECT_DIR}/infra/bootstrap
     TF_STATE_NAME: "btfstate"
-    TF_LOG: INFO
+    TF_LOG: DEBUG
     TF_VAR_cloud_id: ${CLOUD_ID}
     TF_VAR_folder_id: ${FOLDER_ID}
   script:
