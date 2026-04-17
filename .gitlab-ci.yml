@@ -86,6 +86,7 @@ bootstrap_plan:
     TF_VAR_cloud_id: ${CLOUD_ID}
     TF_VAR_folder_id: ${FOLDER_ID}
   script:
+    - env | grep TF_VAR
     - terraform init
     - terraform fmt -check -recursive -diff || true
     - terraform validate
