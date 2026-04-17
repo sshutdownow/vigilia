@@ -79,9 +79,6 @@ bootstrap_plan:
   variables:
     TF_ROOT: ${CI_PROJECT_DIR}/infra/bootstrap
     TF_STATE_NAME: "btfstate"
-    TF_LOG: INFO
-    TF_VAR_cloud_id: ${CLOUD_ID}
-    TF_VAR_folder_id: ${FOLDER_ID}
   script:
     - terraform init
     - terraform fmt -check -recursive -diff || true
@@ -105,9 +102,7 @@ bootstrap_apply:
   stage: apply
   variables:
     TF_ROOT: ${CI_PROJECT_DIR}/infra/bootstrap
-    TF_LOG: INFO
-    TF_VAR_cloud_id: ${CLOUD_ID}
-    TF_VAR_folder_id: ${FOLDER_ID}
+    TF_STATE_NAME: "btfstate"
   needs: ["bootstrap_plan"]
   script:
     - terraform init
