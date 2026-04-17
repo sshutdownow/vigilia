@@ -9,7 +9,7 @@ export const options = {
 };
 
 export default function () {
-  const baseUrl = __ENV.BASE_URL ? `https://${__ENV.BASE_URL}/` : 'https://sausage-store.vigilia.site/';
+  const baseUrl = __ENV.BASE_URL ? `https://${__ENV.BASE_URL}` : 'https://sausage-store.vigilia.site';
 
   group('Main Page', function () {
     const resIndex = http.get(baseUrl);
@@ -19,7 +19,7 @@ export default function () {
     });
   });
 
-  sleep(2);
+  sleep(1);
   
   group('Order Sausage', function () {
     const url = `${baseUrl}/api/orders`;
@@ -48,10 +48,22 @@ export default function () {
     const res = http.post(url, payload, params);
     
     check(res, {
+      'is not 500 error': (r) => r.status !== 500,
       'pay status is 200 or 201': (r) => r.status === 200 || r.status === 201,
-      'has order id': (r) => r.json().hasOwnProperty('id'),
+      'has order id': (r) => {
+        try {
+          return r.status < 400 && r.json().hasOwnProperty('id');
+        } catch (e) {
+          return false;
+        }
+      },
     });
+
+    if (res.status >= 500 && __VU === 1) {
+      console.error(`CRITICAL ERROR 500: URL: ${url} | Response: ${res.body.substring(0, 200)}`);
+    }
   });
+
 
   sleep(1);
 }
