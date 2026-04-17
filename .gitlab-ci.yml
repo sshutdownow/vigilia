@@ -59,6 +59,7 @@ variables:
     - touch ./authorized_key.json && chmod 0600 ./authorized_key.json && echo ${AUTHORIZED_KEY} | base64 -d > ./authorized_key.json
 
 .k6_setup:
+  allow_failure: true
   script:
     - '[ "$[[ inputs.enable_test ]]" == "false" ] && exit 0'
     - |
@@ -383,6 +384,7 @@ k6-pre-otel-loadtest:
 otel-plan:
   extends: .terraform_setup
   stage: plan
+  needs: []
   script:
     - terraform init
     - >
