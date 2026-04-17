@@ -61,11 +61,11 @@ variables:
 
 .k6_setup:
   image: 
-    name: grafana/k6:latest
+    name: grafana/k6:master
     entrypoint: [""]
   script:
     - '[ "$[[ inputs.enable_test ]]" == "false" ] && exit 0'
-    - ./k6 run --env BASE_URL="${K6_BASE_URL}" --vus $[[ inputs.k6_vus ]] --duration $[[ inputs.k6_duration ]] $K6_TEST_FILE --summary-export=load-performance.json
+    - k6 run --env BASE_URL="${K6_BASE_URL}" --vus $[[ inputs.k6_vus ]] --duration $[[ inputs.k6_duration ]] $K6_TEST_FILE --summary-export=load-performance.json
   artifacts:
     reports:
       load_performance: load-performance.json
