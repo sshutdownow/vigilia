@@ -86,9 +86,7 @@ bootstrap_plan:
     TF_VAR_cloud_id: ${CLOUD_ID}
     TF_VAR_folder_id: ${FOLDER_ID}
   script:
-    - terraform init \
-      -backend-config="username=${TF_HTTP_USERNAME}" \
-      -backend-config="password=${TF_HTTP_PASSWORD}"    
+    - terraform init -backend-config="username=${TF_HTTP_USERNAME}" -backend-config="password=${TF_HTTP_PASSWORD}"    
     - terraform fmt -check -recursive -diff || true
     - terraform validate
     - terraform plan -out=${BTPLAN}
