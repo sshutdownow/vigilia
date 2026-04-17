@@ -1,5 +1,5 @@
 import http from "k6/http";
-import { check, sleep } from "k6";
+import { check, sleep, group, textSummary } from "k6";
 
 export const options = {
   thresholds: {
@@ -9,21 +9,39 @@ export const options = {
 };
 
 export default function () {
-  const baseUrl = `https://${__ENV.BASE_URL}`;
+  const baseUrl = __ENV.BASE_URL ? `https://${__ENV.BASE_URL}/` : 'https://sausage-store.vigilia.site/';
 
   group('Main Page', function () {
     const resIndex = http.get(baseUrl);
     check(resIndex, {
       'index status is 200': (r) => r.status === 200,
+      'body contains sausage': (r) => r.body.includes('sausage'),
     });
   });
 
-  sleep(1);
+  sleep(2);
   
-  group('Pay Order', function () {
+  group('Order Sausage', function () {
+    const url = `${baseUrl}/api/orders`;
+    
     const payload = JSON.stringify({
-        product: "sausage",
-        quantity: 1
+      "orderProducts": [
+        {
+          "quantity": 1,
+          "product": {
+            "id": 1,
+            "name": "Сливочная",
+            "price": 320.0,
+            "pictureUrl": "https://res.cloudinary.com/sugrobov/image/upload/v1623323635/repos/sausages/6.jpg"
+          },
+          "totalPrice": 320.0
+        }
+      ],
+      "id": 3,
+      "dateCreated": "17/04/2026",
+      "status": "PAID",
+      "totalOrderPrice": 320.0,
+      "numberOfProducts": 1
     });
 
     const params = {
@@ -32,10 +50,11 @@ export default function () {
       },
     };
 
-    const resPay = http.post(`${baseUrl}/api/orders`, payload, params);
+    const res = http.post(url, payload, params);
     
-    check(resPay, {
-      'pay status is 201 or 200': (r) => r.status === 201 || r.status === 200,
+    check(res, {
+      'pay status is 200 or 201': (r) => r.status === 200 || r.status === 201,
+      'has order id': (r) => r.json().hasOwnProperty('id'),
     });
   });
 
