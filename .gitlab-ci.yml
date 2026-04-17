@@ -385,7 +385,7 @@ k6-pre-otel-loadtest:
   extends: .k6_setup
   stage: tests
   rules:
-    - if: '$OPERATION == "otel" && $[[ inputs.enable_test ]] == true && $[[ inputs.enable_otel ]] == true'
+    - if: $OPERATION == "otel"
       when: manual
 
 otel-plan:
@@ -455,7 +455,6 @@ k6-post-otel-loadtest:
   stage: otel
   needs: ["otel-activate"]
   rules:
-    - if: '$OPERATION == "otel" && $[[ inputs.enable_test ]] == true && $[[ inputs.enable_otel ]] == true'
+    - if: $OPERATION == "otel"
       when: manual
-    - when: never
              
