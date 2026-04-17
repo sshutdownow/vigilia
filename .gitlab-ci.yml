@@ -6,7 +6,15 @@ spec:
     enable_otel:
       type: boolean
       default: false
+    k6_vus:
+      type: number
+      default: 50
+    k6_duration:
+      default: "300s"
 ---
+
+include:
+  - template: Jobs/Load-Performance-Testing.gitlab-ci.yml
 
 stages:
   - tests
@@ -16,7 +24,7 @@ stages:
   - destroy
   - build
   - package
-  - otel 
+  - otel
 
 variables:
   ANSIBLE_ROOT: ${CI_PROJECT_DIR}/ansible
@@ -24,6 +32,8 @@ variables:
   PLAN: infra_plan.cache
   BTPLAN: bootstrap.tfplan
   GITLAB_ACCESS_TOKEN: ${TF_HTTP_PASSWORD}
+  K6_TEST_FILE: load-testing/load_test.js
+  K6_BASE_URL: "sausage-store.${DOMAIN_NAME}"
   OPERATION:
     description: "Select CI/CD-operation"
     value: "terraform"
@@ -39,11 +49,33 @@ variables:
   before_script:
     - cd ${TF_ROOT}
     - touch ./authorized_key.json && chmod 0600 ./authorized_key.json && echo ${AUTHORIZED_KEY} | base64 -d > ./authorized_key.json
-    - sed -i -e "s/\${CI_PROJECT_ID}/${CI_PROJECT_ID}/g" -e "s/\${GITLAB_USER_NAME}/${GITLAB_USER_NAME}/g" -e "s/\${TF_HTTP_PASSWORD}/${TF_HTTP_PASSWORD}/g" provider.tf
+#    - sed -i -e "s/\${CI_PROJECT_ID}/${CI_PROJECT_ID}/g" -e "s/\${GITLAB_USER_NAME}/${GITLAB_USER_NAME}/g" -e "s/\${TF_HTTP_PASSWORD}/${TF_HTTP_PASSWORD}/g" provider.tf
   variables:
     TF_LOG: INFO
     TF_VAR_cloud_id: ${CLOUD_ID}
     TF_VAR_folder_id: ${FOLDER_ID}
+    TF_STATE_NAME: "tfstate"
+    TF_HTTP_ADDRESS: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}"
+    TF_HTTP_LOCK_ADDRESS: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}/lock"
+    TF_HTTP_UNLOCK_ADDRESS: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}/lock"
+    TF_HTTP_USERNAME: "${GITLAB_USER_NAME}"
+    TF_HTTP_PASSWORD: "${TF_HTTP_PASSWORD}"
+    TF_HTTP_LOCK_METHOD: "POST"
+    TF_HTTP_UNLOCK_METHOD: "DELETE"
+    TF_HTTP_RETRY_WAIT_MIN: "5"
+
+.k6_setup:
+  image: 
+    name: grafana/k6:latest
+    entrypoint: [""]
+  script:
+    - '[ "$[[ inputs.enable_test ]]" == "false" ] && exit 0'
+    - k6 run --env BASE_URL="${K6_BASE_URL}" --vus $[[ inputs.k6_vus ]] --duration $[[ inputs.k6_duration ]] $K6_TEST_FILE --summary-export=load-performance.json
+  artifacts:
+    reports:
+      load_performance: load-performance.json
+    paths:
+      - load-performance.json
 
 # Terraform plan для LE-сертификата
 bootstrap_plan:
@@ -51,7 +83,8 @@ bootstrap_plan:
   stage: plan
   variables:
     TF_ROOT: ${CI_PROJECT_DIR}/infra/bootstrap
-    TF_LOG: DEBUG
+    TF_STATE_NAME: "btfstate"
+    TF_LOG: INFO
     TF_VAR_cloud_id: ${CLOUD_ID}
     TF_VAR_folder_id: ${FOLDER_ID}
   script:
@@ -179,7 +212,7 @@ plan:
         - "infra/**/*"
       when: always
   variables:
-    TF_LOG: DEBUG
+    TF_LOG: INFO
     TF_VAR_cloud_id: ${CLOUD_ID}
     TF_VAR_folder_id: ${FOLDER_ID}
     TF_VAR_vm_user: "${SSH_USER}"
@@ -214,7 +247,7 @@ apply:
       when: manual
     - when: never
   variables:
-    TF_LOG: DEBUG
+    TF_LOG: INFO
     TF_VAR_cloud_id: ${CLOUD_ID}
     TF_VAR_folder_id: ${FOLDER_ID}
     TF_VAR_vm_user: "${SSH_USER}"
@@ -241,7 +274,7 @@ destroy:
       when: manual
     - when: never
   variables:
-    TF_LOG: DEBUG
+    TF_LOG: INFO
     TF_VAR_cloud_id: ${CLOUD_ID}
     TF_VAR_folder_id: ${FOLDER_ID}
     TF_VAR_vm_user: "${SSH_USER}"
@@ -261,7 +294,7 @@ terratest:
   before_script:
     - cd ${TF_ROOT}
     - touch ./authorized_key.json && chmod 0600 ./authorized_key.json && echo ${AUTHORIZED_KEY} | base64 -d > ./authorized_key.json
-    - sed -i -e "s/\${CI_PROJECT_ID}/${CI_PROJECT_ID}/g" -e "s/\${GITLAB_USER_NAME}/${GITLAB_USER_NAME}/g" -e "s/\${TF_HTTP_PASSWORD}/${TF_HTTP_PASSWORD}/g" provider.tf
+#    - sed -i -e "s/\${CI_PROJECT_ID}/${CI_PROJECT_ID}/g" -e "s/\${GITLAB_USER_NAME}/${GITLAB_USER_NAME}/g" -e "s/\${TF_HTTP_PASSWORD}/${TF_HTTP_PASSWORD}/g" provider.tf
   script:
     - '[ "$[[ inputs.enable_test ]]" == "false" ] && exit 0'
     - cd test
@@ -281,7 +314,7 @@ terratest:
       when: on_success
   allow_failure: false
   variables:
-    TF_LOG: DEBUG
+    TF_LOG: INFO
     TF_VAR_cloud_id: ${CLOUD_ID}
     TF_VAR_folder_id: ${FOLDER_ID}
     TF_VAR_vm_user: "${SSH_USER}"
@@ -342,6 +375,13 @@ package-helm-chart:
   tags:
     - docker
 
+
+k6-pre-otel-loadtest:
+  extends: .k6_setup
+  stage: tests
+  rules:
+    - if: $OPERATION == "otel" && $[[ inputs.enable_otel ]] == true
+      when: manual
 
 otel-plan:
   extends: .terraform_setup
@@ -404,4 +444,13 @@ otel-activate:
   rules:
     - if: $OPERATION == "otel"
       when: on_success
- 
+
+k6-post-otel-loadtest:
+  extends: .k6_setup
+  stage: otel
+  needs: ["otel-activate"]
+  rules:
+    - if: $OPERATION == "otel" && $[[ inputs.enable_otel ]] == true
+      when: manual
+    - when: never
+             

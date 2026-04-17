@@ -21,12 +21,7 @@ resource "yandex_dns_recordset" "k8s_dns_record" {
 # записи, привязанные к Gwin IP
 resource "yandex_dns_recordset" "public_dns_records" {
   for_each = toset([
-    "grafana.${var.domain_name}.",
-    "jaeger.${var.domain_name}.",
-    "pyroscope.${var.domain_name}.",
-    "argocd.${var.domain_name}.",
-    "sausage-store.${var.domain_name}.",
-    "otel-demo.${var.domain_name}.",
+    "*.${var.domain_name}.",
     "${var.domain_name}."
   ])
 
