@@ -26,7 +26,15 @@ stages:
   - performance
 
 variables:
-  ANSIBLE_ROOT: ${CI_PROJECT_DIR}/ansible
+  TF_STATE_NAME: "tfstate"
+  TF_HTTP_ADDRESS: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}"
+  TF_HTTP_LOCK_ADDRESS: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}/lock"
+  TF_HTTP_UNLOCK_ADDRESS: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}/lock"
+  TF_HTTP_USERNAME: "${GITLAB_USER_NAME}"
+  TF_HTTP_PASSWORD: "${TF_HTTP_PASSWORD}"
+  TF_HTTP_LOCK_METHOD: "POST"
+  TF_HTTP_UNLOCK_METHOD: "DELETE"
+  TF_HTTP_RETRY_WAIT_MIN: "5"
   TF_ROOT: ${CI_PROJECT_DIR}/infra
   PLAN: infra_plan.cache
   BTPLAN: bootstrap.tfplan
@@ -53,15 +61,6 @@ variables:
     TF_LOG: INFO
     TF_VAR_cloud_id: ${CLOUD_ID}
     TF_VAR_folder_id: ${FOLDER_ID}
-    TF_STATE_NAME: "tfstate"
-    TF_HTTP_ADDRESS: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}"
-    TF_HTTP_LOCK_ADDRESS: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}/lock"
-    TF_HTTP_UNLOCK_ADDRESS: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}/lock"
-    TF_HTTP_USERNAME: "${GITLAB_USER_NAME}"
-    TF_HTTP_PASSWORD: "${TF_HTTP_PASSWORD}"
-    TF_HTTP_LOCK_METHOD: "POST"
-    TF_HTTP_UNLOCK_METHOD: "DELETE"
-    TF_HTTP_RETRY_WAIT_MIN: "5"
 
 .k6_setup:
   image: 
@@ -451,4 +450,3 @@ k6-post-otel-loadtest:
   rules:
     - if: $OPERATION == "otel"
       when: manual
-             
