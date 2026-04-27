@@ -1,25 +1,46 @@
 import http from "k6/http";
 import { check, sleep, group, textSummary } from "k6";
+import { htmlReport } from 'https://raw.githubusercontent.com/benc-uk/k6-reporter/latest/dist/bundle.js';
 
 export const options = {
+  scenarios: {
+    warmup: {
+      executor: 'constant-vus',
+      vus: 3,
+      duration: '10s',
+      exec: 'runTest',
+      tags: { stage: 'warmup' },
+    },
+    main_test: {
+      executor: 'constant-vus',
+      vus: __ENV.K6_VUS ? parseInt(__ENV.K6_VUS) : 100,
+      duration: __ENV.K6_DURATION || '600s',
+      startTime: '10s',
+      exec: 'runTest',
+      tags: { stage: 'main' },
+    },
+  },
   thresholds: {
-    http_req_failed: ['rate<0.01'],    // Ошибок менее 1%
-    http_req_duration: ['p(95)<1000'], // 95% запросов быстрее 1.0с
+    'http_req_failed{stage:main}': ['rate<0.01'],    // Ошибок менее 1%
+    'http_req_duration{stage:main}': ['p(95)<1000'], // 95% запросов быстрее 1.0с
   },
 };
 
 export default function () {
-  const baseUrl = __ENV.BASE_URL ? `https://${__ENV.BASE_URL}` : 'https://sausage-store.vigilia.site';
+  const baseUrl  = __ENV.BASE_URL ? `https://${__ENV.BASE_URL}` : 'https://sausage-store.vigilia.site';
+  const runLabel = __ENV.TEST_RUN || 'default';
 
   group('Main Page', function () {
-    const resIndex = http.get(baseUrl);
+    const resIndex = http.get(baseUrl, {
+      tags: { type: 'main', test_run: runLabel }
+    });
     check(resIndex, {
       'index status is 200': (r) => r.status === 200,
-      'body contains sausage': (r) => r.body.includes('sausage'),
+      'body contains sausage': (r) => r.body.includes('Сосисочная у дома'),
     });
   });
 
-  sleep(1);
+  sleep(0.1);
   
   group('Order Sausage', function () {
     const url = `${baseUrl}/api/orders`;
@@ -43,6 +64,7 @@ export default function () {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
+      tags: { type: 'order', test_run: runLabel },
     };
 
     const res = http.post(url, payload, params);
@@ -64,13 +86,13 @@ export default function () {
     }
   });
 
-
-  sleep(1);
+  sleep(0.1);
 }
 
 export function handleSummary(data) {
   return {
-    'load-performance.json': JSON.stringify(data, null, 2),
+    //'summary.html': htmlReport(data),
+    //'load-performance.json': JSON.stringify(data, null, 2),
     'stdout': textSummary(data, { indent: ' ', enableColors: true }),
   };
 }

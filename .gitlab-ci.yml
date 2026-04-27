@@ -24,6 +24,7 @@ stages:
   - package
   - otel
   - performance
+  - report
 
 variables:
   TF_STATE_NAME: "tfstate"
@@ -48,7 +49,7 @@ variables:
     options:
       - "terraform_bootstrap"
       - "terraform"
-      - "k8s"
+      - "pkg"
       - "otel"
 
 # TEMPLATE FOR TERRAFORM JOBS ONLY
@@ -69,16 +70,20 @@ variables:
         -w /k6 \
         grafana/k6:latest \
         run \
+        --env K6_WEB_DASHBOARD=true \
+        --env K6_WEB_DASHBOARD_EXPORT="${REPORT_NAME}.html" \
+        --env TEST_RUN="${TEST_RUN}" \
         --env BASE_URL="${K6_BASE_URL}" \
         --vus $[[ inputs.k6_vus ]] \
         --duration $[[ inputs.k6_duration ]] \
         load-testing/load_test.js \
-        --summary-export=load-performance.json
+        --summary-export="${REPORT_NAME}.json"
   artifacts:
     reports:
-      load_performance: load-performance.json
+      load_performance: "${REPORT_NAME}.json"
     paths:
-      - load-performance.json
+      - "${REPORT_NAME}.json"
+      - "${REPORT_NAME}.html"
 
 # Terraform plan для LE-сертификата
 bootstrap_plan:
@@ -292,7 +297,6 @@ terratest:
   before_script:
     - cd ${TF_ROOT}
     - touch ./authorized_key.json && chmod 0600 ./authorized_key.json && echo ${AUTHORIZED_KEY} | base64 -d > ./authorized_key.json
-#    - sed -i -e "s/\${CI_PROJECT_ID}/${CI_PROJECT_ID}/g" -e "s/\${GITLAB_USER_NAME}/${GITLAB_USER_NAME}/g" -e "s/\${TF_HTTP_PASSWORD}/${TF_HTTP_PASSWORD}/g" provider.tf
   script:
     - '[ "$[[ inputs.enable_test ]]" == "false" ] && exit 0'
     - cd test
@@ -343,7 +347,7 @@ build-and-push-images:
     - docker build -t $DOCKER_IMAGE_BASE/sausage-backend-report:latest ./backend-report/
     - docker push $DOCKER_IMAGE_BASE/sausage-backend-report:latest
   rules:
-    - if: $OPERATION == "k8s"
+    - if: $OPERATION == "pkg"
       when: always
 
 # Упаковка и пуш Helm-чарта в GitLAB
@@ -368,7 +372,7 @@ package-helm-chart:
   needs:
     - build-and-push-images
   rules:
-    - if: $OPERATION == "k8s"
+    - if: $OPERATION == "pkg"
       when: manual
   tags:
     - docker
@@ -380,6 +384,8 @@ k6-pre-otel-loadtest:
   rules:
     - if: $OPERATION == "otel"
       when: manual
+  variables:
+    REPORT_NAME: "report-pre"
 
 otel-plan:
   extends: .terraform_setup
@@ -451,3 +457,19 @@ k6-post-otel-loadtest:
   rules:
     - if: $OPERATION == "otel"
       when: manual
+  variables:
+    REPORT_NAME: "report-post"
+
+# Публикация в GitLab Pages
+pages:
+  stage: report
+  dependencies:
+    - k6-pre-otel-loadtest
+    - k6-post-otel-loadtest
+  script:
+    - mkdir -p public
+    - cp -f report-pre.html report-post.html public/
+    - echo "<html><body><h1>Reports</h1><a href='report-pre.html'>Before</a><br><a href='report-post.html'>After</a></body></html>" > public/index.html
+  artifacts:
+    paths:
+      - public
