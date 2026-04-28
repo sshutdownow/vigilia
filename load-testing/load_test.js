@@ -6,7 +6,7 @@ export const options = {
   scenarios: {
     warmup: {
       executor: 'constant-vus',
-      vus: 3,
+      vus: 5,
       duration: '10s',
       exec: 'runTest',
       tags: { stage: 'warmup' },
@@ -25,6 +25,11 @@ export const options = {
     'http_req_duration{stage:main}': ['p(95)<1000'], // 95% запросов быстрее 1.0с
   },
 };
+
+
+export default function() {
+  runTest();
+}
 
 export function runTest() {
   const baseUrl  = __ENV.BASE_URL ? `https://${__ENV.BASE_URL}` : 'https://sausage-store.vigilia.site';
