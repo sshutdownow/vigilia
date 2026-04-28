@@ -26,18 +26,25 @@ export const options = {
   },
 };
 
-export default function () {
+export function runTest() {
   const baseUrl  = __ENV.BASE_URL ? `https://${__ENV.BASE_URL}` : 'https://sausage-store.vigilia.site';
   const runLabel = __ENV.TEST_RUN || 'default';
 
   group('Main Page', function () {
     const resIndex = http.get(baseUrl, {
-      tags: { type: 'main', test_run: runLabel }
+      tags: { type: 'index', test_run: runLabel }
     });
     check(resIndex, {
       'index status is 200': (r) => r.status === 200,
-      'body contains sausage': (r) => r.body.includes('Сосисочная у дома'),
+      'body contains title Frontend': (r) => r.body.includes('<title>Frontend</title>'),
     });
+    http.batch([
+      ['GET', `${baseUrl}/runtime.js`, null, { tags: { type: 'static' } }],
+      ['GET', `${baseUrl}/polyfills.js`, null, { tags: { type: 'static' } }],
+      ['GET', `${baseUrl}/styles.js`, null, { tags: { type: 'static' } }],
+      ['GET', `${baseUrl}/vendor.js`, null, { tags: { type: 'static' } }],
+      ['GET', `${baseUrl}/main.js`, null, { tags: { type: 'static' } }],
+    ]);
   });
 
   sleep(0.1);
@@ -70,11 +77,12 @@ export default function () {
     const res = http.post(url, payload, params);
     
     check(res, {
-      'is not 500 error': (r) => r.status !== 500,
       'pay status is 200 or 201': (r) => r.status === 200 || r.status === 201,
+      'is not 500 error': (r) => r.status !== 500,
       'has order id': (r) => {
         try {
-          return r.status < 400 && r.json().hasOwnProperty('id');
+          const body = r.json();
+          return r.status < 400 && body !== null && body.hasOwnProperty('id');
         } catch (e) {
           return false;
         }
@@ -82,7 +90,7 @@ export default function () {
     });
 
     if (res.status >= 500 && __VU === 1) {
-      console.error(`CRITICAL ERROR 500: URL: ${url} | Response: ${res.body.substring(0, 200)}`);
+      console.error(`CRITICAL ERROR 500: URL: ${url} | Response: ${res.body ? res.body.substring(0, 200) : 'empty'}`);
     }
   });
 
