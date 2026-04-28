@@ -74,8 +74,8 @@ variables:
         --env K6_WEB_DASHBOARD_EXPORT="${REPORT_NAME}.html" \
         --env TEST_RUN="${TEST_RUN}" \
         --env BASE_URL="${K6_BASE_URL}" \
-        --vus $[[ inputs.k6_vus ]] \
-        --duration $[[ inputs.k6_duration ]] \
+        --env K6_VUS="$[[ inputs.k6_vus ]]" \
+        --env K6_DURATION="$[[ inputs.k6_duration ]]" \
         load-testing/load_test.js \
         --summary-export="${REPORT_NAME}.json"
   artifacts:
