@@ -81,7 +81,7 @@ variables:
   artifacts:
     reports:
       load_performance: "${REPORT_NAME}.json"
-    paths:
+    paths: # https://grafana.com/docs/k6/latest/results-output/web-dashboard/
       - "${REPORT_NAME}.json"
       - "${REPORT_NAME}.html"
 
@@ -386,6 +386,7 @@ k6-pre-otel-loadtest:
       when: manual
   variables:
     REPORT_NAME: "report-pre"
+    TEST_RUN: "pre"
 
 otel-plan:
   extends: .terraform_setup
@@ -459,13 +460,16 @@ k6-post-otel-loadtest:
       when: manual
   variables:
     REPORT_NAME: "report-post"
+    TEST_RUN: "post"
 
 # Публикация в GitLab Pages
 pages:
   stage: report
-  dependencies:
-    - k6-pre-otel-loadtest
-    - k6-post-otel-loadtest
+  needs:
+    - job: k6-pre-otel-loadtest
+      artifacts: true
+    - job: k6-post-otel-loadtest
+      artifacts: true
   script:
     - mkdir -p public
     - cp -f report-pre.html report-post.html public/
@@ -473,3 +477,5 @@ pages:
   artifacts:
     paths:
       - public
+  rules:
+    - if: $OPERATION == "otel"
