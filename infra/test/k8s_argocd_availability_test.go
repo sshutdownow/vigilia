@@ -6,11 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 	"testing"
 	"time"
 
-	http_helper "github.com/gruntwork-io/terratest/modules/http-helper"
+	httphelper "github.com/gruntwork-io/terratest/modules/http-helper"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/assert"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/k8s/v1"
@@ -90,26 +89,32 @@ func TestArgoCDLogin(t *testing.T) {
 	maxRetries := 25
 	timeBetweenRetries := 15 * time.Second
 
-	http_helper.HttpGetWithRetry(
-		t, loginUrl, &tlsConfig, 200, "Waiting for ArgoCD UI", maxRetries, timeBetweenRetries,
-	)
-
-	// Данные для авторизации (ArgoCD API ожидает JSON)
-	requestBody := map[string]string{
-		"username": "admin",
-		"password": adminPassword,
-	}
-	jsonData, _ := json.Marshal(requestBody)
-	status, responseBody := http_helper.HttpPostWithRetry(
+	httphelper.HttpGetWithRetry(
 		t,
 		loginUrl,
 		&tlsConfig,
-		strings.NewReader(string(jsonData)),
-		map[string]string{"Content-Type": "application/json"},
 		200,
-		"Verifying ArgoCD Admin Authorization",
+		"Waiting for ArgoCD UI",
 		maxRetries,
 		timeBetweenRetries,
+	)
+
+	// Данные для авторизации (ArgoCD API ожидает JSON)
+	requestBody, _ := json.Marshal(map[string]string{
+		"username": "admin",
+		"password": adminPassword,
+	})
+
+	status, responseBody := httphelper.HTTPDoWithRetry(
+		t,
+		"POST",
+		loginUrl,
+		requestBody,
+		map[string]string{"Content-Type": "application/json"},
+		200,
+		maxRetries,
+		timeBetweenRetries,
+		&tlsConfig,
 	)
 
 	assert.Equal(t, 200, status, "ArgoCD API should return 200 on successful login")
