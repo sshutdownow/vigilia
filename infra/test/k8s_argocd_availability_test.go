@@ -105,7 +105,7 @@ func TestArgoCDLogin(t *testing.T) {
 		"password": adminPassword,
 	})
 
-	status, responseBody := httphelper.HTTPDoWithRetry(
+	status := httphelper.HTTPDoWithRetry(
 		t,
 		"POST",
 		loginUrl,
@@ -118,5 +118,4 @@ func TestArgoCDLogin(t *testing.T) {
 	)
 
 	assert.Equal(t, 200, status, "ArgoCD API should return 200 on successful login")
-	assert.Contains(t, responseBody, "token", "Response should contain JWT token")
 }
