@@ -337,14 +337,16 @@ terratest:
 k6-pre-otel-loadtest:
   extends: .k6_setup
   stage: performance
-  needs: ["terratest"]
+  needs:
+    - job: apply
+      artifacts: true
+    - job: terratest
   rules:
     - if: $OPERATION == "terraform"
       when: manual
   variables:
     REPORT_NAME: "report-pre"
     TEST_RUN: "pre"
-
 
 # Сборка и пуш Docker-образов в GitLAB
 build-and-push-images:
