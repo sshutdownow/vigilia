@@ -1,19 +1,3 @@
-spec:
-  inputs:
-    enable_test:
-      type: boolean
-      default: true
-    enable_otel:
-      type: boolean
-      default: false
-    k6_vus:
-      type: number
-      default: 100
-    k6_duration:
-      type: string
-      default: "300s"
----
-
 stages:
   - tests
   - plan
@@ -51,6 +35,16 @@ variables:
       - "terraform"
       - "pkg"
       - "otel"
+  K6_VUS:
+    value: "100"
+    description: "Нагрузочное тестирование: количество виртуальных пользователей (VU)"
+  K6_DURATION:
+    value: "300s"
+    description: "Нагрузочное тестирование: длительность теста"
+  ENABLE_TESTS:
+    value: "true"
+    options: ["true", "false"]
+    description: "Запуск проверок и тестов"
 
 # TEMPLATE FOR TERRAFORM JOBS ONLY
 .terraform_setup:
@@ -62,7 +56,7 @@ variables:
 .k6_setup:
   allow_failure: true
   script:
-    - '[ "$[[ inputs.enable_test ]]" == "false" ] && exit 0'
+    - '[ "${ENABLE_TESTS}" == "false" ] && exit 0'
     - |
       docker run --rm \
         --user $(id -u):$(id -g) \
@@ -74,8 +68,8 @@ variables:
         --env K6_WEB_DASHBOARD_EXPORT="${REPORT_NAME}.html" \
         --env TEST_RUN="${TEST_RUN}" \
         --env BASE_URL="${K6_BASE_URL}" \
-        --env K6_VUS="$[[ inputs.k6_vus ]]" \
-        --env K6_DURATION="$[[ inputs.k6_duration ]]" \
+        --env K6_VUS="${K6_VUS}" \
+        --env K6_DURATION="${K6_DURATION}" \
         --out experimental-opentelemetry \
         --env K6_OTEL_GRPC_EXPORTER_ENDPOINT=ingest.monium.yandex.cloud:443 \
         --env K6_OTEL_EXPORTER_PROTOCOL=grpc \
@@ -157,7 +151,7 @@ checkov:
   variables:
     GIT_DEPTH: "1"
   script:
-    - '[ "$[[ inputs.enable_test ]]" == "false" ] && exit 0'
+    - '[ "${ENABLE_TESTS}" == "false" ] && exit 0'
     - checkov -d ${TF_ROOT} --external-checks-dir ${TF_ROOT}/custom_policies --output junitxml --output-file-path checkov_report
   artifacts:
     reports:
@@ -179,7 +173,7 @@ tflint:
   variables:
     GIT_DEPTH: "1"
   script:
-    - '[ "$[[ inputs.enable_test ]]" == "false" ] && exit 0'
+    - '[ "${ENABLE_TESTS}" == "false" ] && exit 0'
     - curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | TFLINT_INSTALL_PATH="${TF_ROOT}" bash
     - terraform init -backend=false
     - ./tflint --init || true
@@ -304,7 +298,7 @@ terratest:
     - cd ${TF_ROOT}
     - touch ./authorized_key.json && chmod 0600 ./authorized_key.json && echo ${AUTHORIZED_KEY} | base64 -d > ./authorized_key.json
   script:
-    - '[ "$[[ inputs.enable_test ]]" == "false" ] && exit 0'
+    - '[ "${ENABLE_TESTS}" == "false" ] && exit 0'
     - cd test
     - go mod init terratest
     - go mod edit -go=1.21
@@ -339,8 +333,10 @@ k6-pre-otel-loadtest:
   stage: performance
   needs:
     - job: "apply"
+      optional: true
       artifacts: true
     - job: "terratest"
+      optional: true
   rules:
     - if: $OPERATION == "terraform"
       when: manual
@@ -397,36 +393,11 @@ package-helm-chart:
     - docker
 
 
-# otel-plan:
-#   extends: .terraform_setup
-#   stage: plan
-#   needs: []
-#   script:
-#     - terraform init
-#     - >
-#       terraform plan 
-#       -var="enable_monium_key=true"
-#       -target=yandex_iam_service_account.monium_sa 
-#       -target=yandex_resourcemanager_folder_iam_member.monium_sa_role 
-#       -target=yandex_iam_service_account_api_key.monium_key        
-#       -out=otel.tfplan
-#   artifacts:
-#     paths:
-#       - ${TF_ROOT}/otel.tfplan
-#     expire_in: 1 yrs
-#   rules:
-#     - if: $OPERATION == "otel"
-#       when: manual
-#   variables:
-#     TF_LOG: INFO
-
 otel-apply:
   extends: .terraform_setup
   stage: apply
-#  needs: ["otel-plan"]
   script:
     - terraform init
-#    - terraform apply "otel.tfplan"
     - echo "MONIUM_API_KEY=$(terraform output -raw monium_api_key)" >> ${CI_PROJECT_DIR}/monium.env
     - echo "ARGO_SERVER=$(terraform output -raw argocd_domain)" >> ${CI_PROJECT_DIR}/monium.env
   artifacts:
