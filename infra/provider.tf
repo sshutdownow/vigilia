@@ -11,9 +11,11 @@ terraform {
     }
     helm = {
       source = "hashicorp/helm"
+      version = ">= 3.1.0"
     }
     kubernetes = {
       source = "hashicorp/kubernetes"
+      version = ">= 3.1.0"
     }
     null = {
       source  = "hashicorp/null"
@@ -21,6 +23,7 @@ terraform {
     }
     bcrypt = {
       source = "viktorradnai/bcrypt"
+      version = ">= 0.1.2"
     }
   }
 

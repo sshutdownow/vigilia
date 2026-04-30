@@ -13,8 +13,8 @@ export const options = {
     },
     main_test: {
       executor: 'constant-vus',
-      vus: __ENV.K6_VUS ? parseInt(__ENV.K6_VUS) : 100,
-      duration: __ENV.K6_DURATION || '600s',
+      vus: __ENV.K6_VUS ? parseInt(__ENV.K6_VUS) : 50,
+      duration: __ENV.K6_DURATION || '300s',
       startTime: '10s',
       exec: 'runTest',
       tags: { stage: 'main' },
@@ -24,6 +24,7 @@ export const options = {
     'http_req_failed': ['rate<0.01'],    // Ошибок менее 1%
     'http_req_duration': ['p(95)<1000'], // 95% запросов быстрее 1.0с
   },
+  summaryTrendStats: ["avg", "min", "med", "max", "p(95)", "p(99)"],
 };
 
 export default function() {

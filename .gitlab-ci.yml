@@ -8,7 +8,7 @@ spec:
       default: false
     k6_vus:
       type: number
-      default: 50
+      default: 100
     k6_duration:
       type: string
       default: "300s"
@@ -76,6 +76,11 @@ variables:
         --env BASE_URL="${K6_BASE_URL}" \
         --env K6_VUS="$[[ inputs.k6_vus ]]" \
         --env K6_DURATION="$[[ inputs.k6_duration ]]" \
+        --out experimental-opentelemetry \
+        --env K6_OTEL_GRPC_EXPORTER_ENDPOINT=ingest.monium.yandex.cloud:443 \
+        --env K6_OTEL_EXPORTER_PROTOCOL=grpc \
+        --env K6_OTEL_SERVICE_NAME="k6-loadtest-${REPORT_NAME}" \
+        --env "K6_OTEL_HEADERS=authorization=Api-Key ${MONIUM_API_KEY},x-monium-project=folder__${FOLDER_ID}" \
         load-testing/load_test.js \
         --summary-export="${REPORT_NAME}.json"
   artifacts:
@@ -220,7 +225,6 @@ plan:
     TF_VAR_folder_id: ${FOLDER_ID}
     TF_VAR_vm_user: "${SSH_USER}"
     TF_VAR_ssh_key: "${SSH_PUBLIC_KEY}"
-    TF_VAR_ssh_private_key: "${SSH_PRIVATE_KEY}"
     TF_VAR_gitlab_username: ${ARGO_USER}
     TF_VAR_gitlab_token: ${ARGO_PASSWD}
     TF_VAR_argocd_admin_password: ${ARGO_ADM_PASSWD}    
@@ -243,6 +247,7 @@ apply:
   script:
     - terraform init
     - terraform apply -auto-approve ${PLAN}
+    - echo "MONIUM_API_KEY=$(terraform output -raw monium_api_key)" >> ${CI_PROJECT_DIR}/monium.env
   rules:
     - if: $OPERATION == "terraform" && $CI_COMMIT_BRANCH =~ /^(main|master)$/
       changes:
@@ -255,14 +260,16 @@ apply:
     TF_VAR_folder_id: ${FOLDER_ID}
     TF_VAR_vm_user: "${SSH_USER}"
     TF_VAR_ssh_key: "${SSH_PUBLIC_KEY}"
-    TF_VAR_ssh_private_key: "${SSH_PRIVATE_KEY}"
     TF_VAR_gitlab_username: ${ARGO_USER}
     TF_VAR_gitlab_token: ${ARGO_PASSWD}
     TF_VAR_argocd_admin_password: ${ARGO_ADM_PASSWD}    
     TF_VAR_spring_datasource_user: "${POSTGRES_USER}"
     TF_VAR_spring_datasource_pass: "${POSTGRES_PASSWORD}"
     TF_VAR_spring_mongo_uri: "${MONGODB_URI}"
- 
+  artifacts:
+    reports:
+      dotenv: monium.env
+
 # Удаление инфраструктуры Terraform за исключением LE-сертификата
 destroy:
   extends: .terraform_setup
@@ -282,7 +289,6 @@ destroy:
     TF_VAR_folder_id: ${FOLDER_ID}
     TF_VAR_vm_user: "${SSH_USER}"
     TF_VAR_ssh_key: "${SSH_PUBLIC_KEY}"
-    TF_VAR_ssh_private_key: "${SSH_PRIVATE_KEY}"
     TF_VAR_gitlab_username: ${ARGO_USER}
     TF_VAR_gitlab_token: ${ARGO_PASSWD}
     TF_VAR_argocd_admin_password: ${ARGO_ADM_PASSWD}    
@@ -321,13 +327,24 @@ terratest:
     TF_VAR_folder_id: ${FOLDER_ID}
     TF_VAR_vm_user: "${SSH_USER}"
     TF_VAR_ssh_key: "${SSH_PUBLIC_KEY}"
-    TF_VAR_ssh_private_key: "${SSH_PRIVATE_KEY}"
     TF_VAR_gitlab_username: ${ARGO_USER}
     TF_VAR_gitlab_token: ${ARGO_PASSWD}
     TF_VAR_argocd_admin_password: ${ARGO_ADM_PASSWD}    
     TF_VAR_spring_datasource_user: "${POSTGRES_USER}"
     TF_VAR_spring_datasource_pass: "${POSTGRES_PASSWORD}"
     TF_VAR_spring_mongo_uri: "${MONGODB_URI}"
+
+k6-pre-otel-loadtest:
+  extends: .k6_setup
+  stage: performance
+  needs: ["terratest"]
+  rules:
+    - if: $OPERATION == "terraform"
+      when: manual
+  variables:
+    REPORT_NAME: "report-pre"
+    TEST_RUN: "pre"
+
 
 # Сборка и пуш Docker-образов в GitLAB
 build-and-push-images:
@@ -378,46 +395,36 @@ package-helm-chart:
     - docker
 
 
-k6-pre-otel-loadtest:
-  extends: .k6_setup
-  stage: tests
-  rules:
-    - if: $OPERATION == "otel"
-      when: manual
-  variables:
-    REPORT_NAME: "report-pre"
-    TEST_RUN: "pre"
-
-otel-plan:
-  extends: .terraform_setup
-  stage: plan
-  needs: []
-  script:
-    - terraform init
-    - >
-      terraform plan 
-      -var="enable_monium_key=true"
-      -target=yandex_iam_service_account.monium_sa 
-      -target=yandex_resourcemanager_folder_iam_member.monium_sa_role 
-      -target=yandex_iam_service_account_api_key.monium_key        
-      -out=otel.tfplan
-  artifacts:
-    paths:
-      - ${TF_ROOT}/otel.tfplan
-    expire_in: 1 yrs
-  rules:
-    - if: $OPERATION == "otel"
-      when: manual
-  variables:
-    TF_LOG: INFO
+# otel-plan:
+#   extends: .terraform_setup
+#   stage: plan
+#   needs: []
+#   script:
+#     - terraform init
+#     - >
+#       terraform plan 
+#       -var="enable_monium_key=true"
+#       -target=yandex_iam_service_account.monium_sa 
+#       -target=yandex_resourcemanager_folder_iam_member.monium_sa_role 
+#       -target=yandex_iam_service_account_api_key.monium_key        
+#       -out=otel.tfplan
+#   artifacts:
+#     paths:
+#       - ${TF_ROOT}/otel.tfplan
+#     expire_in: 1 yrs
+#   rules:
+#     - if: $OPERATION == "otel"
+#       when: manual
+#   variables:
+#     TF_LOG: INFO
 
 otel-apply:
   extends: .terraform_setup
   stage: apply
-  needs: ["otel-plan"]
+#  needs: ["otel-plan"]
   script:
     - terraform init
-    - terraform apply "otel.tfplan"
+#    - terraform apply "otel.tfplan"
     - echo "MONIUM_API_KEY=$(terraform output -raw monium_api_key)" >> ${CI_PROJECT_DIR}/monium.env
     - echo "ARGO_SERVER=$(terraform output -raw argocd_domain)" >> ${CI_PROJECT_DIR}/monium.env
   artifacts:
@@ -461,21 +468,3 @@ k6-post-otel-loadtest:
   variables:
     REPORT_NAME: "report-post"
     TEST_RUN: "post"
-
-# Публикация в GitLab Pages
-pages:
-  stage: report
-  needs:
-    - job: k6-pre-otel-loadtest
-      artifacts: true
-    - job: k6-post-otel-loadtest
-      artifacts: true
-  script:
-    - mkdir -p public
-    - cp -f report-pre.html report-post.html public/
-    - echo "<html><body><h1>Reports</h1><a href='report-pre.html'>Before</a><br><a href='report-post.html'>After</a></body></html>" > public/index.html
-  artifacts:
-    paths:
-      - public
-  rules:
-    - if: $OPERATION == "otel"

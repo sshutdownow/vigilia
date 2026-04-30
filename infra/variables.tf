@@ -63,7 +63,7 @@ variable "net_cidr" {
 
   default = [
     { name = "subnet-a", zone = "ru-central1-a", prefix = "10.10.0.0/16" },
-    { name = "subnet-b", zone = "ru-central1-b", prefix = "10.11.0.0/16" },
+    #{ name = "subnet-b", zone = "ru-central1-b", prefix = "10.11.0.0/16" },
     #{ name = "subnet-d", zone = "ru-central1-d", prefix = "10.13.0.0/16" },
     #{ name = "subnet-e", zone = "ru-central1-e", prefix = "10.14.0.0/16" },
   ]
@@ -94,17 +94,12 @@ variable "gitlab_token" {
 
 variable "gitlab_git_url" {
   type    = string
-  default = "https://cloud-services-engineer.gitlab.yandexcloud.net/s2633401/vigilia.git"
-}
-
-variable "gitlab_helm_url" {
-  type    = string
-  default = "cloud-services-engineer.gitlab.yandexcloud.net:5050/s2633401/vigilia/charts"
+  default = null
 }
 
 variable "gitlab_image_url" {
   type    = string
-  default = "cloud-services-engineer.gitlab.yandexcloud.net:5050/s2633401/vigilia"
+  default = null
 }
 
 variable "spring_datasource_user" {
@@ -138,17 +133,17 @@ variable "ssh_key" {
   default     = null
 }
 
-variable "ssh_private_key" {
-  type        = string
-  description = "SSH private key"
-  sensitive   = true
-  default     = null
-}
+# variable "ssh_private_key" {
+#   type        = string
+#   description = "SSH private key"
+#   sensitive   = true
+#   default     = null
+# }
 
-variable "image_family" {
-  type    = string
-  default = "ubuntu-2404-lts-oslogin"
-}
+# variable "image_family" {
+#   type    = string
+#   default = "ubuntu-2404-lts-oslogin"
+# }
 
 variable "platform_id" {
   type    = string
