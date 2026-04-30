@@ -38,8 +38,8 @@ variables:
     value: "50"
     description: "Нагрузочное тестирование: количество виртуальных пользователей (VU)"
   K6_DURATION:
-    value: "180s"
-    description: "Нагрузочное тестирование: длительность теста"
+    value: "180"
+    description: "Нагрузочное тестирование: длительность теста в секундах"
   ENABLE_TESTS:
     value: "true"
     options: ["true", "false"]
@@ -67,8 +67,8 @@ variables:
         --env K6_WEB_DASHBOARD_EXPORT="${REPORT_NAME}.html" \
         --env TEST_RUN="${TEST_RUN}" \
         --env BASE_URL="${K6_BASE_URL}" \
-        --env K6_VUS="${K6_VUS}" \
-        --env K6_DURATION="${K6_DURATION}" \
+        --env TEST_VUS="${K6_VUS}" \
+        --env TEST_DURATION="${K6_DURATION}" \
         --out opentelemetry \
         --env K6_OTEL_GRPC_EXPORTER_ENDPOINT=ingest.monium.yandex.cloud:443 \
         --env K6_OTEL_EXPORTER_PROTOCOL=grpc \

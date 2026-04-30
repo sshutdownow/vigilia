@@ -2,40 +2,48 @@ import http from "k6/http";
 import { check, sleep, group, textSummary } from "k6";
 import { htmlReport } from 'https://raw.githubusercontent.com/benc-uk/k6-reporter/latest/dist/bundle.js';
 
+const testVUs = __ENV.TEST_VUS ? parseInt(__ENV.TEST_VUS) : 50;
+const testDuration = __ENV.TEST_DURATION ? parseInt(__ENV.TEST_DURATION) : 180;
+const warmupDuration = (testDuration / 5) | 0;
+
 export const options = {
-  // scenarios: {
-  //   warmup: {
-  //     executor: 'constant-vus',
-  //     vus: 5,
-  //     duration: '10s',
-  //     exec: 'runTest',
-  //     tags: { stage: 'warmup' },
-  //   },
-  //   main_test: {
-  //     executor: 'constant-vus',
-  //     vus: __ENV.K6_VUS ? parseInt(__ENV.K6_VUS) : 50,
-  //     duration: __ENV.K6_DURATION || '300s',
-  //     startTime: '10s',
-  //     exec: 'runTest',
-  //     tags: { stage: 'main' },
-  //   },
-  // },
-  scenarios: {
-    ramping_load: {
-      executor: 'ramping-vus',
-      startVUs: 0,
-      stages: [
-        { duration: '1m', target: __ENV.K6_VUS ? parseInt(__ENV.K6_VUS) : 50 }, // Линейный рост до максимума
-        { duration: '3m', target: __ENV.K6_VUS ? parseInt(__ENV.K6_VUS) : 50 }, // Плато (стабильная нагрузка)
-        { duration: '1m', target: 0 },                                          // Линейное снижение
-      ],
-      gracefulRampDown: '30s',
+   scenarios: {
+    warmup: {
+      executor: 'constant-vus',
+      vus: 5,
+      duration: `${warmupDuration}s`,
       exec: 'runTest',
+      tags: { stage: 'warmup' },
     },
-  },  
+    main_test: {
+      executor: 'constant-vus',
+      vus: testVUs,
+      duration: `${testDuration}s`,
+      startTime: `${warmupDuration}s`, 
+      exec: 'runTest',
+      tags: { stage: 'main' },
+    },
+  },
+  // scenarios: {
+  //   ramping_load: {
+  //     executor: 'ramping-vus',
+  //     startVUs: 0,
+  //     stages: [
+  //       // Линейный рост до максимума
+  //       { duration: `${testRamp}s`, target: testVUs },
+  //       // Плато (стабильная нагрузка)                        
+  //       { duration: `${testDuration}s`, target: testVUs },
+  //       // Линейное снижение
+  //       { duration: `${testRamp}s`, target: 0 },
+  //     ],
+  //     gracefulRampDown: '30s',
+  //     exec: 'runTest',
+  //   },
+  // },  
   thresholds: {
     'http_req_failed': ['rate<0.01'],    // Ошибок менее 1%
     'http_req_duration': ['p(95)<1000'], // 95% запросов быстрее 1.0с
+    'http_req_duration{scenario:main_test}': ['p(95)<1000'], // отчёт
   },
   summaryTrendStats: ["avg", "min", "med", "max", "p(95)", "p(99)"],
 };
@@ -57,11 +65,11 @@ export function runTest() {
       'body contains title Frontend': (r) => r.body.includes('<title>Frontend</title>'),
     });
     http.batch([
-      ['GET', `${baseUrl}/runtime.js`, null, { tags: { type: 'static' } }],
-      ['GET', `${baseUrl}/polyfills.js`, null, { tags: { type: 'static' } }],
-      ['GET', `${baseUrl}/styles.js`, null, { tags: { type: 'static' } }],
-      ['GET', `${baseUrl}/vendor.js`, null, { tags: { type: 'static' } }],
-      ['GET', `${baseUrl}/main.js`, null, { tags: { type: 'static' } }],
+      ['GET', `${baseUrl}/runtime.js`, null, { tags: { type: 'static', test_run: runLabel } }],
+      ['GET', `${baseUrl}/polyfills.js`, null, { tags: { type: 'static', test_run: runLabel } }],
+      ['GET', `${baseUrl}/styles.js`, null, { tags: { type: 'static', test_run: runLabel } }],
+      ['GET', `${baseUrl}/vendor.js`, null, { tags: { type: 'static', test_run: runLabel } }],
+      ['GET', `${baseUrl}/main.js`, null, { tags: { type: 'static', test_run: runLabel } }],
     ]);
   });
 
