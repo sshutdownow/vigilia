@@ -338,9 +338,9 @@ k6-pre-otel-loadtest:
   extends: .k6_setup
   stage: performance
   needs:
-    - job: apply
+    - job: "apply"
       artifacts: true
-    - job: terratest
+    - job: "terratest"
   rules:
     - if: $OPERATION == "terraform"
       when: manual
