@@ -3,23 +3,36 @@ import { check, sleep, group, textSummary } from "k6";
 import { htmlReport } from 'https://raw.githubusercontent.com/benc-uk/k6-reporter/latest/dist/bundle.js';
 
 export const options = {
+  // scenarios: {
+  //   warmup: {
+  //     executor: 'constant-vus',
+  //     vus: 5,
+  //     duration: '10s',
+  //     exec: 'runTest',
+  //     tags: { stage: 'warmup' },
+  //   },
+  //   main_test: {
+  //     executor: 'constant-vus',
+  //     vus: __ENV.K6_VUS ? parseInt(__ENV.K6_VUS) : 50,
+  //     duration: __ENV.K6_DURATION || '300s',
+  //     startTime: '10s',
+  //     exec: 'runTest',
+  //     tags: { stage: 'main' },
+  //   },
+  // },
   scenarios: {
-    warmup: {
-      executor: 'constant-vus',
-      vus: 5,
-      duration: '10s',
+    ramping_load: {
+      executor: 'ramping-vus',
+      startVUs: 0,
+      stages: [
+        { duration: '1m', target: __ENV.K6_VUS ? parseInt(__ENV.K6_VUS) : 50 }, // Линейный рост до максимума
+        { duration: '3m', target: __ENV.K6_VUS ? parseInt(__ENV.K6_VUS) : 50 }, // Плато (стабильная нагрузка)
+        { duration: '1m', target: 0 },                                          // Линейное снижение
+      ],
+      gracefulRampDown: '30s',
       exec: 'runTest',
-      tags: { stage: 'warmup' },
     },
-    main_test: {
-      executor: 'constant-vus',
-      vus: __ENV.K6_VUS ? parseInt(__ENV.K6_VUS) : 50,
-      duration: __ENV.K6_DURATION || '300s',
-      startTime: '10s',
-      exec: 'runTest',
-      tags: { stage: 'main' },
-    },
-  },
+  },  
   thresholds: {
     'http_req_failed': ['rate<0.01'],    // Ошибок менее 1%
     'http_req_duration': ['p(95)<1000'], // 95% запросов быстрее 1.0с

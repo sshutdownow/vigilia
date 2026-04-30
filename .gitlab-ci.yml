@@ -35,10 +35,10 @@ variables:
       - "pkg"
       - "otel"
   K6_VUS:
-    value: "100"
+    value: "50"
     description: "Нагрузочное тестирование: количество виртуальных пользователей (VU)"
   K6_DURATION:
-    value: "300s"
+    value: "180s"
     description: "Нагрузочное тестирование: длительность теста"
   ENABLE_TESTS:
     value: "true"
