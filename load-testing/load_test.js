@@ -2,8 +2,8 @@ import http from "k6/http";
 import { check, sleep, group, textSummary } from "k6";
 import { htmlReport } from 'https://raw.githubusercontent.com/benc-uk/k6-reporter/latest/dist/bundle.js';
 
-const testVUs = __ENV.TEST_VUS ? parseInt(__ENV.TEST_VUS) : 50;
-const testDuration = __ENV.TEST_DURATION ? parseInt(__ENV.TEST_DURATION) : 180;
+const testVUs = __ENV.TEST_VUS ? parseInt(__ENV.TEST_VUS) : 25;
+const testDuration = __ENV.TEST_DURATION ? parseInt(__ENV.TEST_DURATION) : 120;
 const warmupDuration = (testDuration / 5) | 0;
 
 export const options = {

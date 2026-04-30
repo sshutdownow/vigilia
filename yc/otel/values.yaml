@@ -27,6 +27,8 @@ opentelemetry-kube-stack:
     # Агент (DaemonSet) на каждой ноде кластера
     agent:
       enabled: true
+      mode: daemonset
+      fullnameOverride: "otel-agent"
       presets:
         logsCollection: # доступ к лог-файлам [/var/log/pods/*/*/*.log]
           enabled: true
@@ -37,8 +39,13 @@ opentelemetry-kube-stack:
           enabled: true # k8s_attributes
           extractAllPodLabels: true
           extractAllPodAnnotations: true
-      mode: daemonset
-      fullnameOverride: "otel-agent"
+      resources:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+        requests:
+          cpu: 200m
+          memory: 256Mi
       image:
         repository: otel/opentelemetry-collector-contrib
         tag: latest 
@@ -94,26 +101,13 @@ opentelemetry-kube-stack:
                 if: 'body contains "trace_id="'
                 on_error: drop
         processors:
-          batch: {}
-          k8sattributes:
-            auth_type: serviceAccount
-            extract:
-              metadata:
-                - k8s.node.name
-                - k8s.namespace.name
-                - k8s.pod.name
-                - k8s.pod.ip
-                - k8s.deployment.name
-                - k8s.container.name
-            pod_association:
-              - sources: # Позволяет сопоставить pod c log-файлом на основе пути
-                  - from: resource_attribute
-                    name: log.file.path
-              - sources: # Позволяет UDP-syslog определить namespace отправителя
-                - from: connection
-              - sources:
-                  - from: resource_attribute
-                    name: k8s.pod.ip
+          memory_limiter:
+            check_interval: 1s
+            limit_percentage: 85
+            spike_limit_percentage: 10
+          batch:
+            send_batch_size: 8192
+            timeout: 2s
           transform/common:
             log_statements:
               - context: log
@@ -135,26 +129,53 @@ opentelemetry-kube-stack:
           pipelines:
             metrics:
               receivers: [otlp]
-              processors: [k8sattributes, batch]
+              processors: [memory_limiter, batch]
               exporters: [otlp_grpc]
             traces:
               receivers: [otlp]
-              processors: [k8sattributes, batch]
+              processors: [memory_limiter, batch]
               exporters: [otlp_grpc]
             logs:
               receivers: [otlp, syslog, filelog/nginx]
-              processors: [k8sattributes, transform/common, batch]
+              processors: [memory_limiter, transform/common, batch]
               exporters: [otlp_grpc]
     # Центральный шлюз (Deployment) для отправки в облако
     gateway:
       enabled: true
       mode: deployment
       fullnameOverride: "otel-gateway"
-      service:
+      presets: # сбора агрегированных данных о состоянии всего кластера
+        clusterMetrics: 
+          enabled: true
+      replicaCount: 4 # по 1й на каждую зону
+      autoscaling:
         enabled: true
-        selector:
-          app.kubernetes.io/name: "otel-gateway"
-          app.kubernetes.io/instance: "otel-stack"
+        minReplicas: 4
+        maxReplicas: 8
+        targetCPUUtilizationPercentage: 80
+      resources:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+        requests:
+          cpu: 250m
+          memory: 256Mi
+      # мягкое ограничение по зонам
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: "topology.kubernetes.io/zone"
+          whenUnsatisfiable: ScheduleAnyway 
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: "otel-gateway"
+      # жёсткое ограничение по нодам - 1 под на 1 ноду
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: "otel-gateway"
+            topologyKey: "kubernetes.io/hostname"
       env:
         - name: MONIUM_API_KEY
           valueFrom:
@@ -186,9 +207,6 @@ opentelemetry-kube-stack:
             send_batch_size: 4096
             send_batch_max_size: 8192
             timeout: 10s
-          k8sattributes:
-            extract:
-              metadata: [k8s.pod.name, k8s.namespace.name, k8s.node.name]
         exporters:
           # Шлюз авторизуется и отправляет данные в Yandex Monitoring (Monium)
           otlp_grpc/monium:
@@ -212,15 +230,15 @@ opentelemetry-kube-stack:
           pipelines:
             metrics:
               receivers: [ otlp ]
-              processors: [ k8sattributes, batch ]
+              processors: [ batch ]
               exporters: [ otlp_grpc/monium ]
             traces:
               receivers: [ otlp ]
-              processors: [ k8sattributes,batch ]
+              processors: [ batch ]
               exporters: [ otlp_grpc/monium ]
             logs:
               receivers: [ otlp ]
-              processors: [ k8sattributes, batch ]
+              processors: [ batch ]
               exporters: [ otlp_grpc/monium ]
         # Телеметрия самого OTel Collector
         telemetry:
