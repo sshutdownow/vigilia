@@ -8,7 +8,6 @@ stages:
   - package
   - otel
   - performance
-  - report
 
 variables:
   TF_STATE_NAME: "tfstate"
@@ -434,7 +433,10 @@ otel-activate:
 k6-post-otel-loadtest:
   extends: .k6_setup
   stage: performance
-  needs: ["otel-activate"]
+  needs:
+  - job: "otel-apply"
+    artifacts: true
+  - job: "otel-activate"
   rules:
     - if: $OPERATION == "otel"
       when: manual
