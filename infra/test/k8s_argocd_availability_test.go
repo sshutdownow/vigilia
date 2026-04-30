@@ -80,26 +80,17 @@ func TestArgoCDLogin(t *testing.T) {
 
 	loginUrl := fmt.Sprintf("https://%s/api/v1/session", argocdDomain)
 
-	// строгая проверка TLS-сертификата
+	// Строгая проверка TLS-сертификата
 	tlsConfig := tls.Config{
 		InsecureSkipVerify: false,
 		ServerName:         argocdDomain,
 	}
-	// Ждем балансировщик (~6 минут)
+
+	// Ждем балансировщик ~6 минут
 	maxRetries := 25
 	timeBetweenRetries := 15 * time.Second
 
-	httphelper.HttpGetWithRetry(
-		t,
-		loginUrl,
-		&tlsConfig,
-		200,
-		"Waiting for ArgoCD UI",
-		maxRetries,
-		timeBetweenRetries,
-	)
-
-	// Данные для авторизации (ArgoCD API ожидает JSON)
+	// Данные для авторизации. ArgoCD API ожидает JSON
 	requestBody, _ := json.Marshal(map[string]string{
 		"username": "admin",
 		"password": adminPassword,
