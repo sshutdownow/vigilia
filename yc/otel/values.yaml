@@ -130,7 +130,7 @@ opentelemetry-kube-stack:
             tls:
               insecure: true
           debug:
-            verbosity: detailed
+            verbosity: normal
         service:
           pipelines:
             metrics:
@@ -144,7 +144,7 @@ opentelemetry-kube-stack:
             logs:
               receivers: [otlp, syslog, filelog/nginx]
               processors: [k8sattributes, transform/common, batch]
-              exporters: [otlp_grpc, debug]
+              exporters: [otlp_grpc]
     # Центральный шлюз (Deployment) для отправки в облако
     gateway:
       enabled: true
@@ -183,7 +183,8 @@ opentelemetry-kube-stack:
                 endpoint: "0.0.0.0:4318"
         processors:
           batch:
-            send_batch_size: 1000
+            send_batch_size: 4096
+            send_batch_max_size: 8192
             timeout: 10s
           k8sattributes:
             extract:
@@ -205,28 +206,28 @@ opentelemetry-kube-stack:
               max_interval: 30s
               max_elapsed_time: 300s
           debug:
-            verbosity: detailed
+            verbosity: normal
         service:
           extensions: [health_check]
           pipelines:
             metrics:
               receivers: [ otlp ]
               processors: [ k8sattributes, batch ]
-              exporters: [ otlp_grpc/monium, debug ]
+              exporters: [ otlp_grpc/monium ]
             traces:
               receivers: [ otlp ]
               processors: [ k8sattributes,batch ]
-              exporters: [ otlp_grpc/monium, debug ]
+              exporters: [ otlp_grpc/monium ]
             logs:
               receivers: [ otlp ]
               processors: [ k8sattributes, batch ]
-              exporters: [ otlp_grpc/monium, debug ]
+              exporters: [ otlp_grpc/monium ]
         # Телеметрия самого OTel Collector
         telemetry:
           logs:
-            level: info  # debug | info | warn | error
+            level: warn  # debug | info | warn | error
           metrics:
-            level: detailed  # none | basic | normal | detailed
+            level: normal  # none | basic | normal | detailed
             readers:
               - periodic:
                   interval: 60000
@@ -253,6 +254,12 @@ opentelemetry-kube-stack:
         value: "otlp"
       - name: OTEL_LOGS_EXPORTER
         value: "otlp"
+      - name: OTEL_BSP_MAX_QUEUE_SIZE
+        value: "8192"
+      - name: OTEL_BSP_MAX_EXPORT_BATCH_SIZE
+        value: "2048"
+      - name: OTEL_BSP_SCHEDULE_DELAY
+        value: "500"
     propagators:
       - tracecontext
       - baggage
