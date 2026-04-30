@@ -69,7 +69,7 @@ variables:
         --env BASE_URL="${K6_BASE_URL}" \
         --env K6_VUS="${K6_VUS}" \
         --env K6_DURATION="${K6_DURATION}" \
-        --out experimental-opentelemetry \
+        --out opentelemetry \
         --env K6_OTEL_GRPC_EXPORTER_ENDPOINT=ingest.monium.yandex.cloud:443 \
         --env K6_OTEL_EXPORTER_PROTOCOL=grpc \
         --env K6_OTEL_SERVICE_NAME="k6-loadtest-${REPORT_NAME}" \
@@ -332,12 +332,12 @@ k6-pre-otel-loadtest:
   stage: performance
   needs:
     - job: "apply"
-      optional: true
       artifacts: true
     - job: "terratest"
-      optional: true
   rules:
     - if: $OPERATION == "terraform"
+      changes:
+        - "infra/**/*"
       when: manual
   variables:
     REPORT_NAME: "report-pre"
