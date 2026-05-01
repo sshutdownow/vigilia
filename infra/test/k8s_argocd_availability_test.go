@@ -35,12 +35,13 @@ func TestYandexK8sExistsAndRunning(t *testing.T) {
 	folderID := os.Getenv("TF_VAR_folder_id")
 	assert.NotEmpty(t, folderID, "ENV 'TF_VAR_folder_id' must be set")
 
+	// Опции Terraform
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 		TerraformDir: "..",
 	})
 
-	// Инициализация и применение Terraform
-	terraform.InitAndApply(t, terraformOptions)
+	// Инициализация Terraform
+	terraform.Init(t, terraformOptions)
 
 	// Получение выходных данных
 	clusterID := terraform.Output(t, terraformOptions, "k8s_cluster_id")
@@ -66,12 +67,12 @@ func TestArgoCDLogin(t *testing.T) {
 	assert.NotEmpty(t, adminPassword, "ENV 'ARGO_ADM_PASSWD' must be set")
 
 	// Опции Terraform
-	terraformOptions := &terraform.Options{
+	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 		TerraformDir: "..",
-	}
+	})
 
-	// Инициализация и применение Terraform
-	terraform.InitAndApply(t, terraformOptions)
+	// Инициализация Terraform
+	terraform.Init(t, terraformOptions)
 
 	// Получение выходных данных
 	argocdDomain := terraform.Output(t, terraformOptions, "argocd_domain")

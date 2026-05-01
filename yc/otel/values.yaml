@@ -46,7 +46,7 @@ opentelemetry-kube-stack:
         requests:
           cpu: 200m
           memory: 256Mi
-      image:
+      image: # k8sattributes, transform, hostmetrics
         repository: otel/opentelemetry-collector-contrib
         tag: latest 
       service:
@@ -76,7 +76,7 @@ opentelemetry-kube-stack:
             protocols:
               grpc:
                 endpoint: "0.0.0.0:4317"
-              http: # для Go
+              http:
                 endpoint: "0.0.0.0:4318"
           syslog:
             udp:
@@ -87,36 +87,29 @@ opentelemetry-kube-stack:
                 parse_from: body
                 parse_to: attributes
                 onError: drop
-          filelog/nginx:
-            include: [/var/log/pods/*/*/*.log]
-            exclude: [/var/log/pods/otel_*/*/*.log]
-            include_file_path: true
-            start_at: end
-            operators:
-              - type: container
-              - type: regex_parser
-                id: nginx-parser
-                regex: 'trace_id=(?P<trace_id>[a-f0-9]+)\s+span_id=(?P<span_id>[a-f0-9]+)\s+request_id=(?P<request_id>[a-f0-9-]+)'
-                parse_from: body
-                if: 'body contains "trace_id="'
-                on_error: drop
         processors:
           memory_limiter:
             check_interval: 1s
             limit_percentage: 85
-            spike_limit_percentage: 10
+            spike_limit_percentage: 25
           batch:
             send_batch_size: 8192
+            send_batch_max_size: 16384
             timeout: 2s
           transform/common:
             log_statements:
               - context: log
                 statements:
-                  - set(log.trace_id, TraceID(log.attributes["trace_id"])) where log.attributes["trace_id"] != nil
-                  - set(log.span_id, SpanID(log.attributes["span_id"])) where log.attributes["span_id"] != nil
-                  - set(resource.attributes["service.name"], Concat([log.attributes["k8s.container.name"], log.attributes["k8s.namespace.name"]], "."))
-                    where log.attributes["k8s.container.name"] != nil and log.attributes["k8s.namespace.name"] != nil
-                  - delete_matching_keys(log.attributes, "^(trace_id|span_id)$")
+                  # Яндекс ALB добавляет request_id, оставляем для корреляции
+                  - set(attributes["request_id"], ExtractPatterns(body, "request_id=(?P<request_id>[a-f0-9-]+)")) where body != nil
+                  # Сохраняем стандартные trace_id и span_id во временные атрибуты
+                  - set(attributes["trace_id"], ExtractPatterns(body, "trace_id=(?P<trace_id>[a-f0-9]+)")) where body != nil
+                  - set(attributes["span_id"], ExtractPatterns(body, "span_id=(?P<span_id>[a-f0-9]+)")) where body != nil
+                  # Для корреляции TraceID/SpanID берём значения из временных атрибутов
+                  - set(log.trace_id, TraceID(attributes["trace_id"])) where attributes["trace_id"] != nil
+                  - set(log.span_id, SpanID(attributes["span_id"])) where attributes["span_id"] != nil
+                  # Удаляем временные атрибуты
+                  - delete_matching_keys(attributes, "^(trace_id|span_id)$")
         exporters:
           # Агент пересылает данные на шлюз (gateway) внутри кластера
           otlp_grpc:
@@ -136,10 +129,10 @@ opentelemetry-kube-stack:
               processors: [memory_limiter, batch]
               exporters: [otlp_grpc]
             logs:
-              receivers: [otlp, syslog, filelog/nginx]
+              receivers: [otlp, syslog]
               processors: [memory_limiter, transform/common, batch]
               exporters: [otlp_grpc]
-    # Центральный шлюз (Deployment) для отправки в облако
+    # Центральный шлюз (Deployment) для отправки в Monium
     gateway:
       enabled: true
       mode: deployment
@@ -147,7 +140,7 @@ opentelemetry-kube-stack:
       presets: # сбора агрегированных данных о состоянии всего кластера
         clusterMetrics: 
           enabled: true
-      replicaCount: 4 # по 1й на каждую зону
+      replicaCount: 4 # по 1й на каждую зону - у Яндекс 4 DC
       autoscaling:
         enabled: true
         minReplicas: 4
@@ -168,7 +161,7 @@ opentelemetry-kube-stack:
           labelSelector:
             matchLabels:
               app.kubernetes.io/name: "otel-gateway"
-      # жёсткое ограничение по нодам - 1 под на 1 ноду
+      # жёсткое ограничение - 1 под на 1 ноду
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -204,11 +197,11 @@ opentelemetry-kube-stack:
                 endpoint: "0.0.0.0:4318"
         processors:
           batch:
-            send_batch_size: 4096
-            send_batch_max_size: 8192
+            send_batch_size: 8192
+            send_batch_max_size: 16384
             timeout: 10s
         exporters:
-          # Шлюз авторизуется и отправляет данные в Yandex Monitoring (Monium)
+          # Шлюз авторизуется и отправляет данные в Яндекс Monium
           otlp_grpc/monium:
             endpoint: "ingest.monium.yandex.cloud:443"
             compression: zstd
@@ -273,11 +266,16 @@ opentelemetry-kube-stack:
       - name: OTEL_LOGS_EXPORTER
         value: "otlp"
       - name: OTEL_BSP_MAX_QUEUE_SIZE
-        value: "8192"
+        value: "16384"
       - name: OTEL_BSP_MAX_EXPORT_BATCH_SIZE
-        value: "2048"
+        value: "4096"
       - name: OTEL_BSP_SCHEDULE_DELAY
         value: "500"
+      # Сэмплирование
+      # - name: OTEL_TRACES_SAMPLER
+      #   value: "parentbased_traceidratio"
+      # - name: OTEL_TRACES_SAMPLER_ARG
+      #   value: "0.2"
     propagators:
       - tracecontext
       - baggage
@@ -309,8 +307,9 @@ opentelemetry-kube-stack:
           value: "info"
       attrs:
       - name: NginxModuleOtelMaxQueueSize
-        value: "4096"
-      image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:latest
+        value: "16384"
+      image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nginx:latest
+    #  image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:latest
     # sdk:
     #   image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-sdk:latest
 
