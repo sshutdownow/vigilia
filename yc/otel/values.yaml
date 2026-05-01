@@ -33,6 +33,26 @@ opentelemetry-kube-stack:
         logsCollection: # доступ к лог-файлам [/var/log/pods/*/*/*.log]
           enabled: true
           includeCollectorLogs: false # не собирать логи OTel
+          extraOperators:
+            - type: regex_parser
+              id: trace-id-parser
+              regex: 'trace_id=(?P<trace_id>[a-f0-9]+)'
+              parse_from: body
+              if: 'body contains "trace_id="'
+              on_error: drop
+            - type: regex_parser
+              id: span-id-parser
+              regex: 'span_id=(?P<span_id>[a-f0-9]+)'
+              parse_from: body
+              if: 'body contains "span_id="'
+              on_error: drop
+              # Яндекс ALB добавляет request_id, оставляем для корреляции
+            - type: regex_parser
+              id: request-id-parser
+              regex: 'request_id=(?P<request_id>[a-f0-9-]+)'
+              parse_from: body
+              if: 'body contains "request_id="'
+              on_error: drop
         hostMetrics:
           enabled: true # метрики CPU/RAM нод 
         kubernetesAttributes:
@@ -100,16 +120,11 @@ opentelemetry-kube-stack:
             log_statements:
               - context: log
                 statements:
-                  # Яндекс ALB добавляет request_id, оставляем для корреляции
-                  - set(attributes["trace_id"], ExtractPatterns(body, "trace_id=(?P<trace_id>[a-f0-9]+)")["trace_id"]) where body != nil
-                  # Сохраняем стандартные trace_id и span_id во временные атрибуты
-                  - set(attributes["span_id"], ExtractPatterns(body, "span_id=(?P<span_id>[a-f0-9]+)")["span_id"]) where body != nil
-                  - set(attributes["request_id"], ExtractPatterns(body, "request_id=(?P<request_id>[a-f0-9-]+)")["request_id"]) where body != nil
                   # Для корреляции TraceID/SpanID берём значения из временных атрибутов
-                  - set(log.trace_id, TraceID(attributes["trace_id"])) where attributes["trace_id"] != nil
-                  - set(log.span_id, SpanID(attributes["span_id"])) where attributes["span_id"] != nil
+                  - set(log.trace_id, TraceID(log.attributes["trace_id"])) where log.attributes["trace_id"] != nil
+                  - set(log.span_id, SpanID(log.attributes["span_id"])) where log.attributes["span_id"] != nil
                   # Удаляем временные атрибуты
-                  - delete_matching_keys(attributes, "^(trace_id|span_id)$")
+                  - delete_matching_keys(log.attributes, "^(trace_id|span_id)$")
         exporters:
           # Агент пересылает данные на шлюз (gateway) внутри кластера
           otlp_grpc:
