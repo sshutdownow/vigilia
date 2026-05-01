@@ -33,7 +33,7 @@ opentelemetry-kube-stack:
         logsCollection: # доступ к лог-файлам [/var/log/pods/*/*/*.log]
           enabled: true
           includeCollectorLogs: false # не собирать логи OTel
-          extraOperators:
+          extraFilelogOperators:
             - type: regex_parser
               id: trace-id-parser
               regex: 'trace_id=(?P<trace_id>[a-f0-9]+)'
