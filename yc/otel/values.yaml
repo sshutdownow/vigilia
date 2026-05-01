@@ -106,8 +106,8 @@ opentelemetry-kube-stack:
                   - set(attributes["trace_id"], ExtractPatterns(body, "trace_id=(?P<trace_id>[a-f0-9]+)")) where body != nil
                   - set(attributes["span_id"], ExtractPatterns(body, "span_id=(?P<span_id>[a-f0-9]+)")) where body != nil
                   # Для корреляции TraceID/SpanID берём значения из временных атрибутов
-                  - set(log.trace_id, TraceID(attributes["trace_id"])) where attributes["trace_id"] != nil
-                  - set(log.span_id, SpanID(attributes["span_id"])) where attributes["span_id"] != nil
+                  - set(trace_id, TraceID(attributes["trace_id"])) where attributes["trace_id"] != nil
+                  - set(span_id, SpanID(attributes["span_id"])) where attributes["span_id"] != nil
                   # Удаляем временные атрибуты
                   - delete_matching_keys(attributes, "^(trace_id|span_id)$")
         exporters:
