@@ -1,16 +1,16 @@
 opentelemetry-kube-stack:
   clusterName: sausage-store-cluster
 
-  extraObjects:
-    - apiVersion: v1
-      kind: Secret
-      metadata:
-        name: monium-secret
-        namespace: {{ .Release.Namespace }}
-      type: Opaque
-      stringData:
-        api-key: {{ .Values.global.monium_api_key | quote }}
-        folder-id: {{ .Values.global.folder_id | quote }}
+  # extraObjects:
+  #   - apiVersion: v1
+  #     kind: Secret
+  #     metadata:
+  #       name: monium-secret
+  #       namespace: {{ .Release.Namespace }}
+  #     type: Opaque
+  #     stringData:
+  #       api-key: {{ .Values.global.monium_api_key | quote }}
+  #       folder-id: {{ .Values.global.folder_id | quote }}
 
   opentelemetry-operator:
     enabled: true
