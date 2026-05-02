@@ -11,17 +11,7 @@ opentelemetry-kube-stack:
   rbac: # k8sattributes
     create: true
 
-  commonEnv:
-    - name: MONIUM_API_KEY
-      valueFrom:
-        secretKeyRef:
-          name: monium-secret
-          key: api-key
-    - name: MONIUM_FOLDER_ID
-      valueFrom:
-        secretKeyRef:
-          name: monium-secret
-          key: folder-id
+  commonEnv: []
 
   collectors:
     # Агент (DaemonSet) на каждой ноде кластера
@@ -81,7 +71,7 @@ opentelemetry-kube-stack:
           syslog:
             udp:
               listen_address: "0.0.0.0:54527"
-            protocol: rfc3164 # rfc3164 стандартный Syslog. rfc5424
+            protocol: rfc3164 # RFC3164 (BSD) либо RFC5424 (IETF)
             operators: # nginx шлёт JSON 
               - type: json_parser
                 parse_from: body
@@ -197,10 +187,6 @@ opentelemetry-kube-stack:
             secretKeyRef:
               name: monium-secret
               key: folder-id
-        - name: MY_POD_IP
-          valueFrom:
-            fieldRef:
-              fieldPath: status.podIP
       config:
         extensions:
           health_check:
