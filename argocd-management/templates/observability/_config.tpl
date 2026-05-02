@@ -1,5 +1,15 @@
 {{- define "otel.config" -}}
 opentelemetry-kube-stack:
+  extraObjects:
+    - apiVersion: v1
+      kind: Secret
+      metadata:
+        name: monium-secret
+        namespace: otel
+      stringData:
+        api-key: {{ .Values.global.monium_api_key | quote }}
+        folder-id: {{ .Values.global.folder_id | quote }}
+
   clusterName: sausage-store-cluster
 
   opentelemetry-operator:
