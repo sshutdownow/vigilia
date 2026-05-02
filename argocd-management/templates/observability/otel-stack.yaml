@@ -12,13 +12,13 @@ spec:
       chart: 'opentelemetry-kube-stack'
       targetRevision: 0.14.12
       helm:
+        # parameters:
+        #   - name: "global.monium_api_key"
+        #     value: ""
+        #   - name: "global.folder_id"
+        #     value: ""
         valueFiles:
           - $values/argocd-management/templates/observability/_values.yaml
-        parameters:
-          - name: "global.monium_api_key"
-            value: ""
-          - name: "global.folder_id"
-            value: ""
     - repoURL: {{ .Values.global.repo_url | quote }}
       targetRevision: master
       ref: values
