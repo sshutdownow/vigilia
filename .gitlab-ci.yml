@@ -420,7 +420,7 @@ otel-activate:
     - >
       argocd app set argocd-management
       -p global.monium_api_key=$MONIUM_API_KEY 
-      -p global.folder_id=$FOLDER_ID
+      -p global.folder_id=$FOLDER_ID || exit 0
     - >
       argocd app set otel-stack
       --sync-policy automated --auto-prune --self-heal
