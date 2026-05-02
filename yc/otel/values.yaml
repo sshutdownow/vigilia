@@ -1,19 +1,16 @@
 opentelemetry-kube-stack:
-  commonEnv: []
+  clusterName: sausage-store-cluster
 
   extraObjects:
     - apiVersion: v1
       kind: Secret
       metadata:
         name: monium-secret
-        namespace: otel
+        namespace: {{ .Release.Namespace }}
+      type: Opaque
       stringData:
-        api-key: "${global.monium_api_key}"
-        folder-id: "${global.folder_id}"
-        # api-key: {{ .Values.global.monium_api_key | quote }}
-        # folder-id: {{ .Values.global.folder_id | quote }}
-
-  clusterName: sausage-store-cluster
+        api-key: {{ .Values.global.monium_api_key | quote }}
+        folder-id: {{ .Values.global.folder_id | quote }}
 
   opentelemetry-operator:
     enabled: true
@@ -24,6 +21,8 @@ opentelemetry-kube-stack:
 
   rbac: # k8sattributes
     create: true
+
+  commonEnv: []
 
   collectors:
     # Агент (DaemonSet) на каждой ноде кластера
@@ -83,7 +82,7 @@ opentelemetry-kube-stack:
           syslog:
             udp:
               listen_address: "0.0.0.0:54527"
-            protocol: rfc3164 # RFC3164 (BSD) или RFC5424 (IETF)
+            protocol: rfc3164 # RFC3164 (BSD) либо RFC5424 (IETF)
             operators: 
               - type: json_parser
                 parse_from: body
@@ -188,7 +187,7 @@ opentelemetry-kube-stack:
               matchLabels:
                 app.kubernetes.io/name: "otel-gateway"
             topologyKey: "kubernetes.io/hostname"
-      extraEnvs:
+      env:
         - name: MONIUM_API_KEY
           valueFrom:
             secretKeyRef:
@@ -261,6 +260,7 @@ opentelemetry-kube-stack:
                     otlp:
                       protocol: http/protobuf
                       endpoint: http://${env:MY_POD_IP}:4318
+
   instrumentation:
     enabled: true
     name: "sausage-store-instrumentation"
@@ -329,3 +329,10 @@ opentelemetry-kube-stack:
 
   opAMPBridge:
     enabled: false
+    addReportingLabel: true
+
+# Глобальные переменные чарта
+global:
+  folder_id: ""
+  monium_api_key: ""
+  otel_enabled: "true"

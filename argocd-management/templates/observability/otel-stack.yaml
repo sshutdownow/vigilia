@@ -7,28 +7,15 @@ metadata:
     argocd.argoproj.io/sync-wave: "5"
 spec:
   project: default
-  sources:
-    - repoURL: 'https://open-telemetry.github.io/opentelemetry-helm-charts'
-      chart: 'opentelemetry-kube-stack'
-      targetRevision: 0.14.12
-      helm:
-        parameters:
-          - name: "global.monium_api_key"
-            value: ""
-          - name: "global.folder_id"
-            value: ""
-        valueFiles:
-          - $values/argocd-management/templates/observability/_values.yaml
-    - repoURL: {{ .Values.global.repo_url | quote }}
-      targetRevision: master
-      ref: values
+  source:
+    repoURL: {{ .Values.global.repo_url | quote }}
+    path: "yc/otel"
+    targetRevision: "master"
   destination:
-    server: 'https://kubernetes.default.svc'
-    namespace: 'otel'
+    server: https://kubernetes.default.svc
+    namespace: otel
   syncPolicy:
     automated:
       enabled: false
-      # prune: false
-      # selfHeal: false
     syncOptions:
       - CreateNamespace=true

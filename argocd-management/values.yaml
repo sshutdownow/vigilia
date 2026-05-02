@@ -1,6 +1,6 @@
 global:
-  monium_api_key: ""
   folder_id: ""
+  monium_api_key: ""
   repo_url: ""
   gitlab_user: ""
   gitlab_token: ""
