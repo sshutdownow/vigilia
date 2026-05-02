@@ -13,7 +13,7 @@ spec:
       targetRevision: 0.14.12
       helm:
         valueFiles:
-          - $values/argocd-management/templates/observability/values.yaml
+          - $values/argocd-management/templates/observability/_values.yaml
         parameters:
           - name: "global.monium_api_key"
             value: ""
