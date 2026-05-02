@@ -1,5 +1,6 @@
-{{- define "otel.config" -}}
 opentelemetry-kube-stack:
+  commonEnv: []
+
   extraObjects:
     - apiVersion: v1
       kind: Secret
@@ -7,8 +8,10 @@ opentelemetry-kube-stack:
         name: monium-secret
         namespace: otel
       stringData:
-        api-key: {{ .Values.global.monium_api_key | quote }}
-        folder-id: {{ .Values.global.folder_id | quote }}
+        api-key: "${global.monium_api_key}"
+        folder-id: "${global.folder_id}"
+        # api-key: {{ .Values.global.monium_api_key | quote }}
+        # folder-id: {{ .Values.global.folder_id | quote }}
 
   clusterName: sausage-store-cluster
 
@@ -21,8 +24,6 @@ opentelemetry-kube-stack:
 
   rbac: # k8sattributes
     create: true
-
-  commonEnv: []
 
   collectors:
     # Агент (DaemonSet) на каждой ноде кластера
@@ -328,4 +329,3 @@ opentelemetry-kube-stack:
 
   opAMPBridge:
     enabled: false
-{{- end -}}

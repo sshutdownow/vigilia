@@ -8,17 +8,20 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://open-telemetry.github.io/opentelemetry-helm-charts'
-    chart: 'opentelemetry-kube-stack'
-    targetRevision: 0.14.12
-    helm:
-      parameters:
-        - name: "global.monium_api_key"
-          value: {{ .Values.global.monium_api_key | default "" | quote }}
-        - name: "global.folder_id"
-          value: {{ .Values.global.folder_id | default "" | quote }}
-      values: |
-{{ include "otel.config" . | indent 8 }}
+    - repoURL: 'https://open-telemetry.github.io/opentelemetry-helm-charts'
+      chart: 'opentelemetry-kube-stack'
+      targetRevision: 0.14.12
+      helm:
+        valueFiles:
+          - $values/argocd-management/templates/observability/values.yaml
+        parameters:
+          - name: "global.monium_api_key"
+            value: ""
+          - name: "global.folder_id"
+            value: ""
+    - repoURL: {{ .Values.global.repo_url | quote }}
+      targetRevision: master
+      ref: values
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: 'otel'
