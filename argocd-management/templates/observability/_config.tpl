@@ -7,11 +7,13 @@ opentelemetry-kube-stack:
       kind: Secret
       metadata:
         name: monium-secret
-        namespace: {{ .Release.Namespace }}
+        # namespace: {{ .Release.Namespace }}
       type: Opaque
       stringData:
-        api-key: {{ .Values.global.monium_api_key | quote }}
-        folder-id: {{ .Values.global.folder_id | quote }}
+        api-key: "${global.monium_api_key}"
+        folder-id: "${global.folder_id}"
+        # api-key: {{ .Values.global.monium_api_key | quote }}
+        # folder-id: {{ .Values.global.folder_id | quote }}
 
   opentelemetry-operator:
     enabled: true
