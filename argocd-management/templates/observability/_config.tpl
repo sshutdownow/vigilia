@@ -1,3 +1,4 @@
+{{- define "otel.config" -}}
 opentelemetry-kube-stack:
   clusterName: sausage-store-cluster
 
@@ -82,7 +83,7 @@ opentelemetry-kube-stack:
           syslog:
             udp:
               listen_address: "0.0.0.0:54527"
-            protocol: rfc3164 # RFC3164 (BSD) либо RFC5424 (IETF)
+            protocol: rfc3164 # RFC3164 (BSD) или RFC5424 (IETF)
             operators: 
               - type: json_parser
                 parse_from: body
@@ -260,7 +261,6 @@ opentelemetry-kube-stack:
                     otlp:
                       protocol: http/protobuf
                       endpoint: http://${env:MY_POD_IP}:4318
-
   instrumentation:
     enabled: true
     name: "sausage-store-instrumentation"
@@ -329,10 +329,10 @@ opentelemetry-kube-stack:
 
   opAMPBridge:
     enabled: false
-    addReportingLabel: true
 
 # Глобальные переменные чарта
 global:
   folder_id: ""
   monium_api_key: ""
   otel_enabled: "true"
+{{- end -}}
