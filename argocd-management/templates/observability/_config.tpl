@@ -177,7 +177,7 @@ opentelemetry-kube-stack:
               matchLabels:
                 app.kubernetes.io/name: "otel-gateway"
             topologyKey: "kubernetes.io/hostname"
-      env:
+      extraEnvs:
         - name: MONIUM_API_KEY
           valueFrom:
             secretKeyRef:
