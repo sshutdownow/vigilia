@@ -1,6 +1,17 @@
 opentelemetry-kube-stack:
   clusterName: sausage-store-cluster
 
+  extraObjects:
+    - apiVersion: v1
+      kind: Secret
+      metadata:
+        name: monium-secret
+        namespace: {{ .Release.Namespace }}
+      type: Opaque
+      stringData:
+        api-key: {{ .Values.global.monium_api_key | quote }}
+        folder-id: {{ .Values.global.folder_id | quote }}
+
   opentelemetry-operator:
     enabled: true
     manager:
@@ -31,11 +42,11 @@ opentelemetry-kube-stack:
           extractAllPodAnnotations: true
       resources:
         limits:
-          cpu: 500m
-          memory: 512Mi
+          cpu: 400m
+          memory: 256Mi
         requests:
           cpu: 200m
-          memory: 256Mi
+          memory: 128Mi
       image: # k8sattributes, transform, hostmetrics
         repository: otel/opentelemetry-collector-contrib
         tag: latest 
@@ -72,7 +83,7 @@ opentelemetry-kube-stack:
             udp:
               listen_address: "0.0.0.0:54527"
             protocol: rfc3164 # RFC3164 (BSD) либо RFC5424 (IETF)
-            operators: # nginx шлёт JSON 
+            operators: 
               - type: json_parser
                 parse_from: body
                 parse_to: attributes
