@@ -7,7 +7,7 @@ opentelemetry-kube-stack:
       kind: Secret
       metadata:
         name: monium-secret
-        # namespace: otel
+        namespace: otel
         # namespace: {{ .Release.Namespace }}
       type: Opaque
       stringData:
