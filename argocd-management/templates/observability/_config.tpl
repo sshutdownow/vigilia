@@ -7,7 +7,7 @@ opentelemetry-kube-stack:
       kind: Secret
       metadata:
         name: monium-secret
-        namespace: otel
+        # namespace: otel
         # namespace: {{ .Release.Namespace }}
       type: Opaque
       stringData:
@@ -332,10 +332,4 @@ opentelemetry-kube-stack:
 
   opAMPBridge:
     enabled: false
-
-# Глобальные переменные чарта
-global:
-  folder_id: ""
-  monium_api_key: ""
-  otel_enabled: "true"
 {{- end -}}
