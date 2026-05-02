@@ -419,6 +419,7 @@ otel-activate:
     - argocd login $ARGO_SERVER --username admin --password "${ARGO_ADM_PASSWD}" --grpc-web
     - >
       argocd app set otel-stack
+      --source-position 1
       -p global.monium_api_key=$MONIUM_API_KEY 
       -p global.folder_id=$FOLDER_ID
       --sync-policy automated --auto-prune --self-heal
