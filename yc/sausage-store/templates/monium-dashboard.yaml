@@ -1,0 +1,17 @@
+{{- if .Values.global.otel_enabled }}
+apiVersion: monitoring.yandex.cloud/v1alpha1
+kind: MonitoringDashboard
+metadata:
+  name: {{ include "sausage-store.vigilia.site" . }}-dashboard
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  title: "Sausage Store: Обзор производительности"
+  widgets:
+    - title: "Traffic (RPS)"
+      type: "graph"
+      query: "sum(http_reqs{service='{{ include "sausage-store.vigilia.site" . }}'})"
+    - title: "Latency P95 (ms)"
+      type: "graph"
+      query: "p95(http_req_duration{service='{{ include "sausage-store.vigilia.site" . }}'})"
+{{- end }}
