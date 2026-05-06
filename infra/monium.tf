@@ -26,20 +26,6 @@ resource "yandex_iam_service_account_api_key" "monium_key" {
   scopes             = ["yc.monium.telemetry.write"]
 }
 
-resource "yandex_monitoring_notification_channel" "email_admin" {
-  count     = var.enable_monium_key ? 1 : 0
-  name      = "email-alerts-admin"
-  folder_id = var.folder_id
-  
-  email {
-    address_list = var.alert_email_addresses
-  }
-}
-
-output "notification_channel_id" {
-  value = one(yandex_monitoring_notification_channel.email_admin[*].id)
-}
-
 output "monium_api_key" {
   value     = one(yandex_iam_service_account_api_key.monium_key[*].secret_key)
   sensitive = true
