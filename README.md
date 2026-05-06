@@ -12,41 +12,17 @@ For more information:
 <!-- Uncomment and update the following link to display a release badge: https://docs.gitlab.com/ee/user/project/badges.html#latest-release-badges -->
 <!-- [![Latest Release](https://gitlab.com/<your project path>/-/badges/release.svg)](https://gitlab.com/<your project path>/-/releases) -->
 
-## Components
+## Развертывание системы наблюдаемости на платформе Yandex Cloud по модели GitOps
 
-### `<Component-name>`
+### Цель
+Разработать масштабируемое решение для автоматизированного развертывания системы наблюдаемости на базе стека OpenTelemetry, оптимизированное под инфраструктуру платформы Яндекс.Облако по модели GitOps.
 
-Use this component to `<component-description>`.
-
-To add this component to your CI/CD pipeline, add the following include entry to your
-project's CI/CD configuration:
-
-```yaml
-include:
-  - component: https://gitlab.com/<your project path>/<name of your template>@<tag>
-```
-
-Where `<tag>` is the release tag you want to use ([releases list](https://gitlab.com/<your-project-path>/-/releases)).
-
-## Inputs
-
-The template contains some optional [inputs](https://docs.gitlab.com/ee/ci/yaml/inputs.html):
-
-<!-- Add or update rows if you change the inputs in the template -->
-
-| Input      | Default value    | Description |
-|------------|------------------|-------------|
-| `job_name` | `job-template`   | The job name. |
-| `image`    | `busybox:latest` | The container image to use to run the job. |
-| `stage`    | `test`           | The stage name for the job. |
-
-## Documentation
-
-This project includes a MVC structure to help you get started with [Gitlab CI/CD components](https://docs.gitlab.com/ee/ci/components/).
-The template provides the basic file structure to create your own single component.
-This project should be public, or one of the jobs in the project's pipeline won't work.
+### Задачи
+ * Разработать требования к системе наблюдаемости микросервисных приложений в инфраструктуре Яндекс.Облака на основе протокола OpenTelemetry и методологии DevOps.
+ * Спроектировать архитектуру стека OpenTelemetry с механизмами автоинструментации и целевую облачную инфраструктуру для микросервисного приложения.
+ * Реализовать CI/CD-конвейеры GitLab для автоматизированного развертывания инфрастуктуры и стека OpenTelemetry по модели GitOps.
+ * Провести комплексное тестирование развернутой инфраструктуры и корректности работы стека наблюдаемости, а также сравнительный анализ производительности микросервисного приложения до и после развёртывания стека OpenTelemetry.
 
 ## Licence
 
 The licence can be changed. By default this project has the [MIT Licence](./LICENCE).
-<!-- You should update the year and name in the license file. -->
