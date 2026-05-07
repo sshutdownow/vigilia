@@ -10,10 +10,8 @@ opentelemetry-kube-stack:
       extraArgs:
         - --enable-go-instrumentation=true
         - --enable-nginx-instrumentation=true
-
   rbac: # k8sattributes
     create: true
-
   collectors:
     # Агент (DaemonSet) на каждой ноде кластера
     agent:
@@ -152,15 +150,16 @@ opentelemetry-kube-stack:
       autoscaling:
         enabled: true
         minReplicas: 4
-        maxReplicas: 8
+        maxReplicas: 12
         targetCPUUtilizationPercentage: 80
+        targetMemoryUtilizationPercentage: 80
       resources:
         limits:
-          cpu: 500m
-          memory: 512Mi
+          cpu: 800m
+          memory: 2Gi
         requests:
           cpu: 250m
-          memory: 256Mi
+          memory: 512Mi
       # мягкое ограничение по зонам
       topologySpreadConstraints:
         - maxSkew: 1
@@ -169,14 +168,16 @@ opentelemetry-kube-stack:
           labelSelector:
             matchLabels:
               app.kubernetes.io/name: "otel-gateway"
-      # жёсткое ограничение - 1 под на 1 ноду
+      # мягкое ограничение - 1 под на 1 ноду
       affinity:
         podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchLabels:
-                app.kubernetes.io/name: "otel-gateway"
-            topologyKey: "kubernetes.io/hostname"
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: "otel-gateway"
+              topologyKey: "kubernetes.io/hostname"
       env:
         - name: MONIUM_API_KEY
           valueFrom:
@@ -203,7 +204,11 @@ opentelemetry-kube-stack:
           batch:
             send_batch_size: 8192
             send_batch_max_size: 16384
-            timeout: 10s
+            timeout: 2s
+          resourcedetection: # В Яндекс можно использовать 'system' для hostname
+            detectors: [env, system] 
+            timeout: 2s
+            override: false
         exporters:
           # Шлюз авторизуется и отправляет данные в Яндекс Monium
           otlp_grpc/monium:
@@ -214,6 +219,7 @@ opentelemetry-kube-stack:
               x-monium-project: "folder__${env:MONIUM_FOLDER_ID}"
             sending_queue:
               enabled: true
+              queue_size: 5000 # в спанах
             # Настройки повторных попыток при ошибках
             retry_on_failure:
               enabled: true
@@ -223,19 +229,22 @@ opentelemetry-kube-stack:
           debug:
             verbosity: normal
         service:
+          annotations:
+            # передавать трафик телеметрии зоны A внутри зоны A
+            service.kubernetes.io/topology-mode: Auto
           extensions: [health_check]
           pipelines:
             metrics:
               receivers: [ otlp ]
-              processors: [ batch ]
+              processors: [ resourcedetection, batch ]
               exporters: [ otlp_grpc/monium ]
             traces:
               receivers: [ otlp ]
-              processors: [ batch ]
+              processors: [ resourcedetection, batch ]
               exporters: [ otlp_grpc/monium ]
             logs:
               receivers: [ otlp ]
-              processors: [ batch ]
+              processors: [ resourcedetection, batch ]
               exporters: [ otlp_grpc/monium ]
         # Телеметрия самого OTel Collector
         telemetry:
