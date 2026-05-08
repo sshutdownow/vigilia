@@ -27,7 +27,8 @@ resource "yandex_kubernetes_cluster" "k8s-cluster" {
       content {
         region = "ru-central1"
         dynamic "location" {
-          for_each = yandex_vpc_subnet.k8s-subnets
+          # master требует строго три зоны
+          for_each = slice(values(yandex_vpc_subnet.k8s-subnets), 0, 3)
           content {
             zone      = location.value.zone
             subnet_id = location.value.id
