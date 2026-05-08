@@ -14,11 +14,12 @@ spec:
     helm:
       values: |
         opentelemetry-kube-stack:
-          gateway:
-            replicaCount: {{ .Values.global.cluster_size | default 1 | int }}
-            autoscaling:
-              minReplicas: {{ .Values.global.cluster_size | default 1 | int }}
-              maxReplicas: {{ mul (.Values.global.cluster_size | default 1 | int) 3 }}
+          collectors:
+            gateway:
+              replicaCount: {{ .Values.global.cluster_size | default 1 | int }}
+              autoscaling:
+                minReplicas: {{ .Values.global.cluster_size | default 1 | int }}
+                maxReplicas: {{ mul (.Values.global.cluster_size | default 1 | int) 3 }}
   destination:
     server: https://kubernetes.default.svc
     namespace: otel
