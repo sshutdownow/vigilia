@@ -39,8 +39,7 @@ opentelemetry-kube-stack:
         repository: otel/opentelemetry-collector-contrib
         tag: latest 
       service:
-        enabled: true
-        type: ClusterIP
+        # направлять трафик телеметрии pod'ов только локальному otel-agent
         internalTrafficPolicy: Local
       # Пробрасываем порты на IP ноды
       hostNetwork: false
@@ -147,6 +146,10 @@ opentelemetry-kube-stack:
         clusterMetrics: 
           enabled: true
       replicaCount: 4 # по 1й на каждую зону - у Яндекс 4 DC
+    service:
+      annotations:
+        # передавать трафик телеметрии зоны A внутри зоны A
+        service.kubernetes.io/topology-mode: Auto
       autoscaling:
         enabled: true
         minReplicas: 4
@@ -229,9 +232,6 @@ opentelemetry-kube-stack:
           debug:
             verbosity: normal
         service:
-          annotations:
-            # передавать трафик телеметрии зоны A внутри зоны A
-            service.kubernetes.io/topology-mode: Auto
           extensions: [health_check]
           pipelines:
             metrics:
