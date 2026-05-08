@@ -152,7 +152,6 @@ opentelemetry-kube-stack:
           # передавать трафик телеметрии зоны A внутри зоны A
           service.kubernetes.io/topology-mode: Auto
       autoscaler:
-        enabled: true
         minReplicas: 1
         maxReplicas: 3
         targetCPUUtilization: 80
