@@ -153,8 +153,8 @@ opentelemetry-kube-stack:
           service.kubernetes.io/topology-mode: Auto
       autoscaling:
         enabled: true
-        # minReplicas: 4
-        # maxReplicas: 12
+        minReplicas: 1
+        maxReplicas: 3
         targetCPUUtilizationPercentage: 80
         targetMemoryUtilizationPercentage: 80
       rollingUpdate: # сначала создать, потом удалить
