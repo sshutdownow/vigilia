@@ -146,17 +146,17 @@ opentelemetry-kube-stack:
         clusterMetrics: 
           enabled: true
       # ArgoCD перезапишет, должно бвть по 1й на каждую зону - у Яндекс 4 ДЦ
-      replicaCount: 1
+      replicas: 1
       service:
         annotations:
           # передавать трафик телеметрии зоны A внутри зоны A
           service.kubernetes.io/topology-mode: Auto
-      autoscaling:
+      autoscaler:
         enabled: true
         minReplicas: 1
         maxReplicas: 3
-        targetCPUUtilizationPercentage: 80
-        targetMemoryUtilizationPercentage: 80
+        targetCPUUtilization: 80
+        targetMemoryUtilization: 80
       rollingUpdate: # сначала создать, потом удалить
         maxUnavailable: 0
         maxSurge: 1

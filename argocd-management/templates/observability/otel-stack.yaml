@@ -16,8 +16,8 @@ spec:
         opentelemetry-kube-stack:
           collectors:
             gateway:
-              replicaCount: {{ .Values.global.cluster_size | default 1 | int }}
-              autoscaling:
+              replicas: {{ .Values.global.cluster_size | default 1 | int }}
+              autoscaler:
                 minReplicas: {{ .Values.global.cluster_size | default 1 | int }}
                 maxReplicas: {{ mul (.Values.global.cluster_size | default 1 | int) 3 }}
   destination:
