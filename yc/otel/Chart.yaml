@@ -1,7 +1,7 @@
 apiVersion: v2
 name: deploy-otel-yandex-cloud
-version: 0.14.12
+version: 0.14.13
 dependencies:
   - name: opentelemetry-kube-stack
-    version: 0.14.12
+    version: 0.14.13
     repository: https://open-telemetry.github.io/opentelemetry-helm-charts
