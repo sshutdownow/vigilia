@@ -146,10 +146,10 @@ opentelemetry-kube-stack:
         clusterMetrics: 
           enabled: true
       replicaCount: 4 # по 1й на каждую зону - у Яндекс 4 DC
-    service:
-      annotations:
-        # передавать трафик телеметрии зоны A внутри зоны A
-        service.kubernetes.io/topology-mode: Auto
+      service:
+        annotations:
+          # передавать трафик телеметрии зоны A внутри зоны A
+          service.kubernetes.io/topology-mode: Auto
       autoscaling:
         enabled: true
         minReplicas: 4
