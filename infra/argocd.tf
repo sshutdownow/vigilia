@@ -175,6 +175,8 @@ resource "helm_release" "argocd_apps" {
                 value: "${yandex_vpc_security_group.gwin.id}"
               - name: "global.certificate_id"
                 value: "${data.yandex_cm_certificate.le_cert.id}"
+              - name: "global.cluster_size"
+                value: "${length(var.net_cidr)}"
         destination:
           server: https://kubernetes.default.svc
           namespace: argocd

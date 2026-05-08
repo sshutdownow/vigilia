@@ -11,6 +11,14 @@ spec:
     repoURL: {{ .Values.global.repo_url | quote }}
     path: "yc/otel"
     targetRevision: "master"
+    helm:
+      values: |
+        opentelemetry-kube-stack:
+          gateway:
+            replicaCount: {{ .Values.global.cluster_size | default 1 | int }}
+            autoscaling:
+              minReplicas: {{ .Values.global.cluster_size | default 1 | int }}
+              maxReplicas: {{ mul (.Values.global.cluster_size | default 1 | int) 3 }}
   destination:
     server: https://kubernetes.default.svc
     namespace: otel
