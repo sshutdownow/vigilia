@@ -106,9 +106,7 @@ resource "helm_release" "argocd" {
   depends_on = [
     yandex_kubernetes_node_group.k8s-node-group,
     helm_release.external_secrets,
-    helm_release.vpa,
-    yandex_vpc_security_group.gwin,
-    helm_release.gwin
+    helm_release.vpa
   ]
 }
 
