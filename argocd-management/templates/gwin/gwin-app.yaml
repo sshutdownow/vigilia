@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    path: gwin-chart
+    chart: gwin-chart
     repoURL: 'oci://cr.yandex/yc-marketplace/yandex-cloud/gwin'
     targetRevision: 'v1.3.1'
     helm:
