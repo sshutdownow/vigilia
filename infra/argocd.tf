@@ -30,11 +30,12 @@ resource "helm_release" "argocd" {
     { # GWIN
       name  = "server.service.type"
       value = "NodePort"
-    },
-    { # разрешить запросы из Helm к k8s
-      name  = "configs.cm.helm\\.enable\\.lookup"
-      value = "true"
     }
+    # ,
+    # { # разрешить запросы из Helm к k8s
+    #   name  = "configs.cm.helm\\.enable\\.lookup"
+    #   value = "true"
+    # }
   ]
 
   values = [
