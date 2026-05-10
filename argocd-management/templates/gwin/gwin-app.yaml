@@ -32,8 +32,8 @@ spec:
     namespace: gwin
   syncPolicy:
     automated:
-      enabled: true
+      enabled: false
       prune: true
       selfHeal: true
-    # syncOptions:
-    #   - Validate=true
+    syncOptions:
+      - Validate=true
