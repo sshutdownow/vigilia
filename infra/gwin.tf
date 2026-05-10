@@ -27,31 +27,31 @@ resource "yandex_iam_service_account_key" "gwin_sa_key" {
   key_algorithm      = "RSA_2048"
 }
 
-resource "kubernetes_namespace_v1" "gwin" {
-  metadata {
-    name = "gwin"
-  }
-}
+# resource "kubernetes_namespace_v1" "gwin" {
+#   metadata {
+#     name = "gwin"
+#   }
+# }
 
-resource "kubernetes_secret_v1" "gwin_sa_key" {
-  metadata {
-    name      = "gwin-sa-key"
-    namespace = kubernetes_namespace_v1.gwin.metadata[0].name
-  }
+# resource "kubernetes_secret_v1" "gwin_sa_key" {
+#   metadata {
+#     name      = "gwin-sa-key"
+#     namespace = kubernetes_namespace_v1.gwin.metadata[0].name
+#   }
 
-  data = {
-    "sa-key.json" = jsonencode({
-      "id"                 : yandex_iam_service_account_key.gwin_sa_key.id,
-      "service_account_id" : yandex_iam_service_account_key.gwin_sa_key.service_account_id,
-      "created_at"         : yandex_iam_service_account_key.gwin_sa_key.created_at,
-      "key_algorithm"      : yandex_iam_service_account_key.gwin_sa_key.key_algorithm,
-      "public_key"         : yandex_iam_service_account_key.gwin_sa_key.public_key,
-      "private_key"        : yandex_iam_service_account_key.gwin_sa_key.private_key
-    })
-  }
+#   data = {
+#     "sa-key.json" = jsonencode({
+#       "id"                 : yandex_iam_service_account_key.gwin_sa_key.id,
+#       "service_account_id" : yandex_iam_service_account_key.gwin_sa_key.service_account_id,
+#       "created_at"         : yandex_iam_service_account_key.gwin_sa_key.created_at,
+#       "key_algorithm"      : yandex_iam_service_account_key.gwin_sa_key.key_algorithm,
+#       "public_key"         : yandex_iam_service_account_key.gwin_sa_key.public_key,
+#       "private_key"        : yandex_iam_service_account_key.gwin_sa_key.private_key
+#     })
+#   }
 
-  depends_on = [kubernetes_namespace_v1.gwin]
-}
+#   depends_on = [kubernetes_namespace_v1.gwin]
+# }
 
 resource "helm_release" "gwin" {
   name             = "gwin"
