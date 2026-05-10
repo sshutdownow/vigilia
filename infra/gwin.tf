@@ -92,9 +92,7 @@ resource "helm_release" "gwin" {
 
   depends_on = [
     yandex_resourcemanager_folder_iam_member.gwin_roles,
-    yandex_iam_service_account_key.gwin_sa_key,
     yandex_kubernetes_node_group.k8s-node-group,
-    yandex_logging_group.log_group_main,
     yandex_vpc_address.gwin_static_ip
   ]
 }
