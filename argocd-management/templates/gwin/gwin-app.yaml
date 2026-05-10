@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: gwin-chart
+  name: gwin
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: 'cr.yandex'
-    path: 'yc-marketplace/yandex-cloud/gwin'
+    path: 'yc-marketplace/yandex-cloud/gwin/gwin-chart'
     targetRevision: 'v1.3.1'
     helm:
       values: |
