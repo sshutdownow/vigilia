@@ -26,7 +26,7 @@ spec:
           annotations:
             gwin.yandex.cloud/logs.logGroupId: {{ .Values.global.log_group_id | quote }}
   destination:
-    server: https://default.svc
+    server: https://kubernetes.default.svc
     namespace: gwin
   syncPolicy:
     automated:
