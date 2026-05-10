@@ -18,8 +18,10 @@ spec:
           defaultBalancerSubnets: {{ .Values.global.gwin_subnets }}
           ycServiceAccount:
             secret:
-              name: "gwin-sa-key"
-              key: "sa-key.json"
+              value: |
+                create: false
+                name: "gwin-sa-key"
+                key: "sa-key.json"
         gatewayClass:
           create: true
           name: gwin-default
