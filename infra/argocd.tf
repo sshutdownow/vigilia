@@ -181,7 +181,7 @@ resource "helm_release" "argocd_apps" {
                 value: "${yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address}"
               - name: "global.gwin_sg"
                 value: "${yandex_vpc_security_group.gwin.id}"
-              - name: "global.gwin_subnets"
+              - name: global.gwin_subnets
                 value: "${jsonencode(local.k8s_node_subnet_ids)}"
               - name: "global.certificate_id"
                 value: "${data.yandex_cm_certificate.le_cert.id}"
