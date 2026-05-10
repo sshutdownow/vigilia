@@ -8,8 +8,8 @@ metadata:
 spec:
   project: default
   source:
-    path: "."
-    repoURL: "oci://cr.yandex/yc-marketplace/yandex-cloud/gwin/gwin-chart"
+    repoURL: "oci://cr.yandex/yc-marketplace/yandex-cloud/gwin"
+    chart: "gwin-chart"
     targetRevision: "v1.3.1"
     helm:
       values: |
