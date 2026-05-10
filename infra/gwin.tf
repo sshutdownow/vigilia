@@ -36,7 +36,7 @@ resource "kubernetes_namespace_v1" "gwin" {
 resource "kubernetes_secret_v1" "gwin_sa_key" {
   metadata {
     name      = "gwin-sa-key"
-    namespace = kubernetes_namespace_v1.gwin.metadata.name
+    namespace = kubernetes_namespace_v1.gwin.metadata[0].name
   }
 
   data = {
