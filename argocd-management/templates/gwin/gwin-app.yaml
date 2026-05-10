@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gwin-controller
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  project: default
+  source:
+    path: "."
+    repoURL: "oci://cr.yandex/yc-marketplace/yandex-cloud/gwin/gwin-chart"
+    targetRevision: "v1.3.1"
+    helm:
+      values: |
+        controller:
+          folderId: {{ .Values.global.folder_id | quote }}
+          defaultBalancerSubnets: {{ .Values.global.gwin_subnets }}
+          ycServiceAccount:
+            secret:
+              name: "gwin-sa-key"
+              key: "sa-key.json"
+        gatewayClass:
+          create: true
+          name: gwin-default
+          annotations:
+            gwin.yandex.cloud/logs.logGroupId: {{ .Values.global.log_group_id | quote }}
+  destination:
+    server: https://default.svc
+    namespace: gwin
+  syncPolicy:
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      Validate=true

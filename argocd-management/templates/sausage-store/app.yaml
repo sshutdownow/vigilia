@@ -29,7 +29,7 @@ spec:
               - secretRef:
                   name: "sausage-kv-secret"
           lockbox:
-            sa_id: {{ .Values.global.sa_id | quote }}
+            eso_sa_id: {{ .Values.global.eso_sa_id | quote }}
             secret_id: {{ .Values.global.lockbox_secret_id | quote }}
           ingress:
             gwin_ip: {{ .Values.global.gwin_ip | quote }}

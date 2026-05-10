@@ -5,7 +5,7 @@ global:
   gitlab_user: ""
   gitlab_token: ""
   gitlab_registry: ""
-  sa_id: ""
+  eso_sa_id: ""
   lockbox_secret_id: ""
   gwin_ip: ""
   gwin_sg: ""

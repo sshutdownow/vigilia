@@ -27,51 +27,77 @@ resource "yandex_iam_service_account_key" "gwin_sa_key" {
   key_algorithm      = "RSA_2048"
 }
 
-resource "helm_release" "gwin" {
-  name             = "gwin"
-  repository       = "oci://cr.yandex/yc-marketplace/yandex-cloud/gwin"
-  version          = "v1.3.1"
-  chart            = "gwin-chart"
-  namespace        = "gwin"
-  create_namespace = true
-
-  values = [<<-EOF
-    controller:
-      folderId: ${var.folder_id}
-      defaultBalancerSubnets: ${jsonencode(local.k8s_node_subnet_ids)}
-      ycServiceAccount:
-        secret:
-          value: |
-            ${jsonencode({
-              "id"                 : yandex_iam_service_account_key.gwin_sa_key.id,
-              "service_account_id" : yandex_iam_service_account_key.gwin_sa_key.service_account_id,
-              "created_at"         : yandex_iam_service_account_key.gwin_sa_key.created_at,
-              "key_algorithm"      : yandex_iam_service_account_key.gwin_sa_key.key_algorithm,
-              "public_key"         : yandex_iam_service_account_key.gwin_sa_key.public_key,
-              "private_key"        : yandex_iam_service_account_key.gwin_sa_key.private_key
-            })}
-    gatewayClass:
-      create: true
-      name: gwin-default
-      annotations:
-        gwin.yandex.cloud/logs.logGroupId: "${yandex_logging_group.log_group_main.id}"
-  EOF
-  ]
- 
-  cleanup_on_fail = true
-  force_update    = true
-  recreate_pods   = true
-  wait            = true
-  timeout         = 900
-
-  depends_on = [
-    yandex_resourcemanager_folder_iam_member.gwin_roles,
-    yandex_iam_service_account_key.gwin_sa_key,
-    yandex_kubernetes_node_group.k8s-node-group,
-    yandex_logging_group.log_group_main,
-    yandex_vpc_address.gwin_static_ip
-  ]
+resource "kubernetes_namespace_v1" "gwin" {
+  metadata {
+    name = "gwin"
+  }
 }
+
+resource "kubernetes_secret_v1" "gwin_sa_key" {
+  metadata {
+    name      = "gwin-sa-key"
+    namespace = kubernetes_namespace_v1.gwin.metadata.name
+  }
+
+  data = {
+    "sa-key.json" = jsonencode({
+      "id"                 : yandex_iam_service_account_key.gwin_sa_key.id,
+      "service_account_id" : yandex_iam_service_account_key.gwin_sa_key.service_account_id,
+      "created_at"         : yandex_iam_service_account_key.gwin_sa_key.created_at,
+      "key_algorithm"      : yandex_iam_service_account_key.gwin_sa_key.key_algorithm,
+      "public_key"         : yandex_iam_service_account_key.gwin_sa_key.public_key,
+      "private_key"        : yandex_iam_service_account_key.gwin_sa_key.private_key
+    })
+  }
+
+  depends_on = [kubernetes_namespace_v1.gwin]
+}
+
+# resource "helm_release" "gwin" {
+#   name             = "gwin"
+#   repository       = "oci://cr.yandex/yc-marketplace/yandex-cloud/gwin"
+#   version          = "v1.3.1"
+#   chart            = "gwin-chart"
+#   namespace        = "gwin"
+#   create_namespace = true
+
+#   values = [<<-EOF
+#     controller:
+#       folderId: ${var.folder_id}
+#       defaultBalancerSubnets: ${jsonencode(local.k8s_node_subnet_ids)}
+#       ycServiceAccount:
+#         secret:
+#           value: |
+#             ${jsonencode({
+#               "id"                 : yandex_iam_service_account_key.gwin_sa_key.id,
+#               "service_account_id" : yandex_iam_service_account_key.gwin_sa_key.service_account_id,
+#               "created_at"         : yandex_iam_service_account_key.gwin_sa_key.created_at,
+#               "key_algorithm"      : yandex_iam_service_account_key.gwin_sa_key.key_algorithm,
+#               "public_key"         : yandex_iam_service_account_key.gwin_sa_key.public_key,
+#               "private_key"        : yandex_iam_service_account_key.gwin_sa_key.private_key
+#             })}
+#     gatewayClass:
+#       create: true
+#       name: gwin-default
+#       annotations:
+#         gwin.yandex.cloud/logs.logGroupId: "${yandex_logging_group.log_group_main.id}"
+#   EOF
+#   ]
+ 
+#   cleanup_on_fail = true
+#   force_update    = true
+#   recreate_pods   = true
+#   wait            = true
+#   timeout         = 900
+
+#   depends_on = [
+#     yandex_resourcemanager_folder_iam_member.gwin_roles,
+#     yandex_iam_service_account_key.gwin_sa_key,
+#     yandex_kubernetes_node_group.k8s-node-group,
+#     yandex_logging_group.log_group_main,
+#     yandex_vpc_address.gwin_static_ip
+#   ]
+# }
 
 resource "yandex_vpc_security_group" "gwin" {
   name        = "k8s-gwin-ingress"

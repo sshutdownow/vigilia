@@ -1,5 +1,6 @@
 locals {
-  gitlab_registry = replace(var.gitlab_image_url, "/^https?:\\/\\/|(\\/.*)$/", "")
+  gitlab_registry = replace(var.gitlab_image_url, "{^https?://|(/.*)$}", "")
+  is_argo_ha      = length(var.net_cidr) >= 2
 }
 
 resource "bcrypt_hash" "argocd_password" {
@@ -40,6 +41,13 @@ resource "helm_release" "argocd" {
 
   values = [
     yamlencode({
+      # https://github.com/argoproj/argo-helm/tree/main/charts/argo-cd#ha-mode-with-autoscaling
+      redis-ha       = { enabled  = local.is_argo_ha }
+      server         = { replicas = local.is_argo_ha ? 2 : 1 }
+      repoServer     = { replicas = local.is_argo_ha ? 2 : 1 }
+      applicationSet = { replicas = local.is_argo_ha ? 2 : 1 }
+      controller     = { replicas = 1 }
+
       extraObjects = [
         {
           apiVersion = "networking.k8s.io/v1"
@@ -165,7 +173,7 @@ resource "helm_release" "argocd_apps" {
                 value: "${var.gitlab_username}"
               - name: "global.gitlab_token"
                 value: "${var.gitlab_token}"
-              - name: "global.sa_id"
+              - name: "global.eso_sa_id"
                 value: "${yandex_iam_service_account.eso_sa.id}"
               - name: "global.lockbox_secret_id"
                 value: "${yandex_lockbox_secret.sausage_store_secrets.id}"
@@ -173,6 +181,8 @@ resource "helm_release" "argocd_apps" {
                 value: "${yandex_vpc_address.gwin_static_ip.external_ipv4_address[0].address}"
               - name: "global.gwin_sg"
                 value: "${yandex_vpc_security_group.gwin.id}"
+              - name: "global.gwin_subnets"
+                value: "${jsonencode(local.k8s_node_subnet_ids)}"
               - name: "global.certificate_id"
                 value: "${data.yandex_cm_certificate.le_cert.id}"
               - name: "global.cluster_size"
@@ -193,7 +203,6 @@ resource "helm_release" "argocd_apps" {
   wait            = true
 
   depends_on = [
-    kubernetes_secret_v1.sausage_repo_gitlab,
-    yandex_lockbox_secret_version.v1
+    kubernetes_secret_v1.sausage_repo_gitlab
   ]
 }

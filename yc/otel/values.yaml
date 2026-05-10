@@ -173,7 +173,7 @@ opentelemetry-kube-stack:
           whenUnsatisfiable: ScheduleAnyway 
           labelSelector:
             matchLabels:
-              app.kubernetes.io/name: "otel-gateway"
+              app.kubernetes.io/name: "otel-gateway-collector"
       # мягкое ограничение - 1 под на 1 ноду
       affinity:
         podAntiAffinity:
@@ -182,7 +182,7 @@ opentelemetry-kube-stack:
             podAffinityTerm:
               labelSelector:
                 matchLabels:
-                  app.kubernetes.io/name: "otel-gateway"
+                  app.kubernetes.io/name: "otel-gateway-collector"
               topologyKey: "kubernetes.io/hostname"
       env:
         - name: MONIUM_API_KEY
@@ -266,11 +266,11 @@ opentelemetry-kube-stack:
   instrumentation:
     enabled: true
     name: "sausage-store-instrumentation"
-    exporter:
-      endpoint: "http://otel-agent-collector.otel.svc.cluster.local:4317"
+    exporter: # "http://otel-agent-collector.otel.svc.cluster.local:4317"
+      endpoint: "http://$(NODE_IP):4317"
     env:
       - name: OTEL_EXPORTER_OTLP_ENDPOINT
-        value: "http://otel-agent-collector.otel.svc.cluster.local:4317"
+        value: "http://$(NODE_IP):4317"
       - name: OTEL_EXPORTER_OTLP_PROTOCOL
         value: "grpc"
       - name: OTEL_EXPORTER_OTLP_METRICS_PROTOCOL
@@ -287,6 +287,8 @@ opentelemetry-kube-stack:
         value: "4096"
       - name: OTEL_BSP_SCHEDULE_DELAY
         value: "500"
+      - name: OTEL_LOG_LEVEL
+        value: "info"
       # Сэмплирование
       # - name: OTEL_TRACES_SAMPLER
       #   value: "parentbased_traceidratio"
@@ -304,14 +306,6 @@ opentelemetry-kube-stack:
       image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
     go: # https://github.com/open-telemetry/opentelemetry-go-instrumentation/blob/main/docs/configuration.md
       env:
-        - name: OTEL_LOG_LEVEL
-          value: "info"
-        - name: OTEL_EXPORTER_OTLP_ENDPOINT
-          value: "http://otel-agent-collector.otel.svc.cluster.local:4317"
-        - name: OTEL_EXPORTER_OTLP_PROTOCOL
-          value: "grpc"
-        - name: OTEL_EXPORTER_OTLP_METRICS_PROTOCOL
-          value: "grpc"
         - name: OTEL_GO_AUTO_INCLUDE_DB_STATEMENT
           value: "true"
         - name: OTEL_GO_AUTO_PARSE_DB_STATEMENT
