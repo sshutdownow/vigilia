@@ -19,5 +19,5 @@ variable "zone" {
 
 variable "domain_name" {
   type    = string
-  default = "vigilia.site"
+  default = null
 }
