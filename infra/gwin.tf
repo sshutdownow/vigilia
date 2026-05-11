@@ -27,32 +27,7 @@ resource "yandex_iam_service_account_key" "gwin_sa_key" {
   key_algorithm      = "RSA_2048"
 }
 
-# resource "kubernetes_namespace_v1" "gwin" {
-#   metadata {
-#     name = "gwin"
-#   }
-# }
-
-# resource "kubernetes_secret_v1" "gwin_sa_key" {
-#   metadata {
-#     name      = "gwin-sa-key"
-#     namespace = kubernetes_namespace_v1.gwin.metadata[0].name
-#   }
-
-#   data = {
-#     "sa-key.json" = jsonencode({
-#       "id"                 : yandex_iam_service_account_key.gwin_sa_key.id,
-#       "service_account_id" : yandex_iam_service_account_key.gwin_sa_key.service_account_id,
-#       "created_at"         : yandex_iam_service_account_key.gwin_sa_key.created_at,
-#       "key_algorithm"      : yandex_iam_service_account_key.gwin_sa_key.key_algorithm,
-#       "public_key"         : yandex_iam_service_account_key.gwin_sa_key.public_key,
-#       "private_key"        : yandex_iam_service_account_key.gwin_sa_key.private_key
-#     })
-#   }
-
-#   depends_on = [kubernetes_namespace_v1.gwin]
-# }
-
+# альтернатива - https://yandex.cloud/ru/docs/terraform/resources/kubernetes_marketplace_helm_release
 resource "helm_release" "gwin" {
   name             = "gwin"
   repository       = "oci://cr.yandex/yc-marketplace/yandex-cloud/gwin"
@@ -96,27 +71,6 @@ resource "helm_release" "gwin" {
     yandex_vpc_address.gwin_static_ip
   ]
 }
-
-// 
-// Create a new Kubernetes Marketplace Helm Release.
-// https://yandex.cloud/ru/docs/terraform/resources/kubernetes_marketplace_helm_release
-# resource "yandex_kubernetes_marketplace_helm_release" "gwin_helm_release" {
-#   cluster_id = yandex_kubernetes_cluster.cluster_resource_name.id
-
-#   product_version = "f2e04077v04sobds7gkt" // Gwin v1.1.0
-
-#   name      = "gwin"
-#   namespace = kubernetes_namespace.namespace_resource_name.metadata[0].name
-
-#   user_values = {
-#     "controller.folderId" = yandex_resourcemanager_folder.folder_resource_name.id
-#     "controller.ycServiceAccount.workloadIdentityFederation.serviceAccountID" = yandex_iam_service_account.service_account_resource_name.id
-#     "controller.defaultBalancerSubnets" = yamlencode([
-#       yandex_vpc_subnet.subnet_resource_name_1.id,
-#       yandex_vpc_subnet.subnet_resource_name_2.id
-#     ])
-#   }
-# }
 
 resource "yandex_vpc_security_group" "gwin" {
   name        = "k8s-gwin-ingress"
