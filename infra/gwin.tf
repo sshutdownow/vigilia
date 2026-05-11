@@ -10,7 +10,6 @@ resource "yandex_resourcemanager_folder_iam_member" "gwin_roles" {
     "alb.editor",
     "load-balancer.admin",
     "certificate-manager.certificates.downloader",
-    "certificate-manager.editor",
     "compute.viewer",
     "vpc.user",
     "k8s.viewer",
