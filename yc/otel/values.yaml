@@ -269,6 +269,10 @@ opentelemetry-kube-stack:
     exporter: # "http://otel-agent-collector.otel.svc.cluster.local:4317"
       endpoint: "http://$(NODE_IP):4317"
     env:
+      - name: NODE_IP
+        valueFrom:
+          fieldRef:
+            fieldPath: status.hostIP
       - name: OTEL_EXPORTER_OTLP_ENDPOINT
         value: "http://$(NODE_IP):4317"
       - name: OTEL_EXPORTER_OTLP_PROTOCOL
