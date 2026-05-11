@@ -266,15 +266,11 @@ opentelemetry-kube-stack:
   instrumentation:
     enabled: true
     name: "sausage-store-instrumentation"
-    exporter: # "http://otel-agent-collector.otel.svc.cluster.local:4317"
-      endpoint: "http://$(NODE_IP):4317"
+    exporter:
+      endpoint: "http://otel-agent-collector.otel.svc.cluster.local:4317"
     env:
-      - name: NODE_IP
-        valueFrom:
-          fieldRef:
-            fieldPath: status.hostIP
       - name: OTEL_EXPORTER_OTLP_ENDPOINT
-        value: "http://$(NODE_IP):4317"
+        value: "http://otel-agent-collector.otel.svc.cluster.local:4317"
       - name: OTEL_EXPORTER_OTLP_PROTOCOL
         value: "grpc"
       - name: OTEL_EXPORTER_OTLP_METRICS_PROTOCOL
@@ -323,9 +319,6 @@ opentelemetry-kube-stack:
       - name: NginxModuleOtelMaxQueueSize
         value: "16384"
       image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nginx:latest
-    #  image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-apache-httpd:latest
-    # sdk:
-    #   image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-sdk:latest
 
   opAMPBridge:
     enabled: false
