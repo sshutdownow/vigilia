@@ -71,7 +71,7 @@ variable "net_cidr" {
 
 variable "domain_name" {
   type    = string
-  default = "vigilia.site"
+  default = null
 }
 
 variable "argocd_admin_password" {
