@@ -1,9 +1,6 @@
 opentelemetry-kube-stack:
   clusterName: sausage-store-cluster
 
-  extraObjects: []
-  commonEnv: []
-
   opentelemetry-operator:
     enabled: true
     manager:
@@ -23,7 +20,9 @@ opentelemetry-kube-stack:
           enabled: true
           includeCollectorLogs: false # не собирать логи OTel
         hostMetrics:
-          enabled: true # метрики CPU/RAM нод 
+          enabled: true # метрики CPU/RAM нод
+        kubeletMetrics:
+          enabled: true # метрики CPU/RAM pod
         kubernetesAttributes:
           enabled: true # k8s_attributes
           extractAllPodLabels: true
@@ -266,14 +265,19 @@ opentelemetry-kube-stack:
   instrumentation:
     enabled: true
     name: "sausage-store-instrumentation"
-    exporter:
-      endpoint: "http://otel-agent-collector.otel.svc.cluster.local:4317"
     env:
+      - name: LOCAL_AGENT_IP
+        valueFrom:
+          fieldRef:
+            apiVersion: v1
+            fieldPath: status.podIP    
       - name: OTEL_EXPORTER_OTLP_ENDPOINT
-        value: "http://otel-agent-collector.otel.svc.cluster.local:4317"
+        value: "http://$(LOCAL_AGENT_IP):4317" # "http://otel-agent-collector.otel:4317"
       - name: OTEL_EXPORTER_OTLP_PROTOCOL
         value: "grpc"
       - name: OTEL_EXPORTER_OTLP_METRICS_PROTOCOL
+        value: "grpc"
+      - name: OTEL_EXPORTER_OTLP_TRACES_PROTOCOL
         value: "grpc"
       - name: OTEL_TRACES_EXPORTER
         value: "otlp"
@@ -294,6 +298,8 @@ opentelemetry-kube-stack:
       #   value: "parentbased_traceidratio"
       # - name: OTEL_TRACES_SAMPLER_ARG
       #   value: "0.2"
+    exporter:
+      endpoint: "http://$(LOCAL_AGENT_IP):4317" # "http://otel-agent-collector.otel:4317"
     propagators:
       - tracecontext
       - baggage
