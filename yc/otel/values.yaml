@@ -272,7 +272,7 @@ opentelemetry-kube-stack:
             apiVersion: v1
             fieldPath: status.podIP    
       - name: OTEL_EXPORTER_OTLP_ENDPOINT
-        value: "http://$(LOCAL_AGENT_IP):4317" # "http://otel-agent-collector.otel:4317"
+        value: "http://otel-agent-collector.otel:4317"
       - name: OTEL_EXPORTER_OTLP_PROTOCOL
         value: "grpc"
       - name: OTEL_EXPORTER_OTLP_METRICS_PROTOCOL
@@ -299,7 +299,7 @@ opentelemetry-kube-stack:
       # - name: OTEL_TRACES_SAMPLER_ARG
       #   value: "0.2"
     exporter:
-      endpoint: "http://$(LOCAL_AGENT_IP):4317" # "http://otel-agent-collector.otel:4317"
+      endpoint: "http://otel-agent-collector.otel:4317"
     propagators:
       - tracecontext
       - baggage
