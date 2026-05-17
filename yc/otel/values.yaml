@@ -261,16 +261,10 @@ opentelemetry-kube-stack:
                     otlp:
                       protocol: http/protobuf
                       endpoint: http://${env:MY_POD_IP}:4318
-
   instrumentation:
     enabled: true
     name: "sausage-store-instrumentation"
     env:
-      - name: LOCAL_AGENT_IP
-        valueFrom:
-          fieldRef:
-            apiVersion: v1
-            fieldPath: status.podIP    
       - name: OTEL_EXPORTER_OTLP_ENDPOINT
         value: "http://otel-agent-collector.otel:4317"
       - name: OTEL_EXPORTER_OTLP_PROTOCOL
