@@ -32,11 +32,6 @@ resource "helm_release" "argocd" {
       name  = "server.service.type"
       value = "NodePort"
     }
-    # ,
-    # { # разрешить запросы из Helm к k8s
-    #   name  = "configs.cm.helm\\.enable\\.lookup"
-    #   value = "true"
-    # }
   ]
 
   values = [
@@ -115,7 +110,8 @@ resource "helm_release" "argocd" {
 
   depends_on = [
     yandex_kubernetes_node_group.k8s-node-group,
-    helm_release.external_secrets,
+    helm_release.gwin,
+    helm_release.cert_manager,
     helm_release.vpa
   ]
 }
