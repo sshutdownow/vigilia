@@ -217,7 +217,7 @@ opentelemetry-kube-stack:
         exporters:
           # Шлюз авторизуется и отправляет данные в Яндекс Monium
           otlp_grpc/monium:
-            endpoint: "ingest.monium.yandex.cloud:443"
+            endpoint: "ipv4.ingest.monium.yandex.cloud:443"
             compression: zstd
             headers:
               Authorization: "Api-Key ${env:MONIUM_API_KEY}"
