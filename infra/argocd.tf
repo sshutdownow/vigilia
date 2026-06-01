@@ -1,5 +1,5 @@
 locals {
-  gitlab_registry = replace(var.gitlab_image_url, "#^https?://|(/.*)$#", "")
+  gitlab_registry = replace(var.gitlab_image_url, "/^(https?:\\/\\/)?|(:[0-9]+)?(\\/.*)$/", "")
   is_argo_ha      = length(var.net_cidr) >= 2
 }
 
