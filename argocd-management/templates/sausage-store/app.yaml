@@ -35,6 +35,10 @@ spec:
             gwin_ip: {{ .Values.global.gwin_ip | quote }}
             gwin_sg: {{ .Values.global.gwin_sg | quote }}
             certificate_id: {{ .Values.global.certificate_id | quote }}
+            host: "sausage-store.{{ .Values.global.domain_name }}"
+          frontend:
+            ingress:
+              host: "sausage-store.{{ .Values.global.domain_name }}"
   destination:
     server: "https://kubernetes.default.svc"
     namespace: "sausage-store"

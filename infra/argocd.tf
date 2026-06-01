@@ -11,7 +11,7 @@ resource "helm_release" "argocd" {
   name             = "argocd"
   repository       = "https://argoproj.github.io/argo-helm"
   chart            = "argo-cd"
-  version          = "v9.5.13"
+  version          = "v9.5.17"
   namespace        = "argocd"
   create_namespace = true
 
@@ -143,7 +143,7 @@ resource "helm_release" "argocd_apps" {
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argocd-apps"
   namespace  = "argocd"
-  version    = "2.0.4"
+  version    = "2.0.5"
 
   values = [
     <<-EOT
@@ -181,6 +181,8 @@ resource "helm_release" "argocd_apps" {
                 value: "${data.yandex_cm_certificate.le_cert.id}"
               - name: "global.cluster_size"
                 value: "${length(var.net_cidr)}"
+              - name: "global.domain_name"
+                value: "${var.domain_name}"
         destination:
           server: https://kubernetes.default.svc
           namespace: argocd

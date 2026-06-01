@@ -10,3 +10,4 @@ global:
   gwin_ip: ""
   gwin_sg: ""
   certificate_id: ""
+  domain_name: ""
