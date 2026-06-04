@@ -1,6 +1,6 @@
 # Существующая публичная DNS-зона
 data "yandex_dns_zone" "sausage_store_public_zone" {
-  name = "observability"
+  zone = "${var.domain_name}."
 }
 
 # Существующий сертификат Let's Encrypt

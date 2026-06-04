@@ -3,7 +3,7 @@ resource "helm_release" "vpa" {
   name       = "vpa"
   repository = "https://charts.fairwinds.com/stable"
   chart      = "vpa"
-  version    = "4.7.2"
+  version    = "4.11.0"
   namespace  = "vpa"
 
   create_namespace = true
