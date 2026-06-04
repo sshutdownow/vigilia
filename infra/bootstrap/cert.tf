@@ -1,11 +1,12 @@
 # Запрос на управляемый сертификат Let's Encrypt
 resource "yandex_cm_certificate" "le_cert" {
-  name      = "sausage-store-le"
-  folder_id = var.folder_id
-  domains   = [
+  name       = "sausage-store-le"
+  folder_id  = var.folder_id
+  domains    = [
     var.domain_name,
     "*.${var.domain_name}"
   ]
+  depends_on = [yandex_dns_zone.sausage_store_public_zone]
 
   managed {
     challenge_type = "DNS_CNAME" # Самый надежный способ для автоматизации
@@ -18,6 +19,7 @@ resource "yandex_cm_certificate" "le_cert" {
     # Игнорирует изменения в доменах, чтобы не инициировать перевыпуск
     ignore_changes = [domains, name, challenges]
   }
+
 }
 
 # Terraform берет данные из запроса сертификата и создает запись в DNS
