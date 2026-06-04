@@ -1,6 +1,6 @@
 # Существующая публичная DNS-зона
 data "yandex_dns_zone" "sausage_store_public_zone" {
-  name = replace("${var.domain_name}", ".", "-")
+  name = trim(replace(lower(var.domain_name), "/[^a-z0-9]+/", "-"), "-")
 }
 
 # Существующий сертификат Let's Encrypt
