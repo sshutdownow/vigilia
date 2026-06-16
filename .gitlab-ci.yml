@@ -58,14 +58,14 @@ variables:
   script:
     - '[ "${ENABLE_TESTS}" == "false" ] && exit 0'
     - |
-      docker run --rm \
+      [ "${ENABLE_STRESS_TEST}" == "true" ] && docker run --rm \
         --user $(id -u):$(id -g) \
         -v "$(pwd)":/k6 \
         -w /k6 \
         grafana/k6:latest \
         run \
         --env K6_WEB_DASHBOARD=true \
-        --env K6_WEB_DASHBOARD_EXPORT="${REPORT_NAME}.html" \
+        --env K6_WEB_DASHBOARD_EXPORT="${REPORT_NAME}-stress.html" \
         --env TEST_RUN="${TEST_RUN}" \
         --env BASE_URL="${K6_BASE_URL}" \
         --env TEST_VUS="${K6_VUS}" \
@@ -76,7 +76,7 @@ variables:
         --env K6_OTEL_SERVICE_NAME="k6-stresstest-${REPORT_NAME}" \
         --env "K6_OTEL_HEADERS=authorization=Api-Key ${MONIUM_API_KEY},x-monium-project=folder__${FOLDER_ID}" \
         load-testing/find_limit.js \
-        --summary-export="${REPORT_NAME}-stress.json" || echo "Limit reached - proceeding to analysis"
+        --summary-export="${REPORT_NAME}-stress.json" || echo "Proceeding to analysis"
       sleep 10
       [ -f k6.env ] && export K6_MAX_VUS=$(cat ./k6.env)
       [ -z "${K6_MAX_VUS}" ] && export K6_MAX_VUS="${K6_VUS}"
@@ -104,7 +104,6 @@ variables:
       load_performance: "${REPORT_NAME}.json"
     paths: # https://grafana.com/docs/k6/latest/results-output/web-dashboard/
       - "${REPORT_NAME}.json"
-      - "${REPORT_NAME}-stress.json"
       - "${REPORT_NAME}.html"
 
 # Terraform plan для LE-сертификата
@@ -366,6 +365,7 @@ k6-pre-otel-loadtest:
   variables:
     REPORT_NAME: "report-pre"
     TEST_RUN: "pre"
+    ENABLE_STRESS_TEST: "true"
 
 # Сборка и пуш Docker-образов в GitLAB
 build-and-push-images:
@@ -467,3 +467,4 @@ k6-post-otel-loadtest:
   variables:
     REPORT_NAME: "report-post"
     TEST_RUN: "post"
+    ENABLE_STRESS_TEST: "false"

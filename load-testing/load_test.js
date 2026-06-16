@@ -7,7 +7,7 @@ export const options = {
     scenarios: {
         warmup: {
             executor: 'constant-vus',
-            vus: Math.max(2, Math.floor(conf.targetVUs * 0.1)),
+            vus: Math.max(2, Math.floor(conf.targetVUs * 0.25)),
             duration: `${conf.warmupSeconds}s`,
             startTime: '0s',
             exec: 'default',
