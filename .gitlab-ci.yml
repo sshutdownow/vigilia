@@ -55,8 +55,6 @@ variables:
 
 .k6_setup:
   allow_failure: true
-  before_script:
-    - apk add --no-cache jq
   script:
     - '[ "${ENABLE_TESTS}" == "false" ] && exit 0'
     - |
