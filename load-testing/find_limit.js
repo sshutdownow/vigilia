@@ -77,14 +77,14 @@ export function handleSummary(data) {
         foundLimit = Math.floor(limitMetric.values.min);
     }
 
-    const recommended = Math.floor(foundLimit * 0.8);
+    const recommended = Math.floor(foundLimit * 0.8) + 1;
 
     result['limit.json'] = JSON.stringify({
         foundLimitVUs: foundLimit,
-        recommendedVUs: recommended > 0 ? recommended : 1
+        recommendedVUs: recommended
     }, null, 2);
   
-    result['k6.env'] = `export K6_MAX_VUS=${safeLoad}`;
+    result['k6.env'] = recommended.toString();
 
     return result;
 }
