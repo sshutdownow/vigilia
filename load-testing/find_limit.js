@@ -3,6 +3,7 @@ import execution from 'k6/execution';
 import { Trend } from 'k6/metrics';
 import * as conf from './config.js';
 import { visitIndex, visitCatalog, createOrder } from './actions.js';
+import { sleep } from 'k6';
 
 const limitTrend = new Trend('limit_hit_vus');
 
