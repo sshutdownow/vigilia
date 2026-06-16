@@ -35,7 +35,20 @@ export const options = {
             exec: 'default',
         },
     },
-    thresholds: { 'http_req_failed': ['rate<1'] },
+
+    thresholds: {
+        'http_req_failed': [{
+            threshold: `rate<${conf.sloErrorRate}`,
+            abortOnFail: true,
+            delayAbortEval: conf.abortDelay
+        }],
+        'http_req_duration': [{
+            threshold: `p(95)<${conf.sloTimeLimit}`,
+            abortOnFail: true,
+            delayAbortEval: conf.abortDelay
+        }],
+    },
+
 };
 
 export default function() {
@@ -70,6 +83,8 @@ export function handleSummary(data) {
         foundLimitVUs: foundLimit,
         recommendedVUs: recommended > 0 ? recommended : 1
     }, null, 2);
+  
+    result['k6.env'] = `export K6_MAX_VUS=${safeLoad}`;
 
     return result;
 }

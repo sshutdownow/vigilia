@@ -76,8 +76,8 @@ variables:
         --env K6_OTEL_SERVICE_NAME="k6-stresstest-${REPORT_NAME}" \
         --env "K6_OTEL_HEADERS=authorization=Api-Key ${MONIUM_API_KEY},x-monium-project=folder__${FOLDER_ID}" \
         load-testing/find_limit.js \
-        --summary-export="${REPORT_NAME}.json"
-    - export K6_VUS_LIMIT=$(jq -r '.recommendedVUs' limit.json)
+        --summary-export="${REPORT_NAME}-stress.json" || echo "Limit reached - proceeding to analysis"
+      [ -f k6.env ] && . ./k6.env || export K6_MAX_VUS="${K6_VUS}"
       docker run --rm \
         --user $(id -u):$(id -g) \
         -v "$(pwd)":/k6 \
@@ -88,7 +88,7 @@ variables:
         --env K6_WEB_DASHBOARD_EXPORT="${REPORT_NAME}.html" \
         --env TEST_RUN="${TEST_RUN}" \
         --env BASE_URL="${K6_BASE_URL}" \
-        --env TEST_VUS="${K6_VUS}" \
+        --env TEST_VUS="${K6_MAX_VUS}" \
         --env TEST_DURATION="${K6_DURATION}" \
         --out opentelemetry \
         --env K6_OTEL_GRPC_EXPORTER_ENDPOINT=ingest.monium.yandex.cloud:443 \
@@ -102,6 +102,7 @@ variables:
       load_performance: "${REPORT_NAME}.json"
     paths: # https://grafana.com/docs/k6/latest/results-output/web-dashboard/
       - "${REPORT_NAME}.json"
+      - "${REPORT_NAME}-stress.json"
       - "${REPORT_NAME}.html"
 
 # Terraform plan для LE-сертификата

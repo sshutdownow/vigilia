@@ -15,3 +15,5 @@ export const mainSeconds = rawDuration;
 
 export const sloErrorRate = parseFloat(env.SLO_ERROR_RATE) || 0.01; // 1%
 export const sloTimeLimit = parseInt(env.SLO_LIMIT) || 1000;        // 1000ms
+
+export const abortDelay = '10s';
