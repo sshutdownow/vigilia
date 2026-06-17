@@ -206,6 +206,10 @@ opentelemetry-kube-stack:
               http:
                 endpoint: "0.0.0.0:4318"
         processors:
+          memory_limiter:
+            check_interval: 1s
+            limit_percentage: 85
+            spike_limit_percentage: 25
           batch:
             send_batch_size: 8192
             send_batch_max_size: 16384
@@ -238,15 +242,15 @@ opentelemetry-kube-stack:
           pipelines:
             metrics:
               receivers: [ otlp ]
-              processors: [ resourcedetection, batch ]
+              processors: [ memory_limiter, resourcedetection, batch ]
               exporters: [ otlp_grpc/monium ]
             traces:
               receivers: [ otlp ]
-              processors: [ resourcedetection, batch ]
+              processors: [ memory_limiter, resourcedetection, batch ]
               exporters: [ otlp_grpc/monium ]
             logs:
               receivers: [ otlp ]
-              processors: [ resourcedetection, batch ]
+              processors: [ memory_limiter, resourcedetection, batch ]
               exporters: [ otlp_grpc/monium ]
         # Телеметрия самого OTel Collector
         telemetry:
